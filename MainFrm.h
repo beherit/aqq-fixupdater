@@ -9,6 +9,15 @@
 #include <ActnList.hpp>
 #include <ComCtrls.hpp>
 #include <ExtCtrls.hpp>
+#include "sBevel.hpp"
+#include "sButton.hpp"
+#include "sCheckBox.hpp"
+#include "sComboBox.hpp"
+#include "sLabel.hpp"
+#include "sListView.hpp"
+#include "sPageControl.hpp"
+#include "sSkinManager.hpp"
+#include "sSkinProvider.hpp"
 //---------------------------------------------------------------------------
 class TMainForm : public TForm
 {
@@ -17,31 +26,33 @@ __published:	// IDE-managed Components
 	TAction *aReadSettings;
 	TAction *aSaveSettings;
 	TAction *aResetSettings;
-	TButton *AddButton;
-	TButton *DeleteButton;
-	TListView *UrlListPreview;
-	TButton *ResetButton;
-	TButton *SaveButton;
-	TButton *EditButton;
+	TsButton *AddButton;
+	TsButton *DeleteButton;
+	TsListView *UrlListPreview;
+	TsButton *ResetButton;
+	TsButton *SaveButton;
+	TsButton *EditButton;
 	TAction *aExit;
-	TPageControl *PageControl;
-	TTabSheet *LinksTabSheet;
-	TTabSheet *SettingsTabSheet;
-	TComboBox *UpdateTimeComboBox;
-	TLabel *UpdateTimeLabel;
-	TLabel *LastUpdateInfoLabel;
-	TLabel *LastUpdateLabel;
+	TsPageControl *PageControl;
+	TsTabSheet *LinksTabSheet;
+	TsTabSheet *SettingsTabSheet;
+	TsComboBox *UpdateTimeComboBox;
+	TsLabel *UpdateTimeLabel;
+	TsLabel *LastUpdateInfoLabel;
 	TTimer *CheckUpdatesOnStartTimer;
 	TTimer *CheckUpdatesTimer;
-	TBevel *Bevel;
-	TComboBox *UpdateModeComboBox;
-	TLabel *UpdateModeLabel;
-	TBevel *Bevel2;
+	TsBevel *Bevel;
+	TsComboBox *UpdateModeComboBox;
+	TsLabel *UpdateModeLabel;
+	TsBevel *Bevel2;
 	TAction *aSettingsChanged;
-	TButton *CancelButton;
-	TButton *OkButton;
-	TBevel *Bevel1;
-	TCheckBox *ChangeAddonBrowserCheckBox;
+	TsButton *CancelButton;
+	TsButton *OkButton;
+	TsBevel *Bevel1;
+	TsCheckBox *ChangeAddonBrowserCheckBox;
+	TsSkinProvider *sSkinProvider;
+	TsSkinManager *sSkinManager;
+	TsLabelFX *LastUpdateLabel;
 	void __fastcall UrlListPreviewSelectItem(TObject *Sender, TListItem *Item, bool Selected);
 	void __fastcall DeleteButtonClick(TObject *Sender);
 	void __fastcall SaveButtonClick(TObject *Sender);
@@ -60,9 +71,7 @@ __published:	// IDE-managed Components
 	void __fastcall UrlListPreviewItemChecked(TObject *Sender, TListItem *Item);
 	void __fastcall OkButtonClick(TObject *Sender);
 	void __fastcall CancelButtonClick(TObject *Sender);
-
-
-
+	void __fastcall FormCreate(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
 	int UpdateTime;
