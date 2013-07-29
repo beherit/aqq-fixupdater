@@ -1,0 +1,1 @@
+Wtyczka ulepszaj¹ca system aktualizacji poprzez mo¿liwoœæ dodawania dodatkowych adresów serwerów zawieraj¹cych bazê dodatków oraz ustawienie czêstszego interwa³u sprawdzania aktualizacji.
