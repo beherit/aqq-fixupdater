@@ -1,3 +1,7 @@
+1.4.1.2
+-----
+* Powrót do starszej wersji komponentów AlphaControls (8.20).
+
 1.4.1.0
 -----
 * Wsparcie dla wtyczki AlphaWindows (ustawianie przeźroczystości obramowania).

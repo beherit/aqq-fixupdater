@@ -438,7 +438,7 @@ extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVe
 {
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,4,1,0);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,4,1,2);
   PluginInfo.Description = L"Ulepszenie systemu aktualizacji poprzez mo¿liwoœæ dodawania dodatkowych adresów serwerów zawieraj¹cych bazê dodatków oraz ustawienie czêstszego interwa³u sprawdzania aktualizacji.";
   PluginInfo.Author = L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = L"kontakt@beherit.pl";
