@@ -1,3 +1,9 @@
+1.0.4.4
+-----
+* Nowy domyślny kanał aktualizacji.
+* Domyślych kanałów aktualizacji nie można usunąć.
+* Drobne kosmetyczne poprawki formy ustawień.
+
 1.0.4.2
 -----
 * Funkcje FIXUPDATER_SYSTEM_ADDLINK i FIXUPDATER_SYSTEM_DELETELINK zwracają 2 w przypadku błędu. 

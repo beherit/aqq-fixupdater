@@ -166,7 +166,8 @@ object MainForm: TMainForm
     Top = 237
     Width = 75
     Height = 25
-    Caption = 'Zapisz'
+    Caption = 'Zastosuj'
+    Enabled = False
     TabOrder = 1
     OnClick = SaveButtonClick
   end
@@ -175,14 +176,10 @@ object MainForm: TMainForm
     Top = 8
     Width = 401
     Height = 217
-    ActivePage = TabSheet1
+    ActivePage = LinksTabSheet
     TabOrder = 0
-    object TabSheet1: TTabSheet
+    object LinksTabSheet: TTabSheet
       Caption = 'Kana'#322'y aktualizacji'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object AddButton: TButton
         Left = 6
         Top = 160
@@ -229,41 +226,27 @@ object MainForm: TMainForm
         Checkboxes = True
         Columns = <
           item
-            Caption = 'Aktywne'
-            Width = 60
+            MaxWidth = 20
+            MinWidth = 20
+            Width = 20
           end
           item
             Caption = 'Adres'
-            Width = 300
+            MaxWidth = 330
+            Width = 330
           end>
-        Items.ItemData = {
-          033B010000030000000000000001000000FFFFFFFF01000000FFFFFFFF000000
-          00002768007400740070003A002F002F0062006500680065007200690074002E
-          0070006C002F006100710071005F007500700064006100740065002F00730074
-          00610062006C0065002E0078006D006C000000000000000000FFFFFFFF010000
-          00FFFFFFFF00000000002568007400740070003A002F002F0062006500680065
-          007200690074002E0070006C002F006100710071005F00750070006400610074
-          0065002F0062006500740061002E0078006D006C000000000001000000FFFFFF
-          FF01000000FFFFFFFF00000000002668007400740070003A002F002F00660069
-          006C00650073002E006100710071006E006500770073002E0070006C002F0066
-          006900780075007000640061007400650072002E00700068007000FFFFFFFFFF
-          FF}
         ReadOnly = True
         RowSelect = True
         TabOrder = 0
         ViewStyle = vsReport
         OnClick = UrlListPreviewClick
-        OnDataStateChange = UrlListPreviewDataStateChange
         OnSelectItem = UrlListPreviewSelectItem
+        OnItemChecked = UrlListPreviewItemChecked
       end
     end
-    object TabSheet2: TTabSheet
+    object SettingsTabSheet: TTabSheet
       Caption = 'Ustawienia aktualizacji'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object UpdateTimeLabel: TLabel
         Left = 8
         Top = 8
@@ -328,6 +311,7 @@ object MainForm: TMainForm
         ItemIndex = 0
         TabOrder = 0
         Text = 'Przy w'#322#261'czeniu AQQ'
+        OnChange = aSettingsChangedExecute
         Items.Strings = (
           'Przy w'#322#261'czeniu AQQ'
           'Co godzin'#281
@@ -344,12 +328,31 @@ object MainForm: TMainForm
         ItemIndex = 0
         TabOrder = 1
         Text = 'Aktualizacje zale'#380'ne od ustawie'#324' AQQ'
+        OnChange = aSettingsChangedExecute
         Items.Strings = (
           'Aktualizacje zale'#380'ne od ustawie'#324' AQQ'
           'Wymuszaj aktualizacje AQQ i dodatk'#243'w'
           'Wymuszaj aktualizacje AQQ (+wersje beta) i dodatk'#243'w')
       end
     end
+  end
+  object CancelButton: TButton
+    Left = 253
+    Top = 237
+    Width = 75
+    Height = 25
+    Caption = 'Anuluj'
+    TabOrder = 2
+    OnClick = CancelButtonClick
+  end
+  object OkButton: TButton
+    Left = 172
+    Top = 237
+    Width = 75
+    Height = 25
+    Caption = 'OK'
+    TabOrder = 3
+    OnClick = OkButtonClick
   end
   object ActionList: TActionList
     Top = 232
@@ -372,6 +375,10 @@ object MainForm: TMainForm
       Caption = 'aExit'
       ShortCut = 27
       OnExecute = aExitExecute
+    end
+    object aSettingsChanged: TAction
+      Caption = 'aSettingsChanged'
+      OnExecute = aSettingsChangedExecute
     end
   end
   object CheckUpdatesOnStartTimer: TTimer
