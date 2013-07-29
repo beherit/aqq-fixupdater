@@ -1,3 +1,9 @@
+1.4.0.0
+-----
+* Dodanie 64-bitowej wersji wtyczki.
+* Drobne zmiany w skórkowaniu formy ustawień.
+* Aktualizacja komponentów AlphaControls do najnowszej dostępnej wersji (8.19).
+
 1.3.0.0
 -----
 * Rebranding kanałów aktualizacji na repozytoria.
