@@ -12,11 +12,8 @@ __declspec(dllimport)UnicodeString GetPluginUserDir();
 __declspec(dllimport)UnicodeString GetLastUpdate();
 __declspec(dllimport)void SetUpdateLink(bool Enabled, UnicodeString URL);
 __declspec(dllimport)void CheckUpdates(int Mode);
-UnicodeString eDir;
 UnicodeString eUrl;
-int eUrlCount;
-int eCount;
-//---------------------------------------------------------------------------
+//-----------------------------------S----------------------------------------
 __fastcall TMainForm::TMainForm(TComponent* Owner)
 	: TForm(Owner)
 {
@@ -82,18 +79,18 @@ void __fastcall TMainForm::AddButtonClick(TObject *Sender)
 
 void __fastcall TMainForm::aReadSettingsExecute(TObject *Sender)
 {
-  eDir = GetPluginUserDir();
-
-  TIniFile *Ini = new TIniFile(eDir + "\\\\FixUpdater\\\\Settings.ini");
+  TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
   //Kana³y aktualizacji
-  eUrlCount = Ini->ReadInteger("UrlCount", "Count", 3);
   UrlListPreview->Items->Clear();
-  for(eCount=1;eCount<=eUrlCount;eCount++)
+  TStringList *Links = new TStringList;
+  Ini->ReadSection("Links",Links);
+  for(int Count=0;Count<Links->Count/2;Count++)
   {
 	UrlListPreview->Items->Add();
-	UrlListPreview->Items->Item[eCount-1]->Checked = Ini->ReadBool("Update" + IntToStr(eCount), "Enable", true);
-	UrlListPreview->Items->Item[eCount-1]->SubItems->Add( Ini->ReadString("Update" + IntToStr(eCount), "Url", "") );
+	UrlListPreview->Items->Item[Count]->Checked = Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true);
+	UrlListPreview->Items->Item[Count]->SubItems->Add(Ini->ReadString("Links", "Url" + IntToStr(Count+1), ""));
   }
+  delete Links;
   //Czêstotliwoœci aktualizacji
   UpdateTimeComboBox->ItemIndex = Ini->ReadInteger("Settings", "UpdateTime", 0);
   //Sposób aktualizacji
@@ -118,55 +115,51 @@ void __fastcall TMainForm::FormShow(TObject *Sender)
 
 void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
 {
-  eDir = GetPluginUserDir();
+  CheckUpdatesTimer->Enabled = false;
+  CheckUpdatesOnStartTimer->Enabled = false;
 
-  TIniFile *Ini = new TIniFile(eDir + "\\\\FixUpdater\\\\Settings.ini");
+  TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
   //Wy³aczanie wszystkich aktualizacji
-  eUrlCount = Ini->ReadInteger("UrlCount", "Count", 3);
-  for(eCount=1;eCount<=eUrlCount;eCount++)
+  TStringList *Links = new TStringList;
+  Ini->ReadSection("Links",Links);
+  for(int Count=0;Count<Links->Count/2;Count++)
   {
-	if(Ini->ReadBool("Update" + IntToStr(eCount), "Enable", true)==true)
+	if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true)==true)
 	{
-	  eUrl = Ini->ReadString("Update" + IntToStr(eCount), "Url", "");
-	  if(eUrl!="") SetUpdateLink(1, eUrl);
+	  eUrl = Ini->ReadString("Links", "Url" + IntToStr(Count+1), "");
+	  if(eUrl!="") SetUpdateLink(false,eUrl);
 	}
   }
+  delete Links;
   //Zapisywanie aktualnych ustawien
-  eUrlCount = UrlListPreview->Items->Count;
-  Ini->WriteInteger("UrlCount", "Count",eUrlCount);
-  for(eCount=0;eCount<eUrlCount;eCount++)
+  Ini->EraseSection("Links");
+  for(int Count=0;Count<UrlListPreview->Items->Count;Count++)
   {
-	if(UrlListPreview->Items->Item[eCount]->SubItems->Strings[0]!="")
+	if(UrlListPreview->Items->Item[Count]->SubItems->Strings[0]!="")
 	{
-	  Ini->WriteBool("Update" + IntToStr(eCount + 1), "Enable", UrlListPreview->Items->Item[eCount]->Checked);
-	  Ini->WriteString("Update" + IntToStr(eCount + 1), "Url", UrlListPreview->Items->Item[eCount]->SubItems->Strings[0]);
+	  Ini->WriteString("Links", "Url" +  IntToStr(Count+1), UrlListPreview->Items->Item[Count]->SubItems->Strings[0]);
+	  Ini->WriteBool("Links", "Enable" + IntToStr(Count+1), UrlListPreview->Items->Item[Count]->Checked);
 	}
   }
   //W³aczanie wszystkich aktualizacji
-  eUrlCount = Ini->ReadInteger("UrlCount", "Count", 3);
-  for(eCount=1;eCount<=eUrlCount;eCount++)
+  for(int Count=0;Count<UrlListPreview->Items->Count;Count++)
   {
-	if(Ini->ReadBool("Update" + IntToStr(eCount), "Enable", true)==true)
+	if((UrlListPreview->Items->Item[Count]->SubItems->Strings[0]!="")&&
+	(UrlListPreview->Items->Item[Count]->Checked==true))
 	{
-	  eUrl = Ini->ReadString("Update" + IntToStr(eCount), "Url", "");
-	  if(eUrl!="") SetUpdateLink(0, eUrl);
-	}
-  }
-  //Czêstotliwoœci aktualizacji
-  if(Ini->ReadInteger("Settings", "UpdateTime", 0)!=UpdateTimeComboBox->ItemIndex)
-  {
-	Ini->WriteInteger("Settings", "UpdateTime",UpdateTimeComboBox->ItemIndex);
-	CheckUpdatesTimer->Enabled = false;
-	CheckUpdatesOnStartTimer->Enabled=false;
-	if(UpdateTimeComboBox->ItemIndex!=0)
-	{
-	  CheckUpdatesTimer->Interval = 3600000 * UpdateTimeComboBox->ItemIndex;
-	  CheckUpdatesTimer->Enabled = true;
+	  SetUpdateLink(true,UrlListPreview->Items->Item[Count]->SubItems->Strings[0]);
 	}
   }
   //Sposób aktualizacji
   Ini->WriteInteger("Settings", "UpdateMode",UpdateModeComboBox->ItemIndex);
   eUpdateMode = UpdateModeComboBox->ItemIndex;
+  //Czêstotliwoœci aktualizacji
+  Ini->WriteInteger("Settings", "UpdateTime",UpdateTimeComboBox->ItemIndex);
+  if(UpdateTimeComboBox->ItemIndex!=0)
+  {
+	CheckUpdatesTimer->Interval = 3600000 * UpdateTimeComboBox->ItemIndex;
+	CheckUpdatesTimer->Enabled = true;
+  }
   delete Ini;
 }
 //---------------------------------------------------------------------------
@@ -183,7 +176,7 @@ void __fastcall TMainForm::aResetSettingsExecute(TObject *Sender)
   UrlListPreview->Items->Item[1]->SubItems->Add("http://beherit.pl/aqq_update/beta.xml");
   UrlListPreview->Items->Add();
   UrlListPreview->Items->Item[2]->Checked = true;
-  UrlListPreview->Items->Item[2]->SubItems->Add("http://aqqnews.komunikatory.pl/Pliki/aqq_update.xml");
+  UrlListPreview->Items->Item[2]->SubItems->Add("http://files.aqqnews.pl/fixupdater.php");
 
   SaveButton->Enabled=true;
 }
@@ -192,14 +185,6 @@ void __fastcall TMainForm::aResetSettingsExecute(TObject *Sender)
 void __fastcall TMainForm::ResetButtonClick(TObject *Sender)
 {
   aResetSettings->Execute();
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TMainForm::UrlListPreviewChange(TObject *Sender, TListItem *Item,
-          TItemChange Change)
-{
-  DeleteButton->Enabled=false;
-  EditButton->Enabled=false;
 }
 //---------------------------------------------------------------------------
 
@@ -256,6 +241,19 @@ void __fastcall TMainForm::CheckUpdatesOnStartTimerTimer(TObject *Sender)
 void __fastcall TMainForm::CheckUpdatesTimerTimer(TObject *Sender)
 {
   CheckUpdates(eUpdateMode);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::aSettingsChangedExecute(TObject *Sender)
+{
+  SaveButton->Enabled = true;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::UrlListPreviewDataStateChange(TObject *Sender, int StartIndex,
+          int EndIndex, TItemStates OldState, TItemStates NewState)
+{
+  SaveButton->Enabled=true;
 }
 //---------------------------------------------------------------------------
 

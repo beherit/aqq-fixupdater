@@ -26,11 +26,7 @@ TPluginHook PluginHook;
 TSaveSetup SaveSetup;
 
 //Zmienne
-UnicodeString Dir;
-int UrlCount;
 UnicodeString Url;
-bool Enabled;
-int Count;
 int UpdateTime;
 int UpdateMode;
 //Zewnetrzny hook
@@ -41,18 +37,9 @@ bool PDoNotAdd;
 
 extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVersion)
 {
-  //Sprawdzanie wersji AQQ
-  if (CompareVersion(AQQVersion,PLUGIN_MAKE_VERSION(2,2,0,45))<0)
-  {
-	MessageBox(Application->Handle,
-	  "Wymagana wesja AQQ przez wtyczkê to minimum 2.2.0.45!\n"
-	  "Wtyczka FixUpdater nie bêdzie dzia³aæ poprawnie!",
-	  "Nieprawid³owa wersja AQQ",
-	  MB_OK | MB_ICONEXCLAMATION);
-  }
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = (wchar_t*)L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,3,0);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,4,0);
   PluginInfo.Description = (wchar_t*)L"Dodawanie w³asnych serwerów aktualizacji dodatków";
   PluginInfo.Author = (wchar_t*)L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = (wchar_t*)L"email@beherit.pl";
@@ -78,7 +65,7 @@ int __stdcall AddLink(WPARAM wParam, LPARAM lParam)
 	  hMainForm = new TMainForm(Application);
 	}
 	hMainForm->aReadSettings->Execute();
-
+	//Szukanie URL
 	PDoNotAdd = false;
 	for(PCount=0;PCount<hMainForm->UrlListPreview->Items->Count;PCount++)
 	{
@@ -88,7 +75,7 @@ int __stdcall AddLink(WPARAM wParam, LPARAM lParam)
 		PCount = hMainForm->UrlListPreview->Items->Count;
 	  }
 	}
-
+    //Dodawanie URL
 	if(PDoNotAdd==false)
 	{
 	  PCount = hMainForm->UrlListPreview->Items->Count;
@@ -96,10 +83,13 @@ int __stdcall AddLink(WPARAM wParam, LPARAM lParam)
 	  hMainForm->UrlListPreview->Items->Item[PCount]->Checked=StrToBool(PEnable);
 	  hMainForm->UrlListPreview->Items->Item[PCount]->SubItems->Add(PURL);
 	  hMainForm->aSaveSettings->Execute();
+	  return 1;
 	}
+	else
+	 return 0;
   }
-
-  return 1;
+  else
+   return 0;
 }
 //---------------------------------------------------------------------------
 
@@ -124,12 +114,13 @@ int __stdcall DeleteLink(WPARAM wParam, LPARAM lParam)
 	  {
 		hMainForm->UrlListPreview->Items->Delete(PCount);
 		hMainForm->aSaveSettings->Execute();
-		PCount = hMainForm->UrlListPreview->Items->Count;
+		return 1;
 	  }
 	}
+	return 0;
   }
-
-  return 1;
+  else
+   return 0;
 }
 //---------------------------------------------------------------------------
 
@@ -157,60 +148,76 @@ UnicodeString GetPluginUserDir()
 }
 //---------------------------------------------------------------------------
 
+void SetUpdateLink(bool Enabled, UnicodeString URL)
+{
+  PluginLink.CallService(AQQ_SYSTEM_SETUPDATELINK,!Enabled,(LPARAM)URL.w_str());
+}
+//---------------------------------------------------------------------------
+
 extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 {
   PluginLink = *Link;
-
-  Dir = GetPluginUserDir();
 
   //Hook SDK wtyczki
   PluginLink.HookEvent(FIXUPDATER_SYSTEM_ADDLINK,AddLink);
   PluginLink.HookEvent(FIXUPDATER_SYSTEM_DELETELINK,DeleteLink);
 
-  //Konwersja ustawieñ 1.0.2.0 -> 1.0.3.0
-  if(FileExists(Dir + "\\\\FixUpdater\\\\Url.ini"))
+  UnicodeString Path = GetPluginUserDir();
+
+  //Konwersja ustawieñ 1.0.3.0 -> 1.0.4.0
+  if(FileExists(Path + "\\\\FixUpdater\\\\Settings.ini"))
   {
-	MoveFile((Dir + "\\\\FixUpdater\\\\Url.ini").t_str(),(Dir + "\\\\FixUpdater\\\\Settings.ini").t_str());
-	TIniFile *Ini = new TIniFile(Dir + "\\\\FixUpdater\\\\Settings.ini");
-	UpdateTime = Ini->ReadInteger("Settings", "UpdateMode", 0);
-	Ini->WriteInteger("Settings", "UpdateTime",UpdateTime);
-	Ini->WriteInteger("Settings", "UpdateMode",0);
+	TIniFile *Ini = new TIniFile(Path + "\\\\FixUpdater\\\\Settings.ini");
+	if(Ini->SectionExists("UrlCount"))
+	{
+	  int UrlCount = Ini->ReadInteger("UrlCount", "Count", 3);
+	  for(int Count=1;Count<=UrlCount;Count++)
+	  {
+		if(Ini->ReadString("Update" + IntToStr(Count), "Url", "")=="http://aqqnews.komunikatory.pl/Pliki/aqq_update.xml")
+		 Ini->WriteString("Update" + IntToStr(Count), "Url", "http://files.aqqnews.pl/fixupdater.php");
+
+		Ini->WriteString("Links", "Url" +  IntToStr(Count), Ini->ReadString("Update" + IntToStr(Count), "Url", ""));
+		Ini->WriteBool("Links", "Enable" + IntToStr(Count), Ini->ReadBool("Update" + IntToStr(Count), "Enable", true));
+		Ini->EraseSection("Update" + IntToStr(Count));
+	  }
+	  Ini->EraseSection("UrlCount");
+	}
 	delete Ini;
   }
 
   //Ustawienia domyœlne
-  if(!FileExists(Dir + "\\\\FixUpdater\\\\Settings.ini"))
+  if(!FileExists(Path + "\\\\FixUpdater\\\\Settings.ini"))
   {
-	if(!DirectoryExists(Dir + "\\\\FixUpdater"))
-	 CreateDir(Dir + "\\\\FixUpdater");
+	if(!DirectoryExists(Path + "\\\\FixUpdater"))
+	 CreateDir(Path + "\\\\FixUpdater");
 
-	TIniFile *Ini = new TIniFile(Dir + "\\\\FixUpdater\\\\Settings.ini");
-	Ini->WriteInteger("UrlCount", "Count", 3);
-	Ini->WriteString("Update1", "Url", "http://beherit.pl/aqq_update/stable.xml");
-	Ini->WriteBool("Update1", "Enable", true);
-	Ini->WriteString("Update2", "Url", "http://beherit.pl/aqq_update/beta.xml");
-	Ini->WriteBool("Update2", "Enable", false);
-	Ini->WriteString("Update3", "Url", "http://aqqnews.komunikatory.pl/Pliki/aqq_update.xml");
-	Ini->WriteBool("Update3", "Enable", true);
+	TIniFile *Ini = new TIniFile(Path + "\\\\FixUpdater\\\\Settings.ini");
+	Ini->WriteString("Links", "Url1", "http://beherit.pl/aqq_update/stable.xml");
+	Ini->WriteBool("Links", "Enable1", true);
+	Ini->WriteString("Links", "Url2", "http://beherit.pl/aqq_update/beta.xml");
+	Ini->WriteBool("Links", "Enable2", false);
+	Ini->WriteString("Links", "Url3", "http://files.aqqnews.pl/fixupdater.php");
+	Ini->WriteBool("Links", "Enable3", true);
 	delete Ini;
   }
 
-  TIniFile *Ini = new TIniFile(Dir + "\\\\FixUpdater\\\\Settings.ini");
   //Kana³y aktualizacji
-  UrlCount = Ini->ReadInteger("UrlCount", "Count", 3);
-  for(Count=1;Count<=UrlCount;Count++)
+  TIniFile *Ini = new TIniFile(Path + "\\\\FixUpdater\\\\Settings.ini");
+  TStringList *Links = new TStringList;
+  Ini->ReadSection("Links",Links);
+  for(int Count=0;Count<Links->Count/2;Count++)
   {
-	Enabled = Ini->ReadBool("Update" + IntToStr(Count), "Enable", true);
-	if(Enabled==true)
+	if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true)==true)
 	{
-	  Url = Ini->ReadString("Update" + IntToStr(Count), "Url", "");
-	  if(Url!="") PluginLink.CallService(AQQ_SYSTEM_SETUPDATELINK,0,(LPARAM)Url.w_str());
+	  Url = Ini->ReadString("Links", "Url" + IntToStr(Count+1), "");
+	  if(Url!="") SetUpdateLink(true,Url);
 	}
   }
-  //Czêstotliwoœci aktualizacji
-  UpdateTime = Ini->ReadInteger("Settings", "UpdateTime", 0);
+  delete Links;
   //Sposób aktualizacji
   UpdateMode = Ini->ReadInteger("Settings", "UpdateMode", 0);
+  //Czêstotliwoœci aktualizacji
+  UpdateTime = Ini->ReadInteger("Settings", "UpdateTime", 0);
   //W³¹czenie Timer'a
   PluginLink.HookEvent(AQQ_SYSTEM_MODULESLOADED, OnModulesLoaded);
   if(PluginLink.CallService(AQQ_SYSTEM_MODULESLOADED,0,0)==true)
@@ -245,30 +252,32 @@ extern "C" int __declspec(dllexport)__stdcall Settings()
 
 extern "C" int __declspec(dllexport) __stdcall Unload()
 {
-  Dir = GetPluginUserDir();
-  TIniFile *Ini = new TIniFile(Dir + "\\\\FixUpdater\\\\Settings.ini");
-  UrlCount = Ini->ReadInteger("UrlCount", "Count", 3);
-  for(Count=1;Count<=UrlCount;Count++)
+  //Wylaczanie timetow
+  if(hMainForm!=NULL)
   {
-	Enabled = Ini->ReadBool("Update" + IntToStr(Count), "Enable", true);
-	if(Enabled==true)
-	{
-	  Url = Ini->ReadString("Update" + IntToStr(Count), "Url", "");
-	  if(Url!="") PluginLink.CallService(AQQ_SYSTEM_SETUPDATELINK,1,(LPARAM)Url.w_str());
-	}
+	hMainForm->CheckUpdatesTimer->Enabled = false;
+	hMainForm->CheckUpdatesOnStartTimer->Enabled = false;
   }
-  delete Ini;
+  //Unhook eventow
   PluginLink.UnhookEvent(AddLink);
   PluginLink.UnhookEvent(DeleteLink);
   PluginLink.UnhookEvent(OnModulesLoaded);
+  //Wywalanie linkow z aktualizatora
+  TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
+  TStringList *Links = new TStringList;
+  Ini->ReadSection("Links",Links);
+  for(int Count=0;Count<Links->Count/2;Count++)
+  {
+	if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true)==true)
+	{
+	  Url = Ini->ReadString("Links", "Url" + IntToStr(Count+1), "");
+	  if(Url!="") SetUpdateLink(false,Url);
+	}
+  }
+  delete Links;
+  delete Ini;
 
   return 0;
-}
-//---------------------------------------------------------------------------
-
-void SetUpdateLink(bool Enabled, UnicodeString URL)
-{
-  PluginLink.CallService(AQQ_SYSTEM_SETUPDATELINK,Enabled,(LPARAM)URL.w_str());
 }
 //---------------------------------------------------------------------------
 
@@ -276,9 +285,9 @@ void CheckUpdates(int Mode)
 {
   if(Mode==0)//Normalne aktualizacje
    PluginLink.CallService(AQQ_FUNCTION_SILENTUPDATECHECK,0,0);
-  if(Mode==1)//Wymuszanie
+  else if(Mode==1)//Wymuszanie
    PluginLink.CallService(AQQ_FUNCTION_SILENTUPDATECHECK,0,1);
-  if(Mode==2)//Wersje Beta AQQ
+  else if(Mode==2)//Wersje Beta AQQ
    PluginLink.CallService(AQQ_FUNCTION_SILENTUPDATECHECK,0,2);
 }
 //---------------------------------------------------------------------------
