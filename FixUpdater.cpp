@@ -422,8 +422,6 @@ extern "C" int __declspec(dllexport) __stdcall Unload()
   }
   delete Links;
   delete Ini;
-  //Usuniecie uchwytu do formy ustawien
-  delete hMainForm;
 
   return 0;
 }
@@ -434,7 +432,7 @@ extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVe
 {
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,2,0,0);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,2,1,0);
   PluginInfo.Description = L"Wtyczka ulepszaj¹ca system aktualizacji w AQQ poprzez mo¿liwoœæ dodawania w³asnych adresów do serwerów zawieraj¹cych aktualizacje.";
   PluginInfo.Author = L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = L"kontakt@beherit.pl";
