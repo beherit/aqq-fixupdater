@@ -4,7 +4,7 @@ object MainForm: TMainForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'FixUpdater - ustawienia'
-  ClientHeight = 264
+  ClientHeight = 231
   ClientWidth = 414
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -155,7 +155,7 @@ object MainForm: TMainForm
   TextHeight = 13
   object Bevel: TsBevel
     Left = 0
-    Top = 226
+    Top = 193
     Width = 414
     Height = 38
     Align = alBottom
@@ -165,7 +165,7 @@ object MainForm: TMainForm
   end
   object SaveButton: TsButton
     Left = 331
-    Top = 233
+    Top = 201
     Width = 75
     Height = 25
     Caption = 'Zastosuj'
@@ -179,22 +179,23 @@ object MainForm: TMainForm
     Left = 6
     Top = 6
     Width = 402
-    Height = 214
+    Height = 181
     Margins.Left = 6
     Margins.Top = 6
     Margins.Right = 6
     Margins.Bottom = 6
-    ActivePage = LinksTabSheet
+    ActivePage = ReposTabSheet
     Align = alClient
     TabOrder = 3
     SkinData.SkinSection = 'PAGECONTROL'
-    object LinksTabSheet: TsTabSheet
-      Caption = 'Kana'#322'y aktualizacji'
+    object ReposTabSheet: TsTabSheet
+      Caption = 'Repozytoria'
       SkinData.CustomColor = False
       SkinData.CustomFont = False
+      ExplicitHeight = 186
       object AddButton: TsButton
         Left = 6
-        Top = 157
+        Top = 124
         Width = 75
         Height = 25
         Caption = 'Dodaj'
@@ -204,7 +205,7 @@ object MainForm: TMainForm
       end
       object DeleteButton: TsButton
         Left = 87
-        Top = 157
+        Top = 124
         Width = 75
         Height = 25
         Caption = 'Usu'#324
@@ -215,7 +216,7 @@ object MainForm: TMainForm
       end
       object EditButton: TsButton
         Left = 168
-        Top = 157
+        Top = 124
         Width = 75
         Height = 25
         Caption = 'Edytuj'
@@ -226,7 +227,7 @@ object MainForm: TMainForm
       end
       object ResetButton: TsButton
         Left = 311
-        Top = 157
+        Top = 124
         Width = 75
         Height = 25
         Caption = 'Domy'#347'lne'
@@ -238,7 +239,7 @@ object MainForm: TMainForm
         Left = 6
         Top = 4
         Width = 380
-        Height = 147
+        Height = 114
         BoundLabel.Indent = 0
         BoundLabel.Font.Charset = DEFAULT_CHARSET
         BoundLabel.Font.Color = clWindowText
@@ -258,7 +259,7 @@ object MainForm: TMainForm
             Width = 20
           end
           item
-            Caption = 'Adres'
+            Caption = 'Adres repozytorium'
             MaxWidth = 336
             MinWidth = 336
             Width = 336
@@ -271,60 +272,22 @@ object MainForm: TMainForm
         OnSelectItem = UrlListPreviewSelectItem
       end
     end
-    object SettingsTabSheet: TsTabSheet
-      Caption = 'Inne'
+    object UpdaterTabSheet: TsTabSheet
+      Caption = 'Aktualizator'
       ImageIndex = 1
       SkinData.CustomColor = False
       SkinData.CustomFont = False
-      object UpdateTimeLabel: TsLabel
-        Left = 8
-        Top = 8
-        Width = 311
-        Height = 13
-        Caption = 'Cz'#281'stotliwo'#347#263' sprawdzania aktualizacji AQQ i dodatk'#243'w'
-        ParentFont = False
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Style = [fsBold]
-      end
+      ExplicitLeft = 0
+      ExplicitTop = 28
       object LastUpdateInfoLabel: TsLabel
-        Left = 8
+        Left = 12
         Top = 54
         Width = 147
         Height = 13
         Caption = 'Data ostatniego sprawdzania -'
       end
-      object UpdateModeLabel: TsLabel
-        Left = 8
-        Top = 90
-        Width = 275
-        Height = 13
-        Caption = 'Spos'#243'b sprawdzania aktualizacji AQQ i dodatk'#243'w'
-        ParentFont = False
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Style = [fsBold]
-      end
-      object Bevel2: TsBevel
-        Left = 4
-        Top = 146
-        Width = 386
-        Height = 3
-        Shape = bsTopLine
-      end
-      object Bevel1: TsBevel
-        Left = 4
-        Top = 79
-        Width = 386
-        Height = 3
-        Shape = bsTopLine
-      end
       object LastUpdateLabel: TsLabelFX
-        Left = 157
+        Left = 165
         Top = 54
         Width = 119
         Height = 13
@@ -333,9 +296,9 @@ object MainForm: TMainForm
         ParentColor = False
         Kind.KindType = ktCustom
         Kind.Color = clGreen
-        Shadow.Mode = smCustom
         Shadow.BlurCount = 0
         Shadow.Distance = 0
+        Shadow.Mode = smCustom
       end
       object UpdateTimeComboBox: TsComboBox
         Left = 12
@@ -343,13 +306,15 @@ object MainForm: TMainForm
         Width = 145
         Height = 21
         Alignment = taLeftJustify
-        BoundLabel.Indent = 0
+        BoundLabel.Active = True
+        BoundLabel.Caption = 'Cz'#281'stotliwo'#347#263' sprawdzania dost'#281'pno'#347'ci aktualizacji'
+        BoundLabel.Indent = 6
         BoundLabel.Font.Charset = DEFAULT_CHARSET
         BoundLabel.Font.Color = clWindowText
         BoundLabel.Font.Height = -11
         BoundLabel.Font.Name = 'Tahoma'
-        BoundLabel.Font.Style = []
-        BoundLabel.Layout = sclLeft
+        BoundLabel.Font.Style = [fsBold]
+        BoundLabel.Layout = sclTopLeft
         BoundLabel.MaxWidth = 0
         BoundLabel.UseSkinColor = True
         SkinData.SkinSection = 'COMBOBOX'
@@ -367,17 +332,19 @@ object MainForm: TMainForm
       end
       object UpdateModeComboBox: TsComboBox
         Left = 12
-        Top = 109
+        Top = 98
         Width = 293
         Height = 21
         Alignment = taLeftJustify
-        BoundLabel.Indent = 0
+        BoundLabel.Active = True
+        BoundLabel.Caption = 'Spos'#243'b sprawdzania aktualizacji przez wtyczk'#281
+        BoundLabel.Indent = 6
         BoundLabel.Font.Charset = DEFAULT_CHARSET
         BoundLabel.Font.Color = clWindowText
         BoundLabel.Font.Height = -11
         BoundLabel.Font.Name = 'Tahoma'
-        BoundLabel.Font.Style = []
-        BoundLabel.Layout = sclLeft
+        BoundLabel.Font.Style = [fsBold]
+        BoundLabel.Layout = sclTopLeft
         BoundLabel.MaxWidth = 0
         BoundLabel.UseSkinColor = True
         SkinData.SkinSection = 'COMBOBOX'
@@ -391,25 +358,11 @@ object MainForm: TMainForm
           'Wymuszaj aktualizacje AQQ i dodatk'#243'w'
           'Wymuszaj aktualizacje AQQ (+wersje beta) i dodatk'#243'w')
       end
-      object ChangeAddonBrowserCheckBox: TsCheckBox
-        Left = 12
-        Top = 155
-        Width = 342
-        Height = 20
-        Caption = 'Zmie'#324' adres przegl'#261'darki dodatk'#243'w na repozytorium z AQQNews.pl'
-        Checked = True
-        State = cbChecked
-        TabOrder = 2
-        OnClick = aSettingsChangedExecute
-        SkinData.SkinSection = 'CHECKBOX'
-        ImgChecked = 0
-        ImgUnchecked = 0
-      end
     end
   end
   object CancelButton: TsButton
     Left = 250
-    Top = 233
+    Top = 201
     Width = 75
     Height = 25
     Caption = 'Anuluj'
@@ -419,7 +372,7 @@ object MainForm: TMainForm
   end
   object OkButton: TsButton
     Left = 169
-    Top = 233
+    Top = 201
     Width = 75
     Height = 25
     Caption = 'OK'
@@ -428,7 +381,7 @@ object MainForm: TMainForm
     SkinData.SkinSection = 'BUTTON'
   end
   object ActionList: TActionList
-    Top = 232
+    Top = 200
     object aLoadSettings: TAction
       Category = 'Settings'
       Caption = 'aLoadSettings'
@@ -459,14 +412,14 @@ object MainForm: TMainForm
     Interval = 300000
     OnTimer = CheckUpdatesOnStartTimerTimer
     Left = 64
-    Top = 232
+    Top = 200
   end
   object CheckUpdatesTimer: TTimer
     Enabled = False
     Interval = 3600000
     OnTimer = CheckUpdatesTimerTimer
     Left = 32
-    Top = 232
+    Top = 200
   end
   object sSkinProvider: TsSkinProvider
     AddedTitle.Font.Charset = DEFAULT_CHARSET
@@ -478,7 +431,7 @@ object MainForm: TMainForm
     SkinData.SkinSection = 'FORM'
     TitleButtons = <>
     Left = 96
-    Top = 232
+    Top = 200
   end
   object sSkinManager: TsSkinManager
     ExtendedBorders = True
@@ -514,6 +467,6 @@ object MainForm: TMainForm
     ThirdParty.ThirdUpDown = ' '
     ThirdParty.ThirdScrollBar = ' '
     Left = 128
-    Top = 232
+    Top = 200
   end
 end

@@ -1,3 +1,13 @@
+1.3.0.0
+-----
+* Rebranding kanałów aktualizacji na repozytoria.
+* Zmieniono skrócony opis wtyczki.
+* Aktualizacja komponentów AlphaControls do najnowszej dostępnej wersji (8.10).
+* Usunięto opcję zmiany adresu przeglądarki dodatków.
+* Usunięto repozytoria z niedziałającej strony aqqnews.pl.
+* Poprawki kosmetyczne formy ustawień.
+* Inne mniej ważnie zmiany w kodzie.
+
 1.2.1.0
 -----
 * Drobne poprawki w procesie wyładowania wtyczki.
