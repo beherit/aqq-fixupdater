@@ -53,6 +53,7 @@ __published:	// IDE-managed Components
 	TsSkinProvider *sSkinProvider;
 	TsSkinManager *sSkinManager;
 	TsLabelFX *LastUpdateLabel;
+	TAction *aPageControlSheetChange;
 	void __fastcall UrlListPreviewSelectItem(TObject *Sender, TListItem *Item, bool Selected);
 	void __fastcall DeleteButtonClick(TObject *Sender);
 	void __fastcall SaveButtonClick(TObject *Sender);
@@ -72,6 +73,7 @@ __published:	// IDE-managed Components
 	void __fastcall OkButtonClick(TObject *Sender);
 	void __fastcall CancelButtonClick(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
+	void __fastcall aPageControlSheetChangeExecute(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
 	int UpdateTime;

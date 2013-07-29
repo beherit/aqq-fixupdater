@@ -1,3 +1,8 @@
+1.1.1.0
+-----
+* Poprawki w implementacji komponentów AlphaControls.
+* Aktualizacja komponentów AlphaControls do najnowszej dostępnej wersji (7.52).
+
 1.1.0.0
 -----
 * Skórkowanie okna ustawień wtyczki.
