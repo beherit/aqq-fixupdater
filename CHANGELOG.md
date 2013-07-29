@@ -1,3 +1,7 @@
+1.0.1.8
+-----
+* Funkcje FIXUPDATER_SYSTEM_ADDLINK i FIXUPDATER_SYSTEM_DELETELINK zwracają wartość 1 (czyli jeżeli wtyczka jest wyłączona lub nie ma jej zainstalowanej to zwróci 0).
+
 1.0.1.6
 -----
 * Przepisanie wtyczki pod kompilator Embarcadero C++ Builder 2010.

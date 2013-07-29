@@ -17,7 +17,7 @@ int WINAPI DllEntryPoint(HINSTANCE hinst, unsigned long reason, void* lpReserved
 //---------------------------------------------------------------------------
 
 //tworzenie uchwytu do formy
-TMainForm *handle;
+TMainForm *hMainForm;
 
 //utworzenie obiektow do struktur
 TPluginLink PluginLink;
@@ -51,7 +51,7 @@ extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVe
   }
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = (wchar_t*)L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,1,6);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,1,8);
   PluginInfo.Description = (wchar_t*)L"Dodawanie w³asnych serwerów aktualizacji dodatków";
   PluginInfo.Author = (wchar_t*)L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = (wchar_t*)L"sirbeherit@gmail.com";
@@ -71,34 +71,34 @@ int __stdcall AddLink(WPARAM wParam, LPARAM lParam)
 
   if(PURL!="")
   {
-	if(handle==NULL)
+	if(hMainForm==NULL)
 	{
-	  Application->Handle = (HWND__*)MainForm;
-	  handle = new TMainForm(Application);
+	  Application->Handle = (HWND)MainForm;
+	  hMainForm = new TMainForm(Application);
 	}
-	handle->aReadSettings->Execute();
+	hMainForm->aReadSettings->Execute();
 
 	PDoNotAdd = false;
-	for(PCount=0;PCount<handle->UrlListPreview->Items->Count;PCount++)
+	for(PCount=0;PCount<hMainForm->UrlListPreview->Items->Count;PCount++)
 	{
-	  if(handle->UrlListPreview->Items->Item[PCount]->SubItems->Strings[0]==PURL)
+	  if(hMainForm->UrlListPreview->Items->Item[PCount]->SubItems->Strings[0]==PURL)
 	  {
 		PDoNotAdd = true;
-		PCount = handle->UrlListPreview->Items->Count;
+		PCount = hMainForm->UrlListPreview->Items->Count;
 	  }
 	}
 
 	if(PDoNotAdd==false)
 	{
-	  PCount = handle->UrlListPreview->Items->Count;
-	  handle->UrlListPreview->Items->Add();
-	  handle->UrlListPreview->Items->Item[PCount]->Checked=StrToBool(PEnable);
-	  handle->UrlListPreview->Items->Item[PCount]->SubItems->Add(PURL);
-	  handle->aSaveSettings->Execute();
+	  PCount = hMainForm->UrlListPreview->Items->Count;
+	  hMainForm->UrlListPreview->Items->Add();
+	  hMainForm->UrlListPreview->Items->Item[PCount]->Checked=StrToBool(PEnable);
+	  hMainForm->UrlListPreview->Items->Item[PCount]->SubItems->Add(PURL);
+	  hMainForm->aSaveSettings->Execute();
 	}
   }
 
-  return 0;
+  return 1;
 }
 //---------------------------------------------------------------------------
 
@@ -110,37 +110,37 @@ int __stdcall DeleteLink(WPARAM wParam, LPARAM lParam)
 
   if(PURL!="")
   {
-	if(handle==NULL)
+	if(hMainForm==NULL)
 	{
-	  Application->Handle = (HWND__*)MainForm;
-	  handle = new TMainForm(Application);
+	  Application->Handle = (HWND)MainForm;
+	  hMainForm = new TMainForm(Application);
 	}
-	handle->aReadSettings->Execute();
+	hMainForm->aReadSettings->Execute();
 
-	for(PCount=0;PCount<handle->UrlListPreview->Items->Count;PCount++)
+	for(PCount=0;PCount<hMainForm->UrlListPreview->Items->Count;PCount++)
 	{
-	  if(handle->UrlListPreview->Items->Item[PCount]->SubItems->Strings[0]==PURL)
+	  if(hMainForm->UrlListPreview->Items->Item[PCount]->SubItems->Strings[0]==PURL)
 	  {
-		handle->UrlListPreview->Items->Delete(PCount);
-		handle->aSaveSettings->Execute();
-		PCount = handle->UrlListPreview->Items->Count;
+		hMainForm->UrlListPreview->Items->Delete(PCount);
+		hMainForm->aSaveSettings->Execute();
+		PCount = hMainForm->UrlListPreview->Items->Count;
 	  }
 	}
   }
 
-  return 0;
+  return 1;
 }
 //---------------------------------------------------------------------------
 
 int __stdcall OnModulesLoaded(WPARAM, LPARAM)
 {
-  if(handle==NULL)
+  if(hMainForm==NULL)
   {
-	Application->Handle = (HWND__*)MainForm;
-	handle = new TMainForm(Application);
+	Application->Handle = (HWND)MainForm;
+	hMainForm = new TMainForm(Application);
   }
-  handle->eUpdateMode = UpdateMode;
-  handle->CheckUpdatesOnStartTimer->Enabled=true;
+  hMainForm->eUpdateMode = UpdateMode;
+  hMainForm->CheckUpdatesOnStartTimer->Enabled=true;
   PluginLink.UnhookEvent(OnModulesLoaded);
 
   return 0;
@@ -212,13 +212,13 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
   }
   else
   {
-	if(handle==NULL)
+	if(hMainForm==NULL)
 	{
-	  Application->Handle = (HWND__*)MainForm;
-	  handle = new TMainForm(Application);
+	  Application->Handle = (HWND)MainForm;
+	  hMainForm = new TMainForm(Application);
 	}
-	handle->eUpdateMode = UpdateMode;
-	handle->CheckUpdatesOnStartTimer->Enabled=true;
+	hMainForm->eUpdateMode = UpdateMode;
+	hMainForm->CheckUpdatesOnStartTimer->Enabled=true;
   }
 
   delete Ini;
@@ -229,12 +229,12 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 
 extern "C" int __declspec(dllexport)__stdcall Settings()
 {
-  if(handle==NULL)
+  if(hMainForm==NULL)
   {
-	Application->Handle = (HWND__*)MainForm;
-	handle = new TMainForm(Application);
+	Application->Handle = (HWND)MainForm;
+	hMainForm = new TMainForm(Application);
   }
-  handle->Show();
+  hMainForm->Show();
 
   return 0;
 }
