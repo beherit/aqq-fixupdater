@@ -56,10 +56,12 @@ object MainForm: TMainForm
   TextHeight = 13
   object Bevel1: TBevel
     Left = 0
-    Top = 231
+    Top = 230
     Width = 417
     Height = 38
+    Align = alBottom
     Shape = bsTopLine
+    ExplicitTop = 231
   end
   object SaveButton: TButton
     Left = 334
@@ -169,8 +171,8 @@ object MainForm: TMainForm
         Caption = 
           'Ustawienie cz'#281'stotliwo'#347'ci sprawdzania aktualizacji przez wtyczk'#281 +
           ' jest niezale'#380'ne od ustawie'#324' w AQQ. Spradzenie czy s'#261' dost'#281'pne a' +
-          'ktualizacje nie zostanie przeprowadzone gdy AQQ b'#281'dziie zablokow' +
-          'ane!'
+          'ktualizacje nie zostanie przeprowadzone tylko gdy AQQ b'#281'dziie za' +
+          'blokowane!'
         Enabled = False
         WordWrap = True
       end
