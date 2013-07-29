@@ -291,7 +291,6 @@ object MainForm: TMainForm
         Caption = 'RRRR-MM-DD HH:MM:SS'
         Color = clBtnFace
         ParentColor = False
-        Angle = 0
         Kind.KindType = ktCustom
         Kind.Color = clGreen
         Shadow.BlurCount = 0
