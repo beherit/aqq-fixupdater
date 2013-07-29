@@ -13,6 +13,7 @@
 #pragma link "sListView"
 #pragma link "sPageControl"
 #pragma link "sSkinManager"
+#pragma link "sSkinProvider"
 #pragma resource "*.dfm"
 TMainForm *MainForm;
 //---------------------------------------------------------------------------

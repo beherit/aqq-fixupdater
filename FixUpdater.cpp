@@ -6,6 +6,7 @@
 #include <PluginAPI.h>
 #include <inifiles.hpp>
 #include <IdHashMessageDigest.hpp>
+#define ALPHAWINDOWS_SETTRANSPARENCY L"AlphaWindows/SetTransparency"
 #define FIXUPDATER_SYSTEM_ADDLINK L"FixUpdater/System/AddLink"
 #define FIXUPDATER_SYSTEM_DELETELINK L"FixUpdater/System/DeleteLink"
 
@@ -25,6 +26,7 @@ int __stdcall OnAddLink(WPARAM wParam, LPARAM lParam);
 int __stdcall OnAddonInstalled(WPARAM wParam, LPARAM lParam);
 int __stdcall OnDeleteLink(WPARAM wParam, LPARAM lParam);
 int __stdcall OnModulesLoaded(WPARAM wParam, LPARAM lParam);
+int __stdcall OnSetTransparency(WPARAM wParam, LPARAM lParam);
 int __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam);
 //---------------------------------------------------------------------------
 
@@ -220,6 +222,23 @@ int __stdcall OnModulesLoaded(WPARAM, LPARAM)
 }
 //---------------------------------------------------------------------------
 
+//Hook na zmiane przezroczystosci okna przez wtyczke AlphaWindows
+int __stdcall OnSetTransparency(WPARAM wParam, LPARAM lParam)
+{
+  //Okno ustawien zostalo juz stworzone i jest oskorkowane
+  if((hMainForm)&&(hMainForm->sSkinManager->Active))
+  {
+	//Pobieranie przekazanego uchwytu do okna
+	HWND hwnd = (HWND)lParam;
+	//Zostala zmieniona przezroczystosc okna wtyczki
+	if(hwnd==hMainForm->Handle)
+	 hMainForm->sSkinProvider->BorderForm->UpdateExBordersPos(true,(int)wParam);
+  }
+
+  return 0;
+}
+//---------------------------------------------------------------------------
+
 //Hook na zmiane kompozycji
 int __stdcall OnThemeChanged (WPARAM wParam, LPARAM lParam)
 {
@@ -359,6 +378,8 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
   PluginLink.HookEvent(FIXUPDATER_SYSTEM_DELETELINK,OnDeleteLink);
   //Hook na zaladowanie wszystkich modolow
   PluginLink.HookEvent(AQQ_SYSTEM_MODULESLOADED, OnModulesLoaded);
+  //Hook na zmiane przezroczystosci okna przez wtyczke AlphaWindows
+  PluginLink.HookEvent(ALPHAWINDOWS_SETTRANSPARENCY,OnSetTransparency);
   //Hook na zmiane kompozycji
   PluginLink.HookEvent(AQQ_SYSTEM_THEMECHANGED,OnThemeChanged);
   //Wlaczenie timera sprawdzania aktualizacji dodatkow
@@ -391,6 +412,7 @@ extern "C" int __declspec(dllexport) __stdcall Unload()
   PluginLink.UnhookEvent(OnAddonInstalled);
   PluginLink.UnhookEvent(OnDeleteLink);
   PluginLink.UnhookEvent(OnModulesLoaded);
+  PluginLink.UnhookEvent(OnSetTransparency);
   PluginLink.UnhookEvent(OnThemeChanged);
   //Usuniecie adresow repozytorium z aktualizatora
   TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
@@ -416,7 +438,7 @@ extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVe
 {
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,4,0,0);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,4,1,0);
   PluginInfo.Description = L"Ulepszenie systemu aktualizacji poprzez mo¿liwoœæ dodawania dodatkowych adresów serwerów zawieraj¹cych bazê dodatków oraz ustawienie czêstszego interwa³u sprawdzania aktualizacji.";
   PluginInfo.Author = L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = L"kontakt@beherit.pl";
