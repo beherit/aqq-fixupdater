@@ -12,6 +12,7 @@ __declspec(dllimport)UnicodeString GetPluginUserDir();
 __declspec(dllimport)UnicodeString GetLastUpdate();
 __declspec(dllimport)void SetUpdateLink(bool Enabled, UnicodeString URL);
 __declspec(dllimport)void CheckUpdates(int Mode);
+__declspec(dllimport)void ChangeAddonBrowser(bool Enabled);
 UnicodeString eUrl;
 //-----------------------------------S----------------------------------------
 __fastcall TMainForm::TMainForm(TComponent* Owner)
@@ -108,6 +109,8 @@ void __fastcall TMainForm::aReadSettingsExecute(TObject *Sender)
   LastUpdateLabel->Caption=GetLastUpdate();
   //Pozycja labela
   LastUpdateLabel->Left = LastUpdateInfoLabel->Left + LastUpdateInfoLabel->Width + 2;
+  //Menedzer dodatkow
+  ChangeAddonBrowserCheckBox->Checked = Ini->ReadBool("Settings", "ChangeAddonBrowser", true);
   delete Ini;
 }
 //---------------------------------------------------------------------------
@@ -167,6 +170,10 @@ void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
 	CheckUpdatesTimer->Interval = 3600000 * UpdateTimeComboBox->ItemIndex;
 	CheckUpdatesTimer->Enabled = true;
   }
+  //Menedzer dodatkow
+  Ini->WriteBool("Settings", "ChangeAddonBrowser",ChangeAddonBrowserCheckBox->Checked);
+  ChangeAddonBrowser(ChangeAddonBrowserCheckBox->Checked);
+
   delete Ini;
 }
 //---------------------------------------------------------------------------
@@ -281,4 +288,3 @@ void __fastcall TMainForm::CancelButtonClick(TObject *Sender)
   Close();
 }
 //---------------------------------------------------------------------------
-

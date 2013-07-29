@@ -4,8 +4,8 @@ object MainForm: TMainForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'FixUpdater - ustawienia'
-  ClientHeight = 268
-  ClientWidth = 417
+  ClientHeight = 264
+  ClientWidth = 414
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -154,16 +154,17 @@ object MainForm: TMainForm
   TextHeight = 13
   object Bevel: TBevel
     Left = 0
-    Top = 230
-    Width = 417
+    Top = 226
+    Width = 414
     Height = 38
     Align = alBottom
     Shape = bsTopLine
     ExplicitTop = 231
+    ExplicitWidth = 417
   end
   object SaveButton: TButton
-    Left = 334
-    Top = 237
+    Left = 331
+    Top = 233
     Width = 75
     Height = 25
     Caption = 'Zastosuj'
@@ -172,17 +173,24 @@ object MainForm: TMainForm
     OnClick = SaveButtonClick
   end
   object PageControl: TPageControl
-    Left = 8
-    Top = 8
-    Width = 401
-    Height = 217
+    AlignWithMargins = True
+    Left = 6
+    Top = 6
+    Width = 402
+    Height = 214
+    Margins.Left = 6
+    Margins.Top = 6
+    Margins.Right = 6
+    Margins.Bottom = 6
     ActivePage = LinksTabSheet
+    Align = alClient
     TabOrder = 0
     object LinksTabSheet: TTabSheet
       Caption = 'Kana'#322'y aktualizacji'
+      ExplicitHeight = 185
       object AddButton: TButton
         Left = 6
-        Top = 160
+        Top = 157
         Width = 75
         Height = 25
         Caption = 'Dodaj'
@@ -191,7 +199,7 @@ object MainForm: TMainForm
       end
       object DeleteButton: TButton
         Left = 87
-        Top = 160
+        Top = 157
         Width = 75
         Height = 25
         Caption = 'Usu'#324
@@ -201,7 +209,7 @@ object MainForm: TMainForm
       end
       object EditButton: TButton
         Left = 168
-        Top = 160
+        Top = 157
         Width = 75
         Height = 25
         Caption = 'Edytuj'
@@ -210,8 +218,8 @@ object MainForm: TMainForm
         OnClick = EditButtonClick
       end
       object ResetButton: TButton
-        Left = 310
-        Top = 160
+        Left = 311
+        Top = 157
         Width = 75
         Height = 25
         Caption = 'Domy'#347'lne'
@@ -221,8 +229,8 @@ object MainForm: TMainForm
       object UrlListPreview: TListView
         Left = 6
         Top = 4
-        Width = 379
-        Height = 150
+        Width = 380
+        Height = 147
         Checkboxes = True
         Columns = <
           item
@@ -232,8 +240,9 @@ object MainForm: TMainForm
           end
           item
             Caption = 'Adres'
-            MaxWidth = 330
-            Width = 330
+            MaxWidth = 336
+            MinWidth = 336
+            Width = 336
           end>
         ReadOnly = True
         RowSelect = True
@@ -245,8 +254,9 @@ object MainForm: TMainForm
       end
     end
     object SettingsTabSheet: TTabSheet
-      Caption = 'Ustawienia aktualizacji'
+      Caption = 'Inne'
       ImageIndex = 1
+      ExplicitHeight = 185
       object UpdateTimeLabel: TLabel
         Left = 8
         Top = 8
@@ -297,6 +307,13 @@ object MainForm: TMainForm
       end
       object Bevel2: TBevel
         Left = 4
+        Top = 146
+        Width = 386
+        Height = 3
+        Shape = bsTopLine
+      end
+      object Bevel1: TBevel
+        Left = 4
         Top = 79
         Width = 386
         Height = 3
@@ -334,11 +351,22 @@ object MainForm: TMainForm
           'Wymuszaj aktualizacje AQQ i dodatk'#243'w'
           'Wymuszaj aktualizacje AQQ (+wersje beta) i dodatk'#243'w')
       end
+      object ChangeAddonBrowserCheckBox: TCheckBox
+        Left = 12
+        Top = 155
+        Width = 345
+        Height = 17
+        Caption = 'Zmie'#324' adres przegl'#261'darki dodatk'#243'w na repozytorium z AQQNews.pl'
+        Checked = True
+        State = cbChecked
+        TabOrder = 2
+        OnClick = aSettingsChangedExecute
+      end
     end
   end
   object CancelButton: TButton
-    Left = 253
-    Top = 237
+    Left = 250
+    Top = 233
     Width = 75
     Height = 25
     Caption = 'Anuluj'
@@ -346,8 +374,8 @@ object MainForm: TMainForm
     OnClick = CancelButtonClick
   end
   object OkButton: TButton
-    Left = 172
-    Top = 237
+    Left = 169
+    Top = 233
     Width = 75
     Height = 25
     Caption = 'OK'

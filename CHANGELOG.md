@@ -1,3 +1,9 @@
+1.0.5.0
+-----
+* Domyślnie włączona zmiana adresu przeglądarki dodatków na repozytorium z AQQNews.pl.
+* Usuwanie starych adresów URL kanałów ze strony beherit.pl.
+* Poprawki wizualne formy ustawień.
+
 1.0.4.4
 -----
 * Nowy domyślny kanał aktualizacji.
