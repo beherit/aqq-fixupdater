@@ -32,6 +32,13 @@ __fastcall TMainForm::TMainForm(TComponent* Owner)
 }
 //---------------------------------------------------------------------------
 
+void __fastcall TMainForm::WMTransparency(TMessage &Message)
+{
+  Application->ProcessMessages();
+  sSkinProvider->BorderForm->UpdateExBordersPos(true,(int)Message.LParam);
+}
+//---------------------------------------------------------------------------
+
 void __fastcall TMainForm::FormCreate(TObject *Sender)
 {
   //Wlaczona zaawansowana stylizacja okien

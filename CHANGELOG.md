@@ -1,3 +1,7 @@
+1.4.2.0
+-----
+* Zmiany w wsparciu dla wtyczki AlphaWindows.
+
 1.4.1.2
 -----
 * Powrót do starszej wersji komponentów AlphaControls (8.20).
