@@ -149,10 +149,11 @@ object MainForm: TMainForm
     000000000000000000000000000000000000000000000000000000000000}
   OldCreateOrder = False
   Position = poScreenCenter
+  OnCreate = FormCreate
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object Bevel: TBevel
+  object Bevel: TsBevel
     Left = 0
     Top = 226
     Width = 414
@@ -162,7 +163,7 @@ object MainForm: TMainForm
     ExplicitTop = 231
     ExplicitWidth = 417
   end
-  object SaveButton: TButton
+  object SaveButton: TsButton
     Left = 331
     Top = 233
     Width = 75
@@ -171,8 +172,9 @@ object MainForm: TMainForm
     Enabled = False
     TabOrder = 1
     OnClick = SaveButtonClick
+    SkinData.SkinSection = 'BUTTON'
   end
-  object PageControl: TPageControl
+  object PageControl: TsPageControl
     AlignWithMargins = True
     Left = 6
     Top = 6
@@ -185,10 +187,12 @@ object MainForm: TMainForm
     ActivePage = LinksTabSheet
     Align = alClient
     TabOrder = 0
-    object LinksTabSheet: TTabSheet
+    SkinData.SkinSection = 'PAGECONTROL'
+    object LinksTabSheet: TsTabSheet
       Caption = 'Kana'#322'y aktualizacji'
-      ExplicitHeight = 185
-      object AddButton: TButton
+      SkinData.CustomColor = False
+      SkinData.CustomFont = False
+      object AddButton: TsButton
         Left = 6
         Top = 157
         Width = 75
@@ -196,8 +200,9 @@ object MainForm: TMainForm
         Caption = 'Dodaj'
         TabOrder = 1
         OnClick = AddButtonClick
+        SkinData.SkinSection = 'BUTTON'
       end
-      object DeleteButton: TButton
+      object DeleteButton: TsButton
         Left = 87
         Top = 157
         Width = 75
@@ -206,8 +211,9 @@ object MainForm: TMainForm
         Enabled = False
         TabOrder = 2
         OnClick = DeleteButtonClick
+        SkinData.SkinSection = 'BUTTON'
       end
-      object EditButton: TButton
+      object EditButton: TsButton
         Left = 168
         Top = 157
         Width = 75
@@ -216,8 +222,9 @@ object MainForm: TMainForm
         Enabled = False
         TabOrder = 3
         OnClick = EditButtonClick
+        SkinData.SkinSection = 'BUTTON'
       end
-      object ResetButton: TButton
+      object ResetButton: TsButton
         Left = 311
         Top = 157
         Width = 75
@@ -225,12 +232,24 @@ object MainForm: TMainForm
         Caption = 'Domy'#347'lne'
         TabOrder = 4
         OnClick = ResetButtonClick
+        SkinData.SkinSection = 'BUTTON'
       end
-      object UrlListPreview: TListView
+      object UrlListPreview: TsListView
         Left = 6
         Top = 4
         Width = 380
         Height = 147
+        BoundLabel.Indent = 0
+        BoundLabel.Font.Charset = DEFAULT_CHARSET
+        BoundLabel.Font.Color = clWindowText
+        BoundLabel.Font.Height = -11
+        BoundLabel.Font.Name = 'Tahoma'
+        BoundLabel.Font.Style = []
+        BoundLabel.Layout = sclLeft
+        BoundLabel.MaxWidth = 0
+        BoundLabel.UseSkinColor = True
+        SkinData.SkinSection = 'EDIT'
+        OnItemChecked = UrlListPreviewItemChecked
         Checkboxes = True
         Columns = <
           item
@@ -250,80 +269,90 @@ object MainForm: TMainForm
         ViewStyle = vsReport
         OnClick = UrlListPreviewClick
         OnSelectItem = UrlListPreviewSelectItem
-        OnItemChecked = UrlListPreviewItemChecked
       end
     end
-    object SettingsTabSheet: TTabSheet
+    object SettingsTabSheet: TsTabSheet
       Caption = 'Inne'
       ImageIndex = 1
-      ExplicitHeight = 185
-      object UpdateTimeLabel: TLabel
+      SkinData.CustomColor = False
+      SkinData.CustomFont = False
+      object UpdateTimeLabel: TsLabel
         Left = 8
         Top = 8
         Width = 311
         Height = 13
         Caption = 'Cz'#281'stotliwo'#347#263' sprawdzania aktualizacji AQQ i dodatk'#243'w'
+        ParentFont = False
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
         Font.Name = 'Tahoma'
         Font.Style = [fsBold]
-        ParentFont = False
       end
-      object LastUpdateInfoLabel: TLabel
+      object LastUpdateInfoLabel: TsLabel
         Left = 8
         Top = 54
         Width = 147
         Height = 13
         Caption = 'Data ostatniego sprawdzania -'
       end
-      object LastUpdateLabel: TLabel
-        Left = 157
-        Top = 54
-        Width = 119
-        Height = 13
-        Caption = 'RRRR-MM-DD HH:MM:SS'
-        Color = clBtnFace
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clGreen
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Style = []
-        ParentColor = False
-        ParentFont = False
-      end
-      object UpdateModeLabel: TLabel
+      object UpdateModeLabel: TsLabel
         Left = 8
         Top = 90
         Width = 275
         Height = 13
         Caption = 'Spos'#243'b sprawdzania aktualizacji AQQ i dodatk'#243'w'
+        ParentFont = False
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
         Font.Name = 'Tahoma'
         Font.Style = [fsBold]
-        ParentFont = False
       end
-      object Bevel2: TBevel
+      object Bevel2: TsBevel
         Left = 4
         Top = 146
         Width = 386
         Height = 3
         Shape = bsTopLine
       end
-      object Bevel1: TBevel
+      object Bevel1: TsBevel
         Left = 4
         Top = 79
         Width = 386
         Height = 3
         Shape = bsTopLine
       end
-      object UpdateTimeComboBox: TComboBox
+      object LastUpdateLabel: TsLabelFX
+        Left = 157
+        Top = 54
+        Width = 119
+        Height = 13
+        Caption = 'RRRR-MM-DD HH:MM:SS'
+        Color = clBtnFace
+        ParentColor = False
+        Kind.KindType = ktCustom
+        Kind.Color = clGreen
+        Shadow.Mode = smCustom
+        Shadow.BlurCount = 0
+        Shadow.Distance = 0
+      end
+      object UpdateTimeComboBox: TsComboBox
         Left = 12
         Top = 27
         Width = 145
-        Height = 21
+        Height = 22
+        Alignment = taLeftJustify
+        BoundLabel.Indent = 0
+        BoundLabel.Font.Charset = DEFAULT_CHARSET
+        BoundLabel.Font.Color = clWindowText
+        BoundLabel.Font.Height = -11
+        BoundLabel.Font.Name = 'Tahoma'
+        BoundLabel.Font.Style = []
+        BoundLabel.Layout = sclLeft
+        BoundLabel.MaxWidth = 0
+        BoundLabel.UseSkinColor = True
+        SkinData.SkinSection = 'COMBOBOX'
         Style = csDropDownList
         ItemIndex = 0
         TabOrder = 0
@@ -336,11 +365,22 @@ object MainForm: TMainForm
           'Co trzy godziny'
           'Co cztery godziny')
       end
-      object UpdateModeComboBox: TComboBox
+      object UpdateModeComboBox: TsComboBox
         Left = 12
         Top = 109
         Width = 293
-        Height = 21
+        Height = 22
+        Alignment = taLeftJustify
+        BoundLabel.Indent = 0
+        BoundLabel.Font.Charset = DEFAULT_CHARSET
+        BoundLabel.Font.Color = clWindowText
+        BoundLabel.Font.Height = -11
+        BoundLabel.Font.Name = 'Tahoma'
+        BoundLabel.Font.Style = []
+        BoundLabel.Layout = sclLeft
+        BoundLabel.MaxWidth = 0
+        BoundLabel.UseSkinColor = True
+        SkinData.SkinSection = 'COMBOBOX'
         Style = csDropDownList
         ItemIndex = 0
         TabOrder = 1
@@ -351,20 +391,23 @@ object MainForm: TMainForm
           'Wymuszaj aktualizacje AQQ i dodatk'#243'w'
           'Wymuszaj aktualizacje AQQ (+wersje beta) i dodatk'#243'w')
       end
-      object ChangeAddonBrowserCheckBox: TCheckBox
+      object ChangeAddonBrowserCheckBox: TsCheckBox
         Left = 12
         Top = 155
-        Width = 345
-        Height = 17
+        Width = 342
+        Height = 20
         Caption = 'Zmie'#324' adres przegl'#261'darki dodatk'#243'w na repozytorium z AQQNews.pl'
         Checked = True
         State = cbChecked
         TabOrder = 2
         OnClick = aSettingsChangedExecute
+        SkinData.SkinSection = 'CHECKBOX'
+        ImgChecked = 0
+        ImgUnchecked = 0
       end
     end
   end
-  object CancelButton: TButton
+  object CancelButton: TsButton
     Left = 250
     Top = 233
     Width = 75
@@ -372,8 +415,9 @@ object MainForm: TMainForm
     Caption = 'Anuluj'
     TabOrder = 2
     OnClick = CancelButtonClick
+    SkinData.SkinSection = 'BUTTON'
   end
-  object OkButton: TButton
+  object OkButton: TsButton
     Left = 169
     Top = 233
     Width = 75
@@ -381,6 +425,7 @@ object MainForm: TMainForm
     Caption = 'OK'
     TabOrder = 3
     OnClick = OkButtonClick
+    SkinData.SkinSection = 'BUTTON'
   end
   object ActionList: TActionList
     Top = 232
@@ -421,6 +466,51 @@ object MainForm: TMainForm
     Interval = 3600000
     OnTimer = CheckUpdatesTimerTimer
     Left = 32
+    Top = 232
+  end
+  object sSkinProvider: TsSkinProvider
+    AddedTitle.Font.Charset = DEFAULT_CHARSET
+    AddedTitle.Font.Color = clNone
+    AddedTitle.Font.Height = -11
+    AddedTitle.Font.Name = 'Tahoma'
+    AddedTitle.Font.Style = []
+    SkinData.SkinManager = sSkinManager
+    SkinData.SkinSection = 'FORM'
+    TitleButtons = <>
+    Left = 96
+    Top = 232
+  end
+  object sSkinManager: TsSkinManager
+    ExtendedBorders = True
+    Active = False
+    InternalSkins = <>
+    MenuSupport.IcoLineSkin = 'ICOLINE'
+    MenuSupport.ExtraLineFont.Charset = DEFAULT_CHARSET
+    MenuSupport.ExtraLineFont.Color = clWindowText
+    MenuSupport.ExtraLineFont.Height = -11
+    MenuSupport.ExtraLineFont.Name = 'Tahoma'
+    MenuSupport.ExtraLineFont.Style = []
+    SkinDirectory = 'c:\Skins'
+    SkinInfo = 'N/A'
+    ThirdParty.ThirdEdits = ' '
+    ThirdParty.ThirdButtons = 'TButton'
+    ThirdParty.ThirdBitBtns = ' '
+    ThirdParty.ThirdCheckBoxes = ' '
+    ThirdParty.ThirdGroupBoxes = ' '
+    ThirdParty.ThirdListViews = ' '
+    ThirdParty.ThirdPanels = ' '
+    ThirdParty.ThirdGrids = ' '
+    ThirdParty.ThirdTreeViews = ' '
+    ThirdParty.ThirdComboBoxes = ' '
+    ThirdParty.ThirdWWEdits = ' '
+    ThirdParty.ThirdVirtualTrees = ' '
+    ThirdParty.ThirdGridEh = ' '
+    ThirdParty.ThirdPageControl = ' '
+    ThirdParty.ThirdTabControl = ' '
+    ThirdParty.ThirdToolBar = ' '
+    ThirdParty.ThirdStatusBar = ' '
+    ThirdParty.ThirdSpeedButton = ' '
+    Left = 128
     Top = 232
   end
 end

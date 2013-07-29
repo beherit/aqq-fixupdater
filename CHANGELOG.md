@@ -1,3 +1,9 @@
+1.1.0.0
+-----
+* Skórkowanie okna ustawień wtyczki.
+* Sprawdzanie aktualizacji po instalacji wtyczek.
+* Mała optymalizacja kodu.
+
 1.0.5.0
 -----
 * Domyślnie włączona zmiana adresu przeglądarki dodatków na repozytorium z AQQNews.pl.

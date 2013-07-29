@@ -5,9 +5,20 @@
 #include <inifiles.hpp>
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
+#pragma link "sBevel"
+#pragma link "sButton"
+#pragma link "sCheckBox"
+#pragma link "sComboBox"
+#pragma link "sLabel"
+#pragma link "sListView"
+#pragma link "sPageControl"
+#pragma link "sSkinManager"
+#pragma link "sSkinProvider"
 #pragma resource "*.dfm"
 TMainForm *MainForm;
 //---------------------------------------------------------------------------
+__declspec(dllimport)UnicodeString GetThemeSkinDir();
+__declspec(dllimport)bool ChkSkinEnabled();
 __declspec(dllimport)UnicodeString GetPluginUserDir();
 __declspec(dllimport)UnicodeString GetLastUpdate();
 __declspec(dllimport)void SetUpdateLink(bool Enabled, UnicodeString URL);
@@ -26,13 +37,13 @@ void __fastcall TMainForm::UrlListPreviewSelectItem(TObject *Sender, TListItem *
 {
   if(UrlListPreview->ItemIndex>3)
   {
-	DeleteButton->Enabled=true;
-	EditButton->Enabled=true;
+	DeleteButton->Enabled = true;
+	EditButton->Enabled = true;
   }
   else
   {
-	DeleteButton->Enabled=false;
-	EditButton->Enabled=false;
+	DeleteButton->Enabled = false;
+	EditButton->Enabled = false;
   }
 }
 //---------------------------------------------------------------------------
@@ -41,11 +52,11 @@ void __fastcall TMainForm::DeleteButtonClick(TObject *Sender)
 {
   if(UrlListPreview->ItemIndex!=-1)
    UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->Delete();
-  DeleteButton->Enabled=false;
-  EditButton->Enabled=false;
+  DeleteButton->Enabled = false;
+  EditButton->Enabled = false;
 
   if(UrlListPreview->Items->Count==0)
-   SaveButton->Enabled=false;
+   SaveButton->Enabled = false;
   else
    SaveButton->Enabled = true;
 }
@@ -65,7 +76,7 @@ void __fastcall TMainForm::AddButtonClick(TObject *Sender)
   bool DoNotAdd = false;
   if(InputQuery("Nowy kana³ aktualizacji","Dodaj nowy adres:",URL))
   {
-	if(URL!="")
+	if(!URL.IsEmpty())
 	{
 	  for(int Count=0;Count<UrlListPreview->Items->Count;Count++)
 	  {
@@ -75,12 +86,12 @@ void __fastcall TMainForm::AddButtonClick(TObject *Sender)
 		  Count = UrlListPreview->Items->Count;
 		}
 	  }
-	  if(DoNotAdd==false)
+	  if(!DoNotAdd)
 	  {
 		UrlListPreview->Items->Add();
-		UrlListPreview->Items->Item[UrlListPreview->Items->Count-1]->Checked=true;
+		UrlListPreview->Items->Item[UrlListPreview->Items->Count-1]->Checked = true;
 		UrlListPreview->Items->Item[UrlListPreview->Items->Count-1]->SubItems->Add(URL);
-		SaveButton->Enabled=true;
+		SaveButton->Enabled = true;
 	  }
 	}
   }
@@ -106,7 +117,7 @@ void __fastcall TMainForm::aReadSettingsExecute(TObject *Sender)
   //Sposób aktualizacji
   UpdateModeComboBox->ItemIndex = Ini->ReadInteger("Settings", "UpdateMode", 0);
   //Czas ostatniej aktualizacji
-  LastUpdateLabel->Caption=GetLastUpdate();
+  LastUpdateLabel->Caption = GetLastUpdate();
   //Pozycja labela
   LastUpdateLabel->Left = LastUpdateInfoLabel->Left + LastUpdateInfoLabel->Width + 2;
   //Menedzer dodatkow
@@ -118,7 +129,7 @@ void __fastcall TMainForm::aReadSettingsExecute(TObject *Sender)
 void __fastcall TMainForm::FormShow(TObject *Sender)
 {
   aReadSettings->Execute();
-  SaveButton->Enabled=false;
+  SaveButton->Enabled = false;
   PageControl->ActivePage = LinksTabSheet;
 }
 //---------------------------------------------------------------------------
@@ -134,10 +145,10 @@ void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
   Ini->ReadSection("Links",Links);
   for(int Count=0;Count<Links->Count/2;Count++)
   {
-	if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true)==true)
+	if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true))
 	{
 	  eUrl = Ini->ReadString("Links", "Url" + IntToStr(Count+1), "");
-	  if(eUrl!="") SetUpdateLink(false,eUrl);
+	  if(!eUrl.IsEmpty()) SetUpdateLink(false,eUrl);
 	}
   }
   delete Links;
@@ -145,7 +156,7 @@ void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
   Ini->EraseSection("Links");
   for(int Count=0;Count<UrlListPreview->Items->Count;Count++)
   {
-	if(UrlListPreview->Items->Item[Count]->SubItems->Strings[0]!="")
+	if(!UrlListPreview->Items->Item[Count]->SubItems->Strings[0].IsEmpty())
 	{
 	  Ini->WriteString("Links", "Url" +  IntToStr(Count+1), UrlListPreview->Items->Item[Count]->SubItems->Strings[0]);
 	  Ini->WriteBool("Links", "Enable" + IntToStr(Count+1), UrlListPreview->Items->Item[Count]->Checked);
@@ -154,8 +165,8 @@ void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
   //W³aczanie wszystkich aktualizacji
   for(int Count=0;Count<UrlListPreview->Items->Count;Count++)
   {
-	if((UrlListPreview->Items->Item[Count]->SubItems->Strings[0]!="")&&
-	(UrlListPreview->Items->Item[Count]->Checked==true))
+	if((!UrlListPreview->Items->Item[Count]->SubItems->Strings[0].IsEmpty())&&
+	(UrlListPreview->Items->Item[Count]->Checked))
 	{
 	  SetUpdateLink(true,UrlListPreview->Items->Item[Count]->SubItems->Strings[0]);
 	}
@@ -209,8 +220,8 @@ void __fastcall TMainForm::UrlListPreviewClick(TObject *Sender)
 {
   if(UrlListPreview->ItemIndex==-1)
   {
-	DeleteButton->Enabled=false;
-	EditButton->Enabled=false;
+	DeleteButton->Enabled = false;
+	EditButton->Enabled = false;
   }
 }
 //---------------------------------------------------------------------------
@@ -220,20 +231,20 @@ void __fastcall TMainForm::EditButtonClick(TObject *Sender)
   if(UrlListPreview->ItemIndex!=-1)
   {
 	UnicodeString URL = InputBox("Edycja kana³u aktualizacji","Edytuj adres:",UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->Strings[0]);
-	if(URL!="")
+	if(!URL.IsEmpty())
 	{
-	  UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->Strings[0]=URL;
+	  UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->Strings[0] = URL;
 	}
-	UrlListPreview->ItemIndex=-1;
+	UrlListPreview->ItemIndex = -1;
   }
 
-  DeleteButton->Enabled=false;
-  EditButton->Enabled=false;
+  DeleteButton->Enabled = false;
+  EditButton->Enabled = false;
 
   if(UrlListPreview->Items->Count==0)
-   SaveButton->Enabled=false;
+   SaveButton->Enabled = false;
   else
-   SaveButton->Enabled=true;
+   SaveButton->Enabled = true;
 }
 //---------------------------------------------------------------------------
 
@@ -245,8 +256,8 @@ void __fastcall TMainForm::aExitExecute(TObject *Sender)
 
 void __fastcall TMainForm::CheckUpdatesOnStartTimerTimer(TObject *Sender)
 {
+  CheckUpdatesOnStartTimer->Enabled = false;
   CheckUpdates(UpdateMode);
-  CheckUpdatesOnStartTimer->Enabled=false;
 
   if(UpdateTime!=0)
   {
@@ -286,5 +297,21 @@ void __fastcall TMainForm::OkButtonClick(TObject *Sender)
 void __fastcall TMainForm::CancelButtonClick(TObject *Sender)
 {
   Close();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::FormCreate(TObject *Sender)
+{
+  UnicodeString ThemeSkinDir = GetThemeSkinDir();
+  if(FileExists(ThemeSkinDir + "\\\\Skin.asz"))
+  {
+	ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
+	sSkinManager->SkinDirectory = ThemeSkinDir;
+	sSkinManager->SkinName = "Skin.asz";
+	sSkinProvider->DrawNonClientArea = ChkSkinEnabled();
+	sSkinManager->Active = true;
+  }
+  else
+   sSkinManager->Active = false;
 }
 //---------------------------------------------------------------------------

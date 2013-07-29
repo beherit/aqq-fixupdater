@@ -33,6 +33,58 @@ bool ChangeAddonBrowserChk;
 //Wymagana wersja AQQ
 bool ChkAQQVersion = true;
 
+//Pobieranie sciezki do skorki kompozycji
+UnicodeString GetThemeSkinDir()
+{
+  UnicodeString Dir = (wchar_t*)(PluginLink.CallService(AQQ_FUNCTION_GETTHEMEDIR,0,0));
+  Dir = StringReplace(Dir, "\\", "\\\\", TReplaceFlags() << rfReplaceAll);
+  Dir = Dir + "\\\\Skin";
+  return Dir;
+}
+//---------------------------------------------------------------------------
+
+//Sprawdzanie czy wlaczona jest obsluga stylow obramowania okien
+bool ChkSkinEnabled()
+{
+  TStrings* IniList = new TStringList();
+  IniList->SetText((wchar_t*)(PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP,0,0)));
+  TMemIniFile *Settings = new TMemIniFile(ChangeFileExt(Application->ExeName, ".INI"));
+  Settings->SetStrings(IniList);
+  delete IniList;
+  UnicodeString AlphaSkinsEnabled = Settings->ReadString("Settings","UseSkin","1");
+  delete Settings;
+  return StrToBool(AlphaSkinsEnabled);
+}
+//---------------------------------------------------------------------------
+
+//Zmiana skorki wtyczki
+void ChangePluginSkin()
+{
+  if(hMainForm)
+  {
+	UnicodeString ThemeSkinDir = GetThemeSkinDir();
+	if(FileExists(ThemeSkinDir + "\\\\Skin.asz"))
+	{
+	  ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
+	  hMainForm->sSkinManager->SkinDirectory = ThemeSkinDir;
+	  hMainForm->sSkinManager->SkinName = "Skin.asz";
+	  hMainForm->sSkinProvider->DrawNonClientArea = ChkSkinEnabled();
+	  hMainForm->sSkinManager->Active = true;
+	}
+	else
+	 hMainForm->sSkinManager->Active = false;
+  }
+}
+//---------------------------------------------------------------------------
+
+int __stdcall OnThemeChanged (WPARAM wParam, LPARAM lParam)
+{
+  ChangePluginSkin();
+
+  return 0;
+}
+//---------------------------------------------------------------------------
+
 //Dodawanie kana³ow przez zewnetrzne wtyczki
 int __stdcall AddLink(WPARAM wParam, LPARAM lParam)
 {
@@ -41,7 +93,7 @@ int __stdcall AddLink(WPARAM wParam, LPARAM lParam)
   URL = URL.Trim();
   int Count;
 
-  if(URL!="")
+  if(!URL.IsEmpty())
   {
 	hMainForm->aReadSettings->Execute();
 	//Szukanie URL
@@ -70,7 +122,7 @@ int __stdcall DeleteLink(WPARAM wParam, LPARAM lParam)
   UnicodeString URL = (wchar_t*)lParam;
   URL = URL.Trim();
 
-  if(URL!="")
+  if(!URL.IsEmpty())
   {
 	hMainForm->aReadSettings->Execute();
 
@@ -99,7 +151,7 @@ int __stdcall OnAddonBrowser(WPARAM wParam, LPARAM lParam)
 
 int __stdcall OnModulesLoaded(WPARAM, LPARAM)
 {
-  hMainForm->CheckUpdatesOnStartTimer->Enabled=true;
+  hMainForm->CheckUpdatesOnStartTimer->Enabled = true;
 
   return 0;
 }
@@ -150,11 +202,28 @@ void ChangeAddonBrowser(bool Enabled)
 }
 //---------------------------------------------------------------------------
 
+int __stdcall OnAddonInstalled(WPARAM wParam, LPARAM lParam)
+{
+  UnicodeString AddonFile = (wchar_t*)lParam ;
+  if(ExtractFileName(AddonFile)!="FixUpdater.dll")
+  {
+	PPluginTriple PluginTriple = (PPluginTriple)wParam;
+	if(PluginTriple->Param1==tatPlugin)
+	{
+	   hMainForm->CheckUpdatesTimer->Enabled = false;
+	   hMainForm->CheckUpdatesOnStartTimer->Enabled = false;
+	   hMainForm->CheckUpdatesOnStartTimer->Interval = 2000;
+	   hMainForm->CheckUpdatesOnStartTimer->Enabled = true;
+	}
+  }
+}
+//---------------------------------------------------------------------------
+
 extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 {
   PluginLink = *Link;
   //Tworzenie uchwytu do okna glownego
-  if(hMainForm==NULL)
+  if(!hMainForm)
   {
 	Application->Handle = (HWND)MainForm;
 	hMainForm = new TMainForm(Application);
@@ -327,6 +396,10 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
   PluginLink.HookEvent(FIXUPDATER_SYSTEM_DELETELINK,DeleteLink);
   //Hook na pokaztwanie browsera dodatkow
   PluginLink.HookEvent(AQQ_SYSTEM_ADDONBROWSER_URL,OnAddonBrowser);
+  //Hook na instalowanie dodatkow
+  PluginLink.HookEvent(AQQ_SYSTEM_ADDONINSTALLED,OnAddonInstalled);
+  //Hook na zmianê kompozycji
+  PluginLink.HookEvent(AQQ_SYSTEM_THEMECHANGED,OnThemeChanged);
   //W³¹czenie Timer'a automatycznej aktualizacji
   PluginLink.HookEvent(AQQ_SYSTEM_MODULESLOADED, OnModulesLoaded);
   if(PluginLink.CallService(AQQ_SYSTEM_MODULESLOADED,0,0)==true)
@@ -348,7 +421,7 @@ extern "C" int __declspec(dllexport)__stdcall Settings()
 extern "C" int __declspec(dllexport) __stdcall Unload()
 {
   //Wylaczanie timetow
-  if(hMainForm!=NULL)
+  if(hMainForm)
   {
 	hMainForm->CheckUpdatesTimer->Enabled = false;
 	hMainForm->CheckUpdatesOnStartTimer->Enabled = false;
@@ -357,6 +430,8 @@ extern "C" int __declspec(dllexport) __stdcall Unload()
   PluginLink.UnhookEvent(AddLink);
   PluginLink.UnhookEvent(DeleteLink);
   PluginLink.UnhookEvent(OnAddonBrowser);
+  PluginLink.UnhookEvent(OnAddonInstalled);
+  PluginLink.UnhookEvent(OnThemeChanged);
   PluginLink.UnhookEvent(OnModulesLoaded);
   //Wywalanie linkow z aktualizatora
   TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
@@ -367,7 +442,7 @@ extern "C" int __declspec(dllexport) __stdcall Unload()
 	if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true)==true)
 	{
 	  UnicodeString Url = Ini->ReadString("Links", "Url" + IntToStr(Count+1), "");
-	  if(Url!="") SetUpdateLink(false,Url);
+	  if(!Url.IsEmpty()) SetUpdateLink(false,Url);
 	}
   }
   delete Links;
@@ -383,13 +458,13 @@ extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVe
   if(PLUGIN_COMPARE_VERSION(AQQVersion,PLUGIN_MAKE_VERSION(2,3,0,15))<0)
    ChkAQQVersion = false;
   PluginInfo.cbSize = sizeof(TPluginInfo);
-  PluginInfo.ShortName = (wchar_t*)L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,5,0);
-  PluginInfo.Description = (wchar_t*)L"Dodawanie w³asnych serwerów aktualizacji dodatków";
-  PluginInfo.Author = (wchar_t*)L"Krzysztof Grochocki (Beherit)";
-  PluginInfo.AuthorMail = (wchar_t*)L"kontakt@beherit.pl";
-  PluginInfo.Copyright = (wchar_t*)L"Krzysztof Grochocki (Beherit)";
-  PluginInfo.Homepage = (wchar_t*)L"http://beherit.pl/";
+  PluginInfo.ShortName = L"FixUpdater";
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,1,0,0);
+  PluginInfo.Description = L"Dodawanie w³asnych serwerów aktualizacji dodatków";
+  PluginInfo.Author = L"Krzysztof Grochocki (Beherit)";
+  PluginInfo.AuthorMail = L"kontakt@beherit.pl";
+  PluginInfo.Copyright = L"Krzysztof Grochocki (Beherit)";
+  PluginInfo.Homepage = L"http://beherit.pl/";
 
   return &PluginInfo;
 }
