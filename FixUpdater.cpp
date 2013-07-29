@@ -37,7 +37,7 @@ UnicodeString PURL;
 int PCount;
 bool PDoNotAdd;
 
-extern "C"  __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVersion)
+extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVersion)
 {
   //Sprawdzanie wersji AQQ
   if (CompareVersion(AQQVersion,PLUGIN_MAKE_VERSION(2,1,0,47))<0)
@@ -50,10 +50,10 @@ extern "C"  __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQV
   }
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = (wchar_t*)L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,1,2);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,1,4);
   PluginInfo.Description = (wchar_t*)L"Dodawanie w³asnych serwerów aktualizacji dodatków";
   PluginInfo.Author = (wchar_t*)L"Krzysztof Grochocki (Beherit)";
-  PluginInfo.AuthorMail = (wchar_t*)L"sirbeherit@gmial.com";
+  PluginInfo.AuthorMail = (wchar_t*)L"sirbeherit@gmail.com";
   PluginInfo.Copyright = (wchar_t*)L"Krzysztof Grochocki (Beherit)";
   PluginInfo.Homepage = (wchar_t*)L"http://beherit.pl/";
 
@@ -78,7 +78,7 @@ int __stdcall AddLink(WPARAM wParam, LPARAM lParam)
   PCount = handle->UrlListPreview->Items->Count;
   for(PCount=0;PCount<handle->UrlListPreview->Items->Count;PCount++)
   {
-	if(Trim(handle->UrlListPreview->Items->Item[PCount]->SubItems->GetText())==PURL)
+	if(handle->UrlListPreview->Items->Item[PCount]->SubItems->Strings[0]==PURL)
 	{
 	  PDoNotAdd = true;
 	  PCount = handle->UrlListPreview->Items->Count;
@@ -145,7 +145,7 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 	 CreateDir(Dir + "\\\\FixUpdater");
 
 	TIniFile *Ini = new TIniFile(Dir + "\\\\FixUpdater\\\\Url.ini");
-	Ini->WriteInteger("UrlCount", "Count", 3);
+	Ini->WriteInteger("UrlCount", "Count", 4);
 	Ini->WriteString("Update1", "Url", "http://beherit.pl/aqq_update/stable.xml");
 	Ini->WriteBool("Update1", "Enable", true);
 	Ini->WriteString("Update2", "Url", "http://beherit.pl/aqq_update/beta.xml");
