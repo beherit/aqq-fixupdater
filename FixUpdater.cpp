@@ -51,7 +51,7 @@ extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVe
   }
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = (wchar_t*)L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,1,8);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,2,0);
   PluginInfo.Description = (wchar_t*)L"Dodawanie w³asnych serwerów aktualizacji dodatków";
   PluginInfo.Author = (wchar_t*)L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = (wchar_t*)L"sirbeherit@gmail.com";
@@ -141,7 +141,6 @@ int __stdcall OnModulesLoaded(WPARAM, LPARAM)
   }
   hMainForm->eUpdateMode = UpdateMode;
   hMainForm->CheckUpdatesOnStartTimer->Enabled=true;
-  PluginLink.UnhookEvent(OnModulesLoaded);
 
   return 0;
 }
@@ -257,6 +256,7 @@ extern "C" int __declspec(dllexport) __stdcall Unload()
   delete Ini;
   PluginLink.UnhookEvent(AddLink);
   PluginLink.UnhookEvent(DeleteLink);
+  PluginLink.UnhookEvent(OnModulesLoaded);
 
   return 0;
 }
