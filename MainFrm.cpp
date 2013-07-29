@@ -55,15 +55,27 @@ void __fastcall TMainForm::SaveButtonClick(TObject *Sender)
 void __fastcall TMainForm::AddButtonClick(TObject *Sender)
 {
   UnicodeString URL;
+  bool DoNotAdd = false;
   if(InputQuery("Nowy kana³ aktualizacji","Dodaj nowy adres:",URL))
   {
 	if(URL!="")
 	{
 	  int Count=UrlListPreview->Items->Count;
-	  UrlListPreview->Items->Add();
-	  UrlListPreview->Items->Item[Count]->Checked=true;
-	  UrlListPreview->Items->Item[Count]->SubItems->Add(URL);
-	  SaveButton->Enabled=true;
+	  for(int XCount=0;XCount<Count;XCount++)
+	  {
+		if(Trim(UrlListPreview->Items->Item[XCount]->SubItems->GetText())==URL)
+		{
+		  DoNotAdd = true;
+		  XCount = Count;
+		}
+	  }
+	  if(DoNotAdd==false)
+	  {
+		UrlListPreview->Items->Add();
+		UrlListPreview->Items->Item[Count]->Checked=true;
+		UrlListPreview->Items->Item[Count]->SubItems->Add(URL);
+		SaveButton->Enabled=true;
+	  }
 	}
   }
 }
@@ -240,6 +252,7 @@ void __fastcall TMainForm::CheckUpdatesOnStartTimerTimer(TObject *Sender)
 
   if(eUpdateMode!=0)
   {
+	CheckUpdatesTimer->Enabled = false;
 	CheckUpdatesTimer->Interval = 3600000 * eUpdateMode;
 	CheckUpdatesTimer->Enabled = true;
   }

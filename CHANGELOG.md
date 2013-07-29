@@ -1,3 +1,9 @@
+1.0.1.2
+-----
+* Poprawienie funkcji FIXUPDATER_SYSTEM_ADDLINK - link nie jest dodawany gdy już znajduje się na liście.
+* Wtyczka włącza sprawdzanie aktualizacji dodatków w AQQ (wymagane by sprawdzanie aktualizacjo zostało przeprowadzone).
+* Dodawanie tych samych kanałów aktualizacji jest zablokowane.
+
 1.0.1.0
 -----
 * Możliwość ustawienia częstotliwości sprawdzania aktualizacji.

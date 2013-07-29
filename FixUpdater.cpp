@@ -22,6 +22,7 @@ TMainForm *handle;
 TPluginLink PluginLink;
 TPluginInfo PluginInfo;
 TPluginHook PluginHook;
+TSaveSetup SaveSetup;
 
 //Zmienne
 UnicodeString Dir;
@@ -34,6 +35,7 @@ int UpdateMode;
 UnicodeString PEnable;
 UnicodeString PURL;
 int PCount;
+bool PDoNotAdd;
 
 extern "C"  __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVersion)
 {
@@ -48,7 +50,7 @@ extern "C"  __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQV
   }
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = (wchar_t*)L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,1,0);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,1,2);
   PluginInfo.Description = (wchar_t*)L"Dodawanie w³asnych serwerów aktualizacji dodatków";
   PluginInfo.Author = (wchar_t*)L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = (wchar_t*)L"sirbeherit@gmial.com";
@@ -64,17 +66,33 @@ int __stdcall AddLink(WPARAM wParam, LPARAM lParam)
 {
   PEnable = (WPARAM)wParam;
   PURL = (wchar_t*)lParam;
+  PURL = PURL.Trim();
   if(handle==NULL)
   {
 	Application->Handle = MainForm;
 	handle = new TMainForm(Application);
   }
   handle->aReadSettings->Execute();
+
+  PDoNotAdd = false;
   PCount = handle->UrlListPreview->Items->Count;
-  handle->UrlListPreview->Items->Add();
-  handle->UrlListPreview->Items->Item[PCount]->Checked=StrToBool(PEnable);
-  handle->UrlListPreview->Items->Item[PCount]->SubItems->Add(PURL);
-  handle->aSaveSettings->Execute();
+  for(PCount=0;PCount<handle->UrlListPreview->Items->Count;PCount++)
+  {
+	if(Trim(handle->UrlListPreview->Items->Item[PCount]->SubItems->GetText())==PURL)
+	{
+	  PDoNotAdd = true;
+	  PCount = handle->UrlListPreview->Items->Count;
+	}
+  }
+
+  if(PDoNotAdd==false)
+  {
+	PCount = handle->UrlListPreview->Items->Count;
+	handle->UrlListPreview->Items->Add();
+	handle->UrlListPreview->Items->Item[PCount]->Checked=StrToBool(PEnable);
+	handle->UrlListPreview->Items->Item[PCount]->SubItems->Add(PURL);
+	handle->aSaveSettings->Execute();
+  }
 
   return 0;
 }
@@ -110,6 +128,14 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 
   Dir = GetPluginUserDir();
 
+  //W³¹czenie aktualizacji dodatkow w AQQ
+  SaveSetup.Section = L"Settings";
+  SaveSetup.Ident = L"UpdateAddons";
+  SaveSetup.Value = L"1";
+  PluginLink.CallService(AQQ_FUNCTION_SAVESETUP,1,(LPARAM)(&SaveSetup));
+  PluginLink.CallService(AQQ_FUNCTION_REFRESHSETUP,0,0);
+
+  //Hook SDK wtyczki
   PluginLink.HookEvent(FIXUPDATER_SYSTEM_ADDLINK,AddLink);
 
   //Ustawienia domyœlne
@@ -161,7 +187,6 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 	handle->eUpdateMode = UpdateMode;
 	handle->CheckUpdatesOnStartTimer->Enabled=true;
   }
-
 
   delete Ini;
 
