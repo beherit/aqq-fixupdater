@@ -17,6 +17,7 @@
 #include <Vcl.Controls.hpp>
 #include <Vcl.ExtCtrls.hpp>
 #include <Vcl.StdCtrls.hpp>
+#include "sSkinProvider.hpp"
 //---------------------------------------------------------------------------
 class TMainForm : public TForm
 {
@@ -46,6 +47,7 @@ __published:	// IDE-managed Components
 	TsButton *OkButton;
 	TsSkinManager *sSkinManager;
 	TsLabelFX *LastUpdateLabel;
+	TsSkinProvider *sSkinProvider;
 	void __fastcall UrlListPreviewSelectItem(TObject *Sender, TListItem *Item, bool Selected);
 	void __fastcall DeleteButtonClick(TObject *Sender);
 	void __fastcall SaveButtonClick(TObject *Sender);

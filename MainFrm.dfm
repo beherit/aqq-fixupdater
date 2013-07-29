@@ -291,6 +291,7 @@ object MainForm: TMainForm
         Caption = 'RRRR-MM-DD HH:MM:SS'
         Color = clBtnFace
         ParentColor = False
+        Angle = 0
         Kind.KindType = ktCustom
         Kind.Color = clGreen
         Shadow.BlurCount = 0
@@ -452,6 +453,17 @@ object MainForm: TMainForm
     ThirdParty.ThirdUpDown = ' '
     ThirdParty.ThirdScrollBar = ' '
     Left = 96
+    Top = 200
+  end
+  object sSkinProvider: TsSkinProvider
+    AddedTitle.Font.Charset = DEFAULT_CHARSET
+    AddedTitle.Font.Color = clNone
+    AddedTitle.Font.Height = -11
+    AddedTitle.Font.Name = 'Tahoma'
+    AddedTitle.Font.Style = []
+    SkinData.SkinSection = 'FORM'
+    TitleButtons = <>
+    Left = 128
     Top = 200
   end
 end

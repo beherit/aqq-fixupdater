@@ -1,3 +1,10 @@
+1.4.1.0
+-----
+* Wsparcie dla wtyczki AlphaWindows (ustawianie przeźroczystości obramowania).
+* Zmniejszenie rozmiaru wtyczki 32-bitowej poprzez użycie kompresji LZMA.
+* Brak kompresji wtyczki 64-bitowej.
+* Aktualizacja komponentów AlphaControls do najnowszej dostępnej wersji (8.30).
+
 1.4.0.0
 -----
 * Dodanie 64-bitowej wersji wtyczki.
