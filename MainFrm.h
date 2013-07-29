@@ -46,12 +46,15 @@ __published:	// IDE-managed Components
 	void __fastcall aSaveSettingsExecute(TObject *Sender);
 	void __fastcall aResetSettingsExecute(TObject *Sender);
 	void __fastcall ResetButtonClick(TObject *Sender);
-	void __fastcall UrlListPreviewChange(TObject *Sender, TListItem *Item, TItemChange Change);
 	void __fastcall UrlListPreviewClick(TObject *Sender);
 	void __fastcall EditButtonClick(TObject *Sender);
 	void __fastcall aExitExecute(TObject *Sender);
 	void __fastcall CheckUpdatesOnStartTimerTimer(TObject *Sender);
 	void __fastcall CheckUpdatesTimerTimer(TObject *Sender);
+	void __fastcall aSettingsChangedExecute(TObject *Sender);
+	void __fastcall UrlListPreviewDataStateChange(TObject *Sender, int StartIndex, int EndIndex,
+          TItemStates OldState, TItemStates NewState);
+
 private:	// User declarations
 public:		// User declarations
 	int eUpdateTime;

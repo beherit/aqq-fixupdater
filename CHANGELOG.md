@@ -1,3 +1,9 @@
+1.0.4.0
+-----
+* Funkcje FIXUPDATER_SYSTEM_ADDLINK i FIXUPDATER_SYSTEM_DELETELINK zwracają 0 w przypadku błędu.
+* Poprawki w strukturze pliku ustawień.
+* Zaktualizowano adres kanału aktualizacji na aqqnews.pl.
+
 1.0.3.0
 -----
 * Możliwość wyboru sposobu sprawdzania aktualizacji.
