@@ -9,7 +9,9 @@
 TMainForm *MainForm;
 //---------------------------------------------------------------------------
 __declspec(dllimport)UnicodeString GetPluginUserDir();
+__declspec(dllimport)UnicodeString GetLastUpdate();
 __declspec(dllimport)void SetUpdateLink(bool Enabled, UnicodeString URL);
+__declspec(dllimport)void CheckUpdates();
 UnicodeString eDir;
 UnicodeString eUrl;
 int eUrlCount;
@@ -45,13 +47,15 @@ void __fastcall TMainForm::SaveButtonClick(TObject *Sender)
 {
   aSaveSettings->Execute();
   Close();
+  if(CheckUpdatesAfterSaveBox->Checked==true)
+   CheckUpdates();
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TMainForm::AddButtonClick(TObject *Sender)
 {
   UnicodeString URL;
-  if(InputQuery("Adres serwera aktualizacji","Dodaj nowy adres:",URL))
+  if(InputQuery("Nowy kana³ aktualizacji","Dodaj nowy adres:",URL))
   {
 	if(URL!="")
 	{
@@ -70,16 +74,21 @@ void __fastcall TMainForm::aReadSettingsExecute(TObject *Sender)
   eDir = GetPluginUserDir();
 
   TIniFile *Ini = new TIniFile(eDir + "\\\\FixUpdater\\\\Url.ini");
+
+  //Kana³y aktualizacji
   eUrlCount = Ini->ReadInteger("UrlCount", "Count", 2);
-
   UrlListPreview->Items->Clear();
-
   for(eCount=0;eCount<eUrlCount;eCount++)
   {
 	UrlListPreview->Items->Add();
 	UrlListPreview->Items->Item[eCount]->Checked = Ini->ReadBool("Update" + IntToStr(eCount+1), "Enable", true);
 	UrlListPreview->Items->Item[eCount]->SubItems->Add( Ini->ReadString("Update" + IntToStr(eCount+1), "Url", "") );
   }
+
+  //Czêstotliwoœci aktualizacji
+  UpdateModeComboBox->ItemIndex = Ini->ReadInteger("Settings", "UpdateMode", 0);
+  LastUpdateLabel->Caption=GetLastUpdate();
+  CheckUpdatesAfterSaveBox->Checked = Ini->ReadBool("Settings", "AfterSave", false);
 
   delete Ini;
 }
@@ -135,6 +144,20 @@ void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
 	}
   }
 
+  //Czêstotliwoœci aktualizacji
+  if(Ini->ReadInteger("Settings", "UpdateMode", 0)!=UpdateModeComboBox->ItemIndex)
+  {
+	Ini->WriteInteger("Settings", "UpdateMode",UpdateModeComboBox->ItemIndex);
+	CheckUpdatesTimer->Enabled = false;
+	CheckUpdatesOnStartTimer->Enabled=false;
+	if(UpdateModeComboBox->ItemIndex!=0)
+	{
+	  CheckUpdatesTimer->Interval = 3600000 * UpdateModeComboBox->ItemIndex;
+	  CheckUpdatesTimer->Enabled = true;
+	}
+  }
+  Ini->WriteBool("Settings", "AfterSave", CheckUpdatesAfterSaveBox->Checked);
+
   delete Ini;
 }
 //---------------------------------------------------------------------------
@@ -152,6 +175,9 @@ void __fastcall TMainForm::aResetSettingsExecute(TObject *Sender)
   UrlListPreview->Items->Add();
   UrlListPreview->Items->Item[2]->Checked = true;
   UrlListPreview->Items->Item[2]->SubItems->Add("http://aqqnews.komunikatory.pl/Pliki/aqq_update.xml");
+  UrlListPreview->Items->Add();
+  UrlListPreview->Items->Item[3]->Checked = false;
+  UrlListPreview->Items->Item[3]->SubItems->Add("http://www.zylber.info-s.pl/aqq/beta.xml");
 
   SaveButton->Enabled=true;
 }
@@ -185,7 +211,7 @@ void __fastcall TMainForm::EditButtonClick(TObject *Sender)
 {
   if(UrlListPreview->ItemIndex!=-1)
   {
-	UnicodeString URL = InputBox("Adres serwera aktualizacji","Edycja adresu:",Trim(UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->GetText()));
+	UnicodeString URL = InputBox("Edycja kana³u aktualizacji","Edytuj adres:",Trim(UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->GetText()));
 	if(URL!="")
 	{
 	  UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->Text=URL;
@@ -206,4 +232,24 @@ void __fastcall TMainForm::aExitExecute(TObject *Sender)
   Close();
 }
 //---------------------------------------------------------------------------
+
+void __fastcall TMainForm::CheckUpdatesOnStartTimerTimer(TObject *Sender)
+{
+  CheckUpdates();
+  CheckUpdatesOnStartTimer->Enabled=false;
+
+  if(eUpdateMode!=0)
+  {
+	CheckUpdatesTimer->Interval = 3600000 * eUpdateMode;
+	CheckUpdatesTimer->Enabled = true;
+  }
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::CheckUpdatesTimerTimer(TObject *Sender)
+{
+  CheckUpdates();
+}
+//---------------------------------------------------------------------------
+
 
