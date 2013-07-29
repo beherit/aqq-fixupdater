@@ -24,7 +24,6 @@ __declspec(dllimport)bool ChkNativeEnabled();
 __declspec(dllimport)UnicodeString GetLastUpdate();
 __declspec(dllimport)void SetUpdateLink(UnicodeString URL, bool Enabled);
 __declspec(dllimport)void CheckUpdates(int Mode);
-__declspec(dllimport)void ChangeAddonBrowser(bool Enabled);
 //---------------------------------------------------------------------------
 __fastcall TMainForm::TMainForm(TComponent* Owner)
 	: TForm(Owner)
@@ -75,7 +74,7 @@ void __fastcall TMainForm::FormShow(TObject *Sender)
   //Ustawienie fokusu na kontrolce
   CancelButton->SetFocus();
   //Ustawienie domyslnej zakladki
-  PageControl->ActivePage = LinksTabSheet;
+  PageControl->ActivePage = ReposTabSheet;
 }
 //---------------------------------------------------------------------------
 
@@ -101,8 +100,6 @@ void __fastcall TMainForm::aLoadSettingsExecute(TObject *Sender)
   LastUpdateLabel->Left = LastUpdateInfoLabel->Left + LastUpdateInfoLabel->Width + 2;
   //Sposób aktualizacji
   UpdateModeComboBox->ItemIndex = Ini->ReadInteger("Settings", "UpdateMode", 0);
-  //Menedzer dodatkow
-  ChangeAddonBrowserCheckBox->Checked = Ini->ReadBool("Settings", "ChangeAddonBrowser", true);
   delete Ini;
 }
 //---------------------------------------------------------------------------
@@ -155,30 +152,21 @@ void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
   //Sposób aktualizacji
   Ini->WriteInteger("Settings", "UpdateMode",UpdateModeComboBox->ItemIndex);
   UpdateMode = UpdateModeComboBox->ItemIndex;
-  //Menedzer dodatkow
-  Ini->WriteBool("Settings", "ChangeAddonBrowser",ChangeAddonBrowserCheckBox->Checked);
-  ChangeAddonBrowser(ChangeAddonBrowserCheckBox->Checked);
   delete Ini;
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TMainForm::aResetSettingsExecute(TObject *Sender)
 {
-  //Usuwanie wszystkich dostepnych kanalow aktualizacji
+  //Usuwanie wszystkich dostepnych repozytorium
   UrlListPreview->Items->Clear();
-  //Dodawanie domyslnych kanalow aktualizacji
+  //Dodawanie domyslnych repozytorium
   UrlListPreview->Items->Add();
   UrlListPreview->Items->Item[0]->Checked = true;
   UrlListPreview->Items->Item[0]->SubItems->Add("http://beherit.pl/aqq_update/stable.xml");
   UrlListPreview->Items->Add();
   UrlListPreview->Items->Item[1]->Checked = false;
   UrlListPreview->Items->Item[1]->SubItems->Add("http://beherit.pl/aqq_update/beta.xml");
-  UrlListPreview->Items->Add();
-  UrlListPreview->Items->Item[2]->Checked = true;
-  UrlListPreview->Items->Item[2]->SubItems->Add("http://files.aqqnews.pl/fixupdater.php");
-  UrlListPreview->Items->Add();
-  UrlListPreview->Items->Item[3]->Checked = false;
-  UrlListPreview->Items->Item[3]->SubItems->Add("http://files.aqqnews.pl/fixupdater-beta.php");
   //Wlaczenie przycisku do zapisu
   SaveButton->Enabled = true;
 }
@@ -236,7 +224,7 @@ void __fastcall TMainForm::UrlListPreviewSelectItem(TObject *Sender, TListItem *
 		  bool Selected)
 {
   //Zezwolenie edycji elementow
-  if(UrlListPreview->ItemIndex>3)
+  if(UrlListPreview->ItemIndex>1)
   {
 	DeleteButton->Enabled = true;
 	EditButton->Enabled = true;
@@ -253,7 +241,7 @@ void __fastcall TMainForm::UrlListPreviewSelectItem(TObject *Sender, TListItem *
 void __fastcall TMainForm::AddButtonClick(TObject *Sender)
 {
   UnicodeString URL;
-  if(InputQuery("Nowy kana³ aktualizacji","Dodaj nowy adres:",URL))
+  if(InputQuery("Nowe repozytorium","Dodaj nowy adres:",URL))
   {
 	//Jezeli zostal wpisany jakis tekst
 	if(!URL.IsEmpty())
@@ -289,6 +277,8 @@ void __fastcall TMainForm::DeleteButtonClick(TObject *Sender)
   //Wylaczanie przyciskow
   DeleteButton->Enabled = false;
   EditButton->Enabled = false;
+  //Wlaczenie przycisku do zapisu
+  SaveButton->Enabled = true;
 }
 //---------------------------------------------------------------------------
 
@@ -297,10 +287,13 @@ void __fastcall TMainForm::EditButtonClick(TObject *Sender)
   //Edycja wybranego elementu
   if(UrlListPreview->ItemIndex!=-1)
   {
-	UnicodeString URL = InputBox("Edycja kana³u aktualizacji","Edytuj adres:",UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->Strings[0]);
+	UnicodeString URL = InputBox("Edycja repozytorium","Edytuj adres:",UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->Strings[0]);
 	if(!URL.IsEmpty())
 	{
+      //Zmiana wybranego elementu
 	  UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->Strings[0] = URL;
+	  //Wlaczenie przycisku do zapisu
+	  SaveButton->Enabled = true;
 	}
 	UrlListPreview->ItemIndex = -1;
   }
@@ -312,7 +305,7 @@ void __fastcall TMainForm::EditButtonClick(TObject *Sender)
 
 void __fastcall TMainForm::ResetButtonClick(TObject *Sender)
 {
-  //Przywracanie domyslnych ustawien kanalow aktualizacji
+  //Przywracanie domyslnych ustawien repozytorium
   aResetSettings->Execute();
 }
 //---------------------------------------------------------------------------

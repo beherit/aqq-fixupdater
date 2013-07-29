@@ -20,11 +20,8 @@ TMainForm *hMainForm;
 //Struktury-glowne-----------------------------------------------------------
 TPluginLink PluginLink;
 TPluginInfo PluginInfo;
-//SETTINGS-------------------------------------------------------------------
-bool ChangeAddonBrowserChk;
 //FORWARD-AQQ-HOOKS----------------------------------------------------------
 int __stdcall OnAddLink(WPARAM wParam, LPARAM lParam);
-int __stdcall OnAddonBrowser(WPARAM wParam, LPARAM lParam);
 int __stdcall OnAddonInstalled(WPARAM wParam, LPARAM lParam);
 int __stdcall OnDeleteLink(WPARAM wParam, LPARAM lParam);
 int __stdcall OnModulesLoaded(WPARAM wParam, LPARAM lParam);
@@ -73,13 +70,6 @@ bool ChkNativeEnabled()
 }
 //---------------------------------------------------------------------------
 
-//Zmiana ustawien przegladarki dodatkow
-void ChangeAddonBrowser(bool Enabled)
-{
-  ChangeAddonBrowserChk = Enabled;
-}
-//---------------------------------------------------------------------------
-
 //Sprawdzanie dostepnosci aktualizacji
 void CheckUpdates(int Mode)
 {
@@ -106,30 +96,30 @@ UnicodeString GetLastUpdate()
 }
 //---------------------------------------------------------------------------
 
-//Dodawanie lub usuwanie linkow kanalow aktualizacji
+//Dodawanie lub usuwanie adresow repozytorium
 void SetUpdateLink(UnicodeString URL, bool Enabled)
 {
   PluginLink.CallService(AQQ_SYSTEM_SETUPDATELINK,!Enabled,(LPARAM)URL.w_str());
 }
 //---------------------------------------------------------------------------
 
-//Hook na dodawanie kana³ow przez zewnetrzne wtyczki
+//Hook na dodawanie repozytorium przez zewnetrzne wtyczki
 int __stdcall OnAddLink(WPARAM wParam, LPARAM lParam)
 {
-  //Pobieranie adresu kanalu
+  //Pobieranie adresu repozytorium
   UnicodeString URL = (wchar_t*)lParam;
   URL = URL.Trim();
-  //Jezeli pobrany kanal nie jest pusty
+  //Jezeli pobrane repozytorium nie jest puste
   if(!URL.IsEmpty())
   {
-	//Pobieranie informacji o aktywacji kanalu
+	//Pobieranie informacji o aktywacji repozytorium
 	UnicodeString Enable = (WPARAM)wParam;
 	//Odczyt ustawien wtyczki na formie ustawien
 	hMainForm->aLoadSettings->Execute();
 	//Szukanie wskazanego adresu
 	for(int Count=0;Count<hMainForm->UrlListPreview->Items->Count;Count++)
 	{
-	  //Wskazany kanal juz istenieje
+	  //Wskazane repozytorium juz istenieje
 	  if(hMainForm->UrlListPreview->Items->Item[Count]->SubItems->Strings[0]==URL)
 	   return 2;
 	}
@@ -143,19 +133,9 @@ int __stdcall OnAddLink(WPARAM wParam, LPARAM lParam)
 	//Zwrocenie info o pomyslnej operacji
 	return 1;
   }
-  //Pobrany kanal jest pusty
+  //Pobrane repozytorium jest puste
   else
    return 2;
-}
-//---------------------------------------------------------------------------
-
-//Hook na pokazywanie browsera dodatkow
-int __stdcall OnAddonBrowser(WPARAM wParam, LPARAM lParam)
-{
-  //Adres przegladarki dodatkow ma byc zmieniany
-  if(ChangeAddonBrowserChk) return (LPARAM)L"http://addons.aqqnews.pl/";
-  //Adres przegladarki dodatkow nie ma byc zmieniany
-  else return 0;
 }
 //---------------------------------------------------------------------------
 
@@ -184,21 +164,21 @@ int __stdcall OnAddonInstalled(WPARAM wParam, LPARAM lParam)
 }
 //---------------------------------------------------------------------------
 
-//Hook na usuwanie kana³ow przez zewnetrzne wtyczki
+//Hook na usuwanie repozytorium przez zewnetrzne wtyczki
 int __stdcall OnDeleteLink(WPARAM wParam, LPARAM lParam)
 {
-  //Pobieranie adresu kanalu
+  //Pobieranie adresu repozytorium
   UnicodeString URL = (wchar_t*)lParam;
   URL = URL.Trim();
-  //Jezeli pobrany kanal nie jest pusty
+  //Jezeli pobrane repozytorium nie jest puste
   if(!URL.IsEmpty())
   {
 	//Odczyt ustawien wtyczki na formie ustawien
 	hMainForm->aLoadSettings->Execute();
-	//Szukanie wskazanego kanalu na formie ustawien
+	//Szukanie wskazanego repozytorium na formie ustawien
 	for(int Count=0;Count<hMainForm->UrlListPreview->Items->Count;Count++)
 	{
-      //Porownanie rekordu z przekazanym w notyfikacji adresem kanalu
+      //Porownanie rekordu z przekazanym w notyfikacji adresem repozytorium
 	  if(hMainForm->UrlListPreview->Items->Item[Count]->SubItems->Strings[0]==URL)
 	  {
 		//Usuniecie wskazanej pozycji
@@ -209,10 +189,10 @@ int __stdcall OnDeleteLink(WPARAM wParam, LPARAM lParam)
 		return 1;
 	  }
 	}
-	//Brak kanalu
+	//Brak repozytorium
 	return 2;
   }
-  //Pobrany kanal jest pusty
+  //Pobrane repozytorium jest puste
   else
    return 2;
 }
@@ -330,21 +310,17 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 	//Tworzenie folderu z ustawieniami wtyczki
 	if(!DirectoryExists(PluginUserDir + "\\\\FixUpdater"))
 	 CreateDir(PluginUserDir + "\\\\FixUpdater");
-    //Tworzenie pliku ustawien z domyslnymi kanalami
+    //Tworzenie pliku ustawien z domyslnym repozytorium
 	TIniFile *Ini = new TIniFile(PluginUserDir + "\\\\FixUpdater\\\\Settings.ini");
 	Ini->WriteString("Links", "Url1", "http://beherit.pl/aqq_update/stable.xml");
 	Ini->WriteBool("Links", "Enable1", true);
 	Ini->WriteString("Links", "Url2", "http://beherit.pl/aqq_update/beta.xml");
 	Ini->WriteBool("Links", "Enable2", false);
-	Ini->WriteString("Links", "Url3", "http://files.aqqnews.pl/fixupdater.php");
-	Ini->WriteBool("Links", "Enable3", true);
-	Ini->WriteString("Links", "Url4", "http://files.aqqnews.pl/fixupdater-beta.php");
-	Ini->WriteBool("Links", "Enable4", false);
 	delete Ini;
   }
   //Odczyt ustawien wtyczki
   TIniFile *Ini = new TIniFile(PluginUserDir + "\\\\FixUpdater\\\\Settings.ini");
-  //Kanaly aktualizacji
+  //Repozytorium
   TStringList *Links = new TStringList;
   Ini->ReadSection("Links",Links);
   for(int Count=0;Count<Links->Count/2;Count++)
@@ -360,17 +336,13 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
   hMainForm->UpdateMode = Ini->ReadInteger("Settings", "UpdateMode", 0);
   //Czestotliwosci aktualizacji
   hMainForm->UpdateTime = Ini->ReadInteger("Settings", "UpdateTime", 0);
-  //Menedzer dodatkow
-  ChangeAddonBrowserChk = Ini->ReadBool("Settings", "ChangeAddonBrowser", true);
   //Zakonczenie odczytu ustawien wtyczki
   delete Ini;
-  //Hook na dodawanie kana³ow przez zewnetrzne wtyczki
+  //Hook na dodawanie repozytorium przez zewnetrzne wtyczki
   PluginLink.HookEvent(FIXUPDATER_SYSTEM_ADDLINK,OnAddLink);
-  //Hook na pokazywanie browsera dodatkow
-  PluginLink.HookEvent(AQQ_SYSTEM_ADDONBROWSER_URL,OnAddonBrowser);
   //Hook na instalowanie dodatkow
   PluginLink.HookEvent(AQQ_SYSTEM_ADDONINSTALLED,OnAddonInstalled);
-  //Hook na usuwanie kana³ow przez zewnetrzne wtyczki
+  //Hook na usuwanie repozytorium przez zewnetrzne wtyczki
   PluginLink.HookEvent(FIXUPDATER_SYSTEM_DELETELINK,OnDeleteLink);
   //Hook na zaladowanie wszystkich modolow
   PluginLink.HookEvent(AQQ_SYSTEM_MODULESLOADED, OnModulesLoaded);
@@ -403,12 +375,11 @@ extern "C" int __declspec(dllexport) __stdcall Unload()
   }
   //Wyladowanie wszystkich hookow
   PluginLink.UnhookEvent(OnAddLink);
-  PluginLink.UnhookEvent(OnAddonBrowser);
   PluginLink.UnhookEvent(OnAddonInstalled);
   PluginLink.UnhookEvent(OnDeleteLink);
   PluginLink.UnhookEvent(OnModulesLoaded);
   PluginLink.UnhookEvent(OnThemeChanged);
-  //Usuniecie adresow kanalow aktualizacji z aktualizatora
+  //Usuniecie adresow repozytorium z aktualizatora
   TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
   TStringList *Links = new TStringList;
   Ini->ReadSection("Links",Links);
@@ -432,8 +403,8 @@ extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVe
 {
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,2,1,0);
-  PluginInfo.Description = L"Wtyczka ulepszaj¹ca system aktualizacji w AQQ poprzez mo¿liwoœæ dodawania w³asnych adresów do serwerów zawieraj¹cych aktualizacje.";
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,3,0,0);
+  PluginInfo.Description = L"Ulepszenie systemu aktualizacji poprzez mo¿liwoœæ dodawania dodatkowych adresów serwerów zawieraj¹cych bazê dodatków oraz ustawienie czêstszego interwa³u sprawdzania aktualizacji.";
   PluginInfo.Author = L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = L"kontakt@beherit.pl";
   PluginInfo.Copyright = L"Krzysztof Grochocki (Beherit)";
