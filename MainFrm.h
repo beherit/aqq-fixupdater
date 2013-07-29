@@ -2,13 +2,6 @@
 #ifndef MainFrmH
 #define MainFrmH
 //---------------------------------------------------------------------------
-#include <Classes.hpp>
-#include <Controls.hpp>
-#include <StdCtrls.hpp>
-#include <Forms.hpp>
-#include <ActnList.hpp>
-#include <ComCtrls.hpp>
-#include <ExtCtrls.hpp>
 #include "sBevel.hpp"
 #include "sButton.hpp"
 #include "sCheckBox.hpp"
@@ -18,12 +11,18 @@
 #include "sPageControl.hpp"
 #include "sSkinManager.hpp"
 #include "sSkinProvider.hpp"
+#include <ActnList.hpp>
+#include <Classes.hpp>
+#include <ComCtrls.hpp>
+#include <Controls.hpp>
+#include <ExtCtrls.hpp>
+#include <StdCtrls.hpp>
 //---------------------------------------------------------------------------
 class TMainForm : public TForm
 {
 __published:	// IDE-managed Components
 	TActionList *ActionList;
-	TAction *aReadSettings;
+	TAction *aLoadSettings;
 	TAction *aSaveSettings;
 	TAction *aResetSettings;
 	TsButton *AddButton;
@@ -53,12 +52,11 @@ __published:	// IDE-managed Components
 	TsSkinProvider *sSkinProvider;
 	TsSkinManager *sSkinManager;
 	TsLabelFX *LastUpdateLabel;
-	TAction *aPageControlSheetChange;
 	void __fastcall UrlListPreviewSelectItem(TObject *Sender, TListItem *Item, bool Selected);
 	void __fastcall DeleteButtonClick(TObject *Sender);
 	void __fastcall SaveButtonClick(TObject *Sender);
 	void __fastcall AddButtonClick(TObject *Sender);
-	void __fastcall aReadSettingsExecute(TObject *Sender);
+	void __fastcall aLoadSettingsExecute(TObject *Sender);
 	void __fastcall FormShow(TObject *Sender);
 	void __fastcall aSaveSettingsExecute(TObject *Sender);
 	void __fastcall aResetSettingsExecute(TObject *Sender);
@@ -71,9 +69,7 @@ __published:	// IDE-managed Components
 	void __fastcall aSettingsChangedExecute(TObject *Sender);
 	void __fastcall UrlListPreviewItemChecked(TObject *Sender, TListItem *Item);
 	void __fastcall OkButtonClick(TObject *Sender);
-	void __fastcall CancelButtonClick(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
-	void __fastcall aPageControlSheetChangeExecute(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
 	int UpdateTime;

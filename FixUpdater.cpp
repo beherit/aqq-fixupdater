@@ -6,6 +6,7 @@
 #include "Aqq.h"
 #include "MainFrm.h"
 #include <inifiles.hpp>
+#include <IdHashMessageDigest.hpp>
 #define FIXUPDATER_SYSTEM_ADDLINK L"FixUpdater/System/AddLink"
 #define FIXUPDATER_SYSTEM_DELETELINK L"FixUpdater/System/DeleteLink"
 //---------------------------------------------------------------------------
@@ -16,30 +17,33 @@ int WINAPI DllEntryPoint(HINSTANCE hinst, unsigned long reason, void* lpReserved
 }
 //---------------------------------------------------------------------------
 
-//tworzenie uchwytu do formy
+//Uchwyt-do-formy-ustawien---------------------------------------------------
 TMainForm *hMainForm;
-
-//utworzenie obiektow do struktur
+//Struktury-glowne-----------------------------------------------------------
 TPluginLink PluginLink;
 TPluginInfo PluginInfo;
-TPluginHook PluginHook;
-TSaveSetup SaveSetup;
-
-//Zmienne
-int UpdateTime;
-int UpdateMode;
+//SETTINGS-------------------------------------------------------------------
 bool ChangeAddonBrowserChk;
+//FORWARD-AQQ-HOOKS----------------------------------------------------------
+int __stdcall OnAddLink(WPARAM wParam, LPARAM lParam);
+int __stdcall OnAddonBrowser(WPARAM wParam, LPARAM lParam);
+int __stdcall OnAddonInstalled(WPARAM wParam, LPARAM lParam);
+int __stdcall OnDeleteLink(WPARAM wParam, LPARAM lParam);
+int __stdcall OnModulesLoaded(WPARAM wParam, LPARAM lParam);
+int __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam);
+//---------------------------------------------------------------------------
 
-//Wymagana wersja AQQ
-bool ChkAQQVersion = true;
+//Pobieranie sciezki katalogu prywatnego wtyczek
+UnicodeString GetPluginUserDir()
+{
+  return StringReplace((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_GETPLUGINUSERDIR,0,0), "\\", "\\\\", TReplaceFlags() << rfReplaceAll);
+}
+//---------------------------------------------------------------------------
 
 //Pobieranie sciezki do skorki kompozycji
 UnicodeString GetThemeSkinDir()
 {
-  UnicodeString Dir = (wchar_t*)(PluginLink.CallService(AQQ_FUNCTION_GETTHEMEDIR,0,0));
-  Dir = StringReplace(Dir, "\\", "\\\\", TReplaceFlags() << rfReplaceAll);
-  Dir = Dir + "\\\\Skin";
-  return Dir;
+  return StringReplace((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_GETTHEMEDIR,0,0), "\\", "\\\\", TReplaceFlags() << rfReplaceAll) + "\\\\Skin";
 }
 //---------------------------------------------------------------------------
 
@@ -47,116 +51,38 @@ UnicodeString GetThemeSkinDir()
 bool ChkSkinEnabled()
 {
   TStrings* IniList = new TStringList();
-  IniList->SetText((wchar_t*)(PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP,0,0)));
+  IniList->SetText((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP,0,0));
   TMemIniFile *Settings = new TMemIniFile(ChangeFileExt(Application->ExeName, ".INI"));
   Settings->SetStrings(IniList);
   delete IniList;
-  UnicodeString AlphaSkinsEnabled = Settings->ReadString("Settings","UseSkin","1");
+  UnicodeString SkinsEnabled = Settings->ReadString("Settings","UseSkin","1");
   delete Settings;
-  return StrToBool(AlphaSkinsEnabled);
+  return StrToBool(SkinsEnabled);
 }
 //---------------------------------------------------------------------------
 
-//Zmiana skorki wtyczki
-void ChangePluginSkin()
+//Sprawdzanie czy wlaczony jest natywny styl Windows
+bool ChkNativeEnabled()
 {
-  if(hMainForm)
-  {
-	UnicodeString ThemeSkinDir = GetThemeSkinDir();
-	if(FileExists(ThemeSkinDir + "\\\\Skin.asz"))
-	{
-	  ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
-	  hMainForm->sSkinManager->SkinDirectory = ThemeSkinDir;
-	  hMainForm->sSkinManager->SkinName = "Skin.asz";
-	  hMainForm->sSkinProvider->DrawNonClientArea = ChkSkinEnabled();
-	  hMainForm->sSkinManager->Active = true;
-	}
-	else
-	 hMainForm->sSkinManager->Active = false;
-  }
+  TStrings* IniList = new TStringList();
+  IniList->SetText((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP,0,0));
+  TMemIniFile *Settings = new TMemIniFile(ChangeFileExt(Application->ExeName, ".INI"));
+  Settings->SetStrings(IniList);
+  delete IniList;
+  UnicodeString NativeEnabled = Settings->ReadString("Settings","Native","0");
+  delete Settings;
+  return StrToBool(NativeEnabled);
 }
 //---------------------------------------------------------------------------
 
-int __stdcall OnThemeChanged (WPARAM wParam, LPARAM lParam)
+//Zmiana ustawien przegladarki dodatkow
+void ChangeAddonBrowser(bool Enabled)
 {
-  ChangePluginSkin();
-
-  return 0;
+  ChangeAddonBrowserChk = Enabled;
 }
 //---------------------------------------------------------------------------
 
-//Dodawanie kana³ow przez zewnetrzne wtyczki
-int __stdcall AddLink(WPARAM wParam, LPARAM lParam)
-{
-  UnicodeString Enable = (WPARAM)wParam;
-  UnicodeString URL = (wchar_t*)lParam;
-  URL = URL.Trim();
-  int Count;
-
-  if(!URL.IsEmpty())
-  {
-	hMainForm->aReadSettings->Execute();
-	//Szukanie URL
-	for(Count=0;Count<hMainForm->UrlListPreview->Items->Count;Count++)
-	{
-	  //URL juz dodany
-	  if(hMainForm->UrlListPreview->Items->Item[Count]->SubItems->Strings[0]==URL)
-	   return 2;
-	}
-    //Dodawanie URL
-	Count = hMainForm->UrlListPreview->Items->Count;
-	hMainForm->UrlListPreview->Items->Add();
-	hMainForm->UrlListPreview->Items->Item[Count]->Checked=StrToBool(Enable);
-	hMainForm->UrlListPreview->Items->Item[Count]->SubItems->Add(URL);
-	hMainForm->aSaveSettings->Execute();
-	return 1;
-  }
-  else
-   return 2;
-}
-//---------------------------------------------------------------------------
-
-//Usuwanie kana³ow przez zewnetrzne wtyczki
-int __stdcall DeleteLink(WPARAM wParam, LPARAM lParam)
-{
-  UnicodeString URL = (wchar_t*)lParam;
-  URL = URL.Trim();
-
-  if(!URL.IsEmpty())
-  {
-	hMainForm->aReadSettings->Execute();
-
-	for(int Count=0;Count<hMainForm->UrlListPreview->Items->Count;Count++)
-	{
-	  if(hMainForm->UrlListPreview->Items->Item[Count]->SubItems->Strings[0]==URL)
-	  {
-		hMainForm->UrlListPreview->Items->Delete(Count);
-		hMainForm->aSaveSettings->Execute();
-		return 1;
-	  }
-	}
-	return 2;
-  }
-  else
-   return 2;
-}
-//---------------------------------------------------------------------------
-
-int __stdcall OnAddonBrowser(WPARAM wParam, LPARAM lParam)
-{
-   if(ChangeAddonBrowserChk) return (LPARAM)L"http://addons.aqqnews.pl/";
-   else return 0;
-}
-//---------------------------------------------------------------------------
-
-int __stdcall OnModulesLoaded(WPARAM, LPARAM)
-{
-  hMainForm->CheckUpdatesOnStartTimer->Enabled = true;
-
-  return 0;
-}
-//---------------------------------------------------------------------------
-
+//Sprawdzanie dostepnosci aktualizacji
 void CheckUpdates(int Mode)
 {
   if(Mode==0)//Normalne aktualizacje
@@ -168,6 +94,7 @@ void CheckUpdates(int Mode)
 }
 //---------------------------------------------------------------------------
 
+//Pobieranie daty ostatniego sprawdzania aktualizacji
 UnicodeString GetLastUpdate()
 {
   TStrings* IniList = new TStringList();
@@ -181,62 +108,234 @@ UnicodeString GetLastUpdate()
 }
 //---------------------------------------------------------------------------
 
-//Pobieranie sciezki katalogu prywatnego uzytkownika
-UnicodeString GetPluginUserDir()
-{
-  UnicodeString Dir = (wchar_t*)(PluginLink.CallService(AQQ_FUNCTION_GETPLUGINUSERDIR,(WPARAM)(HInstance),0));
-  Dir = StringReplace(Dir, "\\", "\\\\", TReplaceFlags() << rfReplaceAll);
-  return Dir;
-}
-//---------------------------------------------------------------------------
-
-void SetUpdateLink(bool Enabled, UnicodeString URL)
+//Dodawanie lub usuwanie linkow kanalow aktualizacji
+void SetUpdateLink(UnicodeString URL, bool Enabled)
 {
   PluginLink.CallService(AQQ_SYSTEM_SETUPDATELINK,!Enabled,(LPARAM)URL.w_str());
 }
 //---------------------------------------------------------------------------
 
-void ChangeAddonBrowser(bool Enabled)
+//Hook na dodawanie kana³ow przez zewnetrzne wtyczki
+int __stdcall OnAddLink(WPARAM wParam, LPARAM lParam)
 {
-  ChangeAddonBrowserChk = Enabled;
+  //Pobieranie adresu kanalu
+  UnicodeString URL = (wchar_t*)lParam;
+  URL = URL.Trim();
+  //Jezeli pobrany kanal nie jest pusty
+  if(!URL.IsEmpty())
+  {
+	//Pobieranie informacji o aktywacji kanalu
+	UnicodeString Enable = (WPARAM)wParam;
+	//Odczyt ustawien wtyczki na formie ustawien
+	hMainForm->aLoadSettings->Execute();
+	//Szukanie wskazanego adresu
+	for(int Count=0;Count<hMainForm->UrlListPreview->Items->Count;Count++)
+	{
+	  //Wskazany kanal juz istenieje
+	  if(hMainForm->UrlListPreview->Items->Item[Count]->SubItems->Strings[0]==URL)
+	   return 2;
+	}
+	//Dodawanie wskazanego adresu
+	int Count = hMainForm->UrlListPreview->Items->Count;
+	hMainForm->UrlListPreview->Items->Add();
+	hMainForm->UrlListPreview->Items->Item[Count]->Checked=StrToBool(Enable);
+	hMainForm->UrlListPreview->Items->Item[Count]->SubItems->Add(URL);
+	//Zapisanie ustawien
+	hMainForm->aSaveSettings->Execute();
+	//Zwrocenie info o pomyslnej operacji
+	return 1;
+  }
+  //Pobrany kanal jest pusty
+  else
+   return 2;
 }
 //---------------------------------------------------------------------------
 
+//Hook na pokazywanie browsera dodatkow
+int __stdcall OnAddonBrowser(WPARAM wParam, LPARAM lParam)
+{
+  //Adres przegladarki dodatkow ma byc zmieniany
+  if(ChangeAddonBrowserChk) return (LPARAM)L"http://addons.aqqnews.pl/";
+  //Adres przegladarki dodatkow nie ma byc zmieniany
+  else return 0;
+}
+//---------------------------------------------------------------------------
+
+//Hook na instalowanie dodatkow
 int __stdcall OnAddonInstalled(WPARAM wParam, LPARAM lParam)
 {
-  UnicodeString AddonFile = (wchar_t*)lParam ;
-  if(ExtractFileName(AddonFile)!="FixUpdater.dll")
+  //Pobranie typu zainstalowanego dodatku
+  PPluginTriple PluginTriple = (PPluginTriple)wParam;
+  if(PluginTriple->Param1==tatPlugin)
   {
-	PPluginTriple PluginTriple = (PPluginTriple)wParam;
-	if(PluginTriple->Param1==tatPlugin)
+    //Pobranie sciezki do dodatku
+	UnicodeString AddonFile = (wchar_t*)lParam ;
+	if(ExtractFileName(AddonFile)!="FixUpdater.dll")
 	{
-	   hMainForm->CheckUpdatesTimer->Enabled = false;
-	   hMainForm->CheckUpdatesOnStartTimer->Enabled = false;
-	   hMainForm->CheckUpdatesOnStartTimer->Interval = 2000;
-	   hMainForm->CheckUpdatesOnStartTimer->Enabled = true;
-	}
+	  //Wylaczenie timerow sprawdzania aktualizacji dodatkow
+	  hMainForm->CheckUpdatesTimer->Enabled = false;
+	  hMainForm->CheckUpdatesOnStartTimer->Enabled = false;
+	  //Ustawienie interwalu timera
+	  hMainForm->CheckUpdatesOnStartTimer->Interval = 2000;
+	  //Wlaczenie timera sprawdzania aktualizacji dodatkow
+	  hMainForm->CheckUpdatesOnStartTimer->Enabled = true;
+    }
   }
+
+  return 0;
+}
+//---------------------------------------------------------------------------
+
+//Hook na usuwanie kana³ow przez zewnetrzne wtyczki
+int __stdcall OnDeleteLink(WPARAM wParam, LPARAM lParam)
+{
+  //Pobieranie adresu kanalu
+  UnicodeString URL = (wchar_t*)lParam;
+  URL = URL.Trim();
+  //Jezeli pobrany kanal nie jest pusty
+  if(!URL.IsEmpty())
+  {
+	//Odczyt ustawien wtyczki na formie ustawien
+	hMainForm->aLoadSettings->Execute();
+	//Szukanie wskazanego kanalu na formie ustawien
+	for(int Count=0;Count<hMainForm->UrlListPreview->Items->Count;Count++)
+	{
+      //Porownanie rekordu z przekazanym w notyfikacji adresem kanalu
+	  if(hMainForm->UrlListPreview->Items->Item[Count]->SubItems->Strings[0]==URL)
+	  {
+		//Usuniecie wskazanej pozycji
+		hMainForm->UrlListPreview->Items->Delete(Count);
+		//Zapisanie ustawien
+		hMainForm->aSaveSettings->Execute();
+		//Zwrocenie info o pomyslnej operacji
+		return 1;
+	  }
+	}
+	//Brak kanalu
+	return 2;
+  }
+  //Pobrany kanal jest pusty
+  else
+   return 2;
+}
+//---------------------------------------------------------------------------
+
+//Hook na zaladowanie wszystkich modolow
+int __stdcall OnModulesLoaded(WPARAM, LPARAM)
+{
+  //Wlaczenie timera sprawdzania aktualizacji dodatkow
+  hMainForm->CheckUpdatesOnStartTimer->Enabled = true;
+
+  return 0;
+}
+//---------------------------------------------------------------------------
+
+//Hook na zmiane kompozycji
+int __stdcall OnThemeChanged (WPARAM wParam, LPARAM lParam)
+{
+  //Pobieranie sciezki nowej aktywnej kompozycji
+  UnicodeString ThemeDir = StringReplace((wchar_t*)lParam, "\\", "\\\\", TReplaceFlags() << rfReplaceAll);
+  //Zmiana skorki wtyczki
+  if(hMainForm)
+  {
+	//Wlaczenie skorkowania
+	if((FileExists(ThemeDir+"\\\\Skin\\\\Skin.asz"))&&(!ChkNativeEnabled()))
+	{
+	  UnicodeString ThemeSkinDir = ThemeDir+"\\\\Skin";
+	  ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
+	  hMainForm->sSkinManager->SkinDirectory = ThemeSkinDir;
+	  hMainForm->sSkinManager->SkinName = "Skin.asz";
+	  hMainForm->sSkinProvider->DrawNonClientArea = ChkSkinEnabled();
+	  hMainForm->sSkinManager->Active = true;
+	}
+	//Wylaczenie skorkowania
+	else
+	 hMainForm->sSkinManager->Active = false;
+  }
+
+  return 0;
+}
+//---------------------------------------------------------------------------
+
+//Zapisywanie zasobów
+bool SaveResourceToFile(char *FileName, char *res)
+{
+  HRSRC hrsrc = FindResource(HInstance, res, RT_RCDATA);
+  if(!hrsrc) return false;
+  DWORD size = SizeofResource(HInstance, hrsrc);
+  HGLOBAL hglob = LoadResource(HInstance, hrsrc);
+  LPVOID rdata = LockResource(hglob);
+  HANDLE hFile = CreateFile(FileName, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+  DWORD writ;
+  WriteFile(hFile, rdata, size, &writ, NULL);
+  CloseHandle(hFile);
+  return true;
+}
+//---------------------------------------------------------------------------
+
+using namespace std;
+
+//Obliczanie sumy kontrolnej pliku
+UnicodeString MD5File(UnicodeString FileName)
+{
+  if(FileExists(FileName))
+  {
+	UnicodeString Result;
+    TFileStream *fs;
+
+	fs = new TFileStream(FileName, fmOpenRead | fmShareDenyWrite);
+	try
+	{
+	  TIdHashMessageDigest5 *idmd5= new TIdHashMessageDigest5();
+	  try
+	  {
+		Result = idmd5->HashStreamAsHex(fs);
+	  }
+	  __finally
+	  {
+		delete idmd5;
+	  }
+    }
+	__finally
+    {
+	  delete fs;
+    }
+
+    return Result;
+  }
+  else
+   return 0;
 }
 //---------------------------------------------------------------------------
 
 extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 {
+  //Linkowanie wtyczki z komunikatorem
   PluginLink = *Link;
-  //Tworzenie uchwytu do okna glownego
+  //Przypisanie uchwytu do formy ustawien
   if(!hMainForm)
   {
 	Application->Handle = (HWND)MainForm;
 	hMainForm = new TMainForm(Application);
   }
-  //Pobieranie sciezki
-  UnicodeString Path = GetPluginUserDir();
-  //Ustawienia domyœlne
-  if(!FileExists(Path + "\\\\FixUpdater\\\\Settings.ini"))
+  //Sciezka folderu prywatnego wtyczek
+  UnicodeString PluginUserDir = GetPluginUserDir();
+  //Wypakiwanie ikonki FixUpdater.dll.png
+  //3EA122B23FBF8835FDE23DCD1CC9968B
+  if(!DirectoryExists(PluginUserDir+"\\\\Shared"))
+   CreateDir(PluginUserDir+"\\\\Shared");
+  if(!FileExists(PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png"))
+   SaveResourceToFile((PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png").t_str(),"PLUGIN_RES");
+  else if(MD5File(PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png")!="3EA122B23FBF8835FDE23DCD1CC9968B")
+   SaveResourceToFile((PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png").t_str(),"PLUGIN_RES");
+  //Ustawienia domyœlne wtyczki
+  if(!FileExists(PluginUserDir+"\\\\FixUpdater\\\\Settings.ini"))
   {
-	if(!DirectoryExists(Path + "\\\\FixUpdater"))
-	 CreateDir(Path + "\\\\FixUpdater");
-
-	TIniFile *Ini = new TIniFile(Path + "\\\\FixUpdater\\\\Settings.ini");
+	//Tworzenie folderu z ustawieniami wtyczki
+	if(!DirectoryExists(PluginUserDir + "\\\\FixUpdater"))
+	 CreateDir(PluginUserDir + "\\\\FixUpdater");
+    //Tworzenie pliku ustawien z domyslnymi kanalami
+	TIniFile *Ini = new TIniFile(PluginUserDir + "\\\\FixUpdater\\\\Settings.ini");
 	Ini->WriteString("Links", "Url1", "http://beherit.pl/aqq_update/stable.xml");
 	Ini->WriteBool("Links", "Enable1", true);
 	Ini->WriteString("Links", "Url2", "http://beherit.pl/aqq_update/beta.xml");
@@ -247,163 +346,43 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 	Ini->WriteBool("Links", "Enable4", false);
 	delete Ini;
   }
-  //Sprawdzenie czy sa domyslne linki
-  else
-  {
-	TIniFile *Ini = new TIniFile(Path + "\\\\FixUpdater\\\\Settings.ini");
-	UnicodeString Version = Ini->ReadString("Settings","Default","");
-	//Wersja domyslnych linkow jest inna
-	if(Version!="1.3")
-	{
-	  //Ustawiane nowej wersji
-	  Ini->WriteString("Settings","Default","1.3");
-	  //Aktualizacja linkow
-	  TStringList *Links = new TStringList;
-	  TStringList *UserLinks = new TStringList;
-	  TStringList *DefLinks = new TStringList;
-	  Ini->ReadSection("Links",Links);
-	  for(int Count=0;Count<Links->Count/2;Count++)
-	  {
-		UserLinks->Add(Ini->ReadString("Links","Url"+IntToStr(Count+1),""));
-		UserLinks->Add(Ini->ReadString("Links","Enable"+IntToStr(Count+1),""));
-	  }
-	  //Usuwanie starych domyslnych linkow
-	  int Count = UserLinks->IndexOf("http://beherit.pl/aqq_update.xml");
-	  if(Count!=-1)
-	  {
-		UserLinks->Delete(Count);
-		UserLinks->Delete(Count);
-	  }
-	  Count = UserLinks->IndexOf("http://beherit.pl/aqq_update_beta.xml");
-      if(Count!=-1)
-	  {
-		UserLinks->Delete(Count);
-		UserLinks->Delete(Count);
-	  }
-	  //Usuwanie domyslnych linkow
-	  Count = UserLinks->IndexOf("http://beherit.pl/aqq_update/stable.xml");
-	  if(Count!=-1)
-	  {
-		DefLinks->Add(UserLinks->Strings[Count]);
-		DefLinks->Add(UserLinks->Strings[Count+1]);
-		UserLinks->Delete(Count);
-		UserLinks->Delete(Count);
-	  }
-	  Count = UserLinks->IndexOf("http://beherit.pl/aqq_update/beta.xml");
-	  if(Count!=-1)
-	  {
-		DefLinks->Add(UserLinks->Strings[Count]);
-		DefLinks->Add(UserLinks->Strings[Count+1]);
-		UserLinks->Delete(Count);
-		UserLinks->Delete(Count);
-	  }
-	  Count = UserLinks->IndexOf("http://files.aqqnews.pl/fixupdater.php");
-	  if(Count!=-1)
-	  {
-		DefLinks->Add(UserLinks->Strings[Count]);
-		DefLinks->Add(UserLinks->Strings[Count+1]);
-		UserLinks->Delete(Count);
-		UserLinks->Delete(Count);
-	  }
-	  Count = UserLinks->IndexOf("http://files.aqqnews.pl/fixupdater-beta.php");
-	  if(Count!=-1)
-	  {
-		DefLinks->Add(UserLinks->Strings[Count]);
-		DefLinks->Add(UserLinks->Strings[Count+1]);
-		UserLinks->Delete(Count);
-		UserLinks->Delete(Count);
-	  }
-	  //Dodawanie domyslnych linkow
-	  Count = DefLinks->IndexOf("http://files.aqqnews.pl/fixupdater-beta.php");
-	  if(Count!=-1)
-	  {
-		UserLinks->Insert(0,DefLinks->Strings[Count+1]);
-		UserLinks->Insert(0,DefLinks->Strings[Count]);
-	  }
-	  else
-	  {
-		UserLinks->Insert(0,"1");
-		UserLinks->Insert(0,"http://files.aqqnews.pl/fixupdater-beta.php");
-	  }
-	  Count = DefLinks->IndexOf("http://files.aqqnews.pl/fixupdater.php");
-	  if(Count!=-1)
-	  {
-		UserLinks->Insert(0,DefLinks->Strings[Count+1]);
-		UserLinks->Insert(0,DefLinks->Strings[Count]);
-	  }
-	  else
-	  {
-		UserLinks->Insert(0,"1");
-		UserLinks->Insert(0,"http://files.aqqnews.pl/fixupdater.php");
-	  }
-	  Count = DefLinks->IndexOf("http://beherit.pl/aqq_update/beta.xml");
-	  if(Count!=-1)
-	  {
-		UserLinks->Insert(0,DefLinks->Strings[Count+1]);
-		UserLinks->Insert(0,DefLinks->Strings[Count]);
-	  }
-	  else
-	  {
-		UserLinks->Insert(0,"0");
-		UserLinks->Insert(0,"http://beherit.pl/aqq_update/beta.xml");
-	  }
-	  Count = DefLinks->IndexOf("http://beherit.pl/aqq_update/stable.xml");
-	  if(Count!=-1)
-	  {
-		UserLinks->Insert(0,DefLinks->Strings[Count+1]);
-		UserLinks->Insert(0,DefLinks->Strings[Count]);
-	  }
-	  else
-	  {
-		UserLinks->Insert(0,"1");
-		UserLinks->Insert(0,"http://beherit.pl/aqq_update/stable.xml");
-	  }
-	  //Zapisywanie nowej struktury
-	  Ini->EraseSection("Links");
-	  for(int Count=0;Count<UserLinks->Count/2;Count++)
-	  {
-		Ini->WriteString("Links","Url"+IntToStr(Count+1),UserLinks->Strings[Count+Count]);
-		Ini->WriteString("Links","Enable"+IntToStr(Count+1),UserLinks->Strings[Count+Count+1]);
-	  }
-	  delete DefLinks;
-	  delete UserLinks;
-	  delete Links;
-	}
-	delete Ini;
-  }
-  //Kana³y aktualizacji
-  TIniFile *Ini = new TIniFile(Path + "\\\\FixUpdater\\\\Settings.ini");
+  //Odczyt ustawien wtyczki
+  TIniFile *Ini = new TIniFile(PluginUserDir + "\\\\FixUpdater\\\\Settings.ini");
+  //Kanaly aktualizacji
   TStringList *Links = new TStringList;
   Ini->ReadSection("Links",Links);
   for(int Count=0;Count<Links->Count/2;Count++)
   {
-	if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true)==true)
+	if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true))
 	{
 	  UnicodeString Url = Ini->ReadString("Links", "Url" + IntToStr(Count+1), "");
-	  if(Url!="") SetUpdateLink(true,Url);
+	  if(!Url.IsEmpty()) SetUpdateLink(Url,true);
 	}
   }
   delete Links;
-  //Sposób aktualizacji
+  //Sposob aktualizacji
   hMainForm->UpdateMode = Ini->ReadInteger("Settings", "UpdateMode", 0);
-  //Czêstotliwoœci aktualizacji
+  //Czestotliwosci aktualizacji
   hMainForm->UpdateTime = Ini->ReadInteger("Settings", "UpdateTime", 0);
   //Menedzer dodatkow
   ChangeAddonBrowserChk = Ini->ReadBool("Settings", "ChangeAddonBrowser", true);
+  //Zakonczenie odczytu ustawien wtyczki
   delete Ini;
-  //Hook SDK wtyczki
-  PluginLink.HookEvent(FIXUPDATER_SYSTEM_ADDLINK,AddLink);
-  PluginLink.HookEvent(FIXUPDATER_SYSTEM_DELETELINK,DeleteLink);
-  //Hook na pokaztwanie browsera dodatkow
+  //Hook na dodawanie kana³ow przez zewnetrzne wtyczki
+  PluginLink.HookEvent(FIXUPDATER_SYSTEM_ADDLINK,OnAddLink);
+  //Hook na pokazywanie browsera dodatkow
   PluginLink.HookEvent(AQQ_SYSTEM_ADDONBROWSER_URL,OnAddonBrowser);
   //Hook na instalowanie dodatkow
   PluginLink.HookEvent(AQQ_SYSTEM_ADDONINSTALLED,OnAddonInstalled);
-  //Hook na zmianê kompozycji
-  PluginLink.HookEvent(AQQ_SYSTEM_THEMECHANGED,OnThemeChanged);
-  //W³¹czenie Timer'a automatycznej aktualizacji
+  //Hook na usuwanie kana³ow przez zewnetrzne wtyczki
+  PluginLink.HookEvent(FIXUPDATER_SYSTEM_DELETELINK,OnDeleteLink);
+  //Hook na zaladowanie wszystkich modolow
   PluginLink.HookEvent(AQQ_SYSTEM_MODULESLOADED, OnModulesLoaded);
-  if(PluginLink.CallService(AQQ_SYSTEM_MODULESLOADED,0,0)==true)
-   hMainForm->CheckUpdatesOnStartTimer->Enabled=true;
+  //Hook na zmiane kompozycji
+  PluginLink.HookEvent(AQQ_SYSTEM_THEMECHANGED,OnThemeChanged);
+  //Wlaczenie timera sprawdzania aktualizacji dodatkow
+  if(PluginLink.CallService(AQQ_SYSTEM_MODULESLOADED,0,0))
+   hMainForm->CheckUpdatesOnStartTimer->Enabled = true;
 
   return 0;
 }
@@ -411,8 +390,8 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 
 extern "C" int __declspec(dllexport)__stdcall Settings()
 {
+  //Pokaznie okna ustawien
   hMainForm->Show();
-  hMainForm->ChangeAddonBrowserCheckBox->Enabled = ChkAQQVersion;
 
   return 0;
 }
@@ -420,29 +399,29 @@ extern "C" int __declspec(dllexport)__stdcall Settings()
 
 extern "C" int __declspec(dllexport) __stdcall Unload()
 {
-  //Wylaczanie timetow
+  //Wylaczanie timerow
   if(hMainForm)
   {
 	hMainForm->CheckUpdatesTimer->Enabled = false;
 	hMainForm->CheckUpdatesOnStartTimer->Enabled = false;
   }
-  //Unhook eventow
-  PluginLink.UnhookEvent(AddLink);
-  PluginLink.UnhookEvent(DeleteLink);
+  //Wyladowanie wszystkich hookow
+  PluginLink.UnhookEvent(OnAddLink);
   PluginLink.UnhookEvent(OnAddonBrowser);
   PluginLink.UnhookEvent(OnAddonInstalled);
-  PluginLink.UnhookEvent(OnThemeChanged);
+  PluginLink.UnhookEvent(OnDeleteLink);
   PluginLink.UnhookEvent(OnModulesLoaded);
-  //Wywalanie linkow z aktualizatora
+  PluginLink.UnhookEvent(OnThemeChanged);
+  //Usuniecie adresow kanalow aktualizacji z aktualizatora
   TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
   TStringList *Links = new TStringList;
   Ini->ReadSection("Links",Links);
   for(int Count=0;Count<Links->Count/2;Count++)
   {
-	if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true)==true)
+	if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true))
 	{
 	  UnicodeString Url = Ini->ReadString("Links", "Url" + IntToStr(Count+1), "");
-	  if(!Url.IsEmpty()) SetUpdateLink(false,Url);
+	  if(!Url.IsEmpty()) SetUpdateLink(Url,false);
 	}
   }
   delete Links;
@@ -452,15 +431,13 @@ extern "C" int __declspec(dllexport) __stdcall Unload()
 }
 //---------------------------------------------------------------------------
 
+//Informacje o wtyczce
 extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVersion)
 {
-  //Sprawdzanie wersji AQQ
-  if(PLUGIN_COMPARE_VERSION(AQQVersion,PLUGIN_MAKE_VERSION(2,3,0,15))<0)
-   ChkAQQVersion = false;
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,1,1,0);
-  PluginInfo.Description = L"Dodawanie w³asnych serwerów aktualizacji dodatków";
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,1,2,0);
+  PluginInfo.Description = L"Pozwala na dodawanie w³asnych serwerów aktualizacji dodatków";
   PluginInfo.Author = L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = L"kontakt@beherit.pl";
   PluginInfo.Copyright = L"Krzysztof Grochocki (Beherit)";

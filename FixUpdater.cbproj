@@ -18,19 +18,17 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
-			<ILINK_GenerateDRC>True</ILINK_GenerateDRC>
-			<LinkPackageStatics>rtl.lib;vcl.lib;acntCB2010_R.lib;vclimg.lib;vclx.lib</LinkPackageStatics>
+			<LinkPackageStatics>rtl.lib;vcl.lib;IndyCore.lib;IndySystem.lib;IndyProtocols.lib;acntCB2010_R.lib;vclimg.lib;vclx.lib</LinkPackageStatics>
 			<Multithreaded>true</Multithreaded>
 			<ProjectType>CppDynamicLibrary</ProjectType>
-			<PackageImports>vcl.bpi;rtl.bpi;bcbie.bpi;vclx.bpi;vclactnband.bpi;xmlrtl.bpi;bcbsmp.bpi;vclimg.bpi;dbrtl.bpi;vcldb.bpi;vcldbx.bpi;bdertl.bpi;vcltouch.bpi;dsnap.bpi;dsnapcon.bpi;TeeUI.bpi;TeeDB.bpi;Tee.bpi;adortl.bpi;IndyCore.bpi;IndySystem.bpi;IndyProtocols.bpi</PackageImports>
-			<ILINK_GenerateImportLibrary>true</ILINK_GenerateImportLibrary>
+			<PackageImports>dclZipForged13.bpi;vclZipForged13.bpi;vclx.bpi;vcl.bpi;rtl.bpi;lmdcore11rt_140.bpi;lmdrtl11rt_140.bpi;lmdrtlx11rt_140.bpi;lmdplugin11rt_140.bpi;vclie.bpi;IndyCore.bpi;IndySystem.bpi;IndyProtocols.bpi;vclactnband.bpi;xmlrtl.bpi;bcbsmp.bpi;vclimg.bpi;vclribbon.bpi;webdsnap.bpi;DbxCommonDriver.bpi;DbxClientDriver.bpi;DBXFirebirdDriver.bpi;DBXSybaseASEDriver.bpi;DBXSybaseASADriver.bpi;DBXOracleDriver.bpi;DBXMSSQLDriver.bpi;DBXInformixDriver.bpi;DBXDb2Driver.bpi;DBXInterBaseDriver.bpi;DBXMySQLDriver.bpi;bcbie.bpi;acntCB2010_R.bpi</PackageImports>
 			<OutputExt>dll</OutputExt>
-			<AllPackageLibs>rtl.lib;vcl.lib;acntCB2010_R.lib;vclimg.lib;vclx.lib</AllPackageLibs>
+			<AllPackageLibs>rtl.lib;vcl.lib;IndyCore.lib;IndySystem.lib;IndyProtocols.lib;acntCB2010_R.lib;vclimg.lib;vclx.lib</AllPackageLibs>
 			<FinalOutputDir>.</FinalOutputDir>
 			<DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
 			<DynamicRTL>true</DynamicRTL>
 			<IncludePath>$(CG_BOOST_ROOT)\boost\tr1\tr1;$(BDS)\include;$(BDS)\include\dinkumware;$(BDS)\include\vcl;$(CG_BOOST_ROOT);$(BDS)\AlphaControls;$(IncludePath)</IncludePath>
-			<ILINK_LibraryPath>$(BDS)\lib\obj;$(BDS)\AlphaControls;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+			<ILINK_LibraryPath>$(BDS)\lib\psdk\;$(BDS)\lib\obj;$(BDS)\AlphaControls;$(ILINK_LibraryPath)</ILINK_LibraryPath>
 			<BCC_wpar>false</BCC_wpar>
 			<BCC_OptimizeForSpeed>true</BCC_OptimizeForSpeed>
 			<BCC_ExtendedErrorInfo>true</BCC_ExtendedErrorInfo>
@@ -54,6 +52,8 @@
 			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
+			<ILINK_GenerateImportLibrary>false</ILINK_GenerateImportLibrary>
+			<ILINK_GenerateDRC>false</ILINK_GenerateDRC>
 			<DynamicRTL>false</DynamicRTL>
 			<Defines>NDEBUG;$(Defines)</Defines>
 			<IntermediateOutputDir>Release</IntermediateOutputDir>
@@ -61,17 +61,21 @@
 			<TASM_Debugging>None</TASM_Debugging>
 		</PropertyGroup>
 		<ItemGroup>
-			<CppCompile Include="FixUpdater.cpp">
-				<BuildOrder>0</BuildOrder>
-			</CppCompile>
+			<ResFiles Include="FixUpdater.res">
+				<BuildOrder>2</BuildOrder>
+			</ResFiles>
 			<CppCompile Include="MainFrm.cpp">
 				<Form>MainForm</Form>
 				<DependentOn>MainFrm.h</DependentOn>
 				<BuildOrder>1</BuildOrder>
 			</CppCompile>
-			<ResFiles Include="FixUpdater.res">
-				<BuildOrder>2</BuildOrder>
-			</ResFiles>
+			<CppCompile Include="FixUpdater.cpp">
+				<BuildOrder>0</BuildOrder>
+			</CppCompile>
+			<RcItem Include="Data\FixUpdater.dll.png">
+				<ResourceType>RCData</ResourceType>
+				<ResourceId>PLUGIN_RES</ResourceId>
+			</RcItem>
 			<FormResources Include="MainFrm.dfm"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
@@ -96,7 +100,7 @@
 						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
 						<VersionInfo Name="MajorVer">1</VersionInfo>
 						<VersionInfo Name="MinorVer">1</VersionInfo>
-						<VersionInfo Name="Release">1</VersionInfo>
+						<VersionInfo Name="Release">2</VersionInfo>
 						<VersionInfo Name="Build">0</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
@@ -109,14 +113,14 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName">Krzysztof Grochocki (Beherit)</VersionInfoKeys>
 						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">1.1.1.0</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">1.1.2.0</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName">FixUpdater</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalCopyright">Krzysztof Grochocki (Beherit)</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks">Krzysztof Grochocki (Beherit)</VersionInfoKeys>
 						<VersionInfoKeys Name="OriginalFilename">FixUpdater.dll</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductName">FixUpdater</VersionInfoKeys>
-						<VersionInfoKeys Name="ProductVersion">1.1.1.0</VersionInfoKeys>
-						<VersionInfoKeys Name="Comments">Dodawanie własnych serwerów aktualizacji dodatków</VersionInfoKeys>
+						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="Comments">Pozwala na dodawanie własnych serwerów aktualizacji dodatków</VersionInfoKeys>
 					</VersionInfoKeys>
 					<Debugging>
 						<Debugging Name="DebugSourceDirs"/>
@@ -147,6 +151,118 @@
 						<Language Name="ProjectLang">$00000415</Language>
 						<Language Name="ActiveLang">PLK</Language>
 					</Language>
+					<Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\Bin\dclmid140.bpl">Embarcadero MyBase DataAccess Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dcldbx140.bpl">Embarcadero dbExpress Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclbde140.bpl">Embarcadero BDE DB Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dbx140.bpl">Embarcadero SQL Explorer UI Package</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dcltouch140.bpl">Embarcadero Touch Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclmcn140.bpl">Embarcadero DataSnap Connection Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dcltee8140.bpl">TeeChart Standard 8 Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclado140.bpl">Embarcadero ADO DB Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclIntraweb_100_140.bpl">VCL for the Web 10.0  Design Package for CodeGear RAD Studio</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclwebsnap140.bpl">Embarcadero WebSnap Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclsoap140.bpl">Embarcadero SOAP Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclDataSnapIndy10ServerTransport140.bpl">Embarcadero DBExpress DataSnap Server Transport Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclDataSnapProviderClient140.bpl">Embarcadero DBExpress DataSnap Provider Client Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclDataSnapServer140.bpl">Embarcadero DBExpress DataSnap Server Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dcldbxcds140.bpl">Embarcadero SimpleDataset Component (DBX)</Excluded_Packages>
+					</Excluded_Packages>
+					<DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="ALLUSERSPROFILE">C:\ProgramData</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="APPDATA">C:\Users\Beherit\AppData\Roaming</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="BCB">c:\program files (x86)\rad studio</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="BDS">c:\program files (x86)\rad studio</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="BDSAppDataBaseDir">BDS</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="BDSCOMMONDIR">C:\Users\Public\Documents\RAD Studio\7.0</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="BDSPROJECTSDIR">C:\Users\Beherit\Documents\RAD Studio\Projects</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="BDSUSERDIR">C:\Users\Beherit\Documents\RAD Studio\7.0</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="CG_BOOST_ROOT">C:\Program Files (x86)\RAD Studio\include\boost_1_39</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="CommonProgramFiles(x86)">C:\Program Files (x86)\Common Files</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="CommonProgramFiles">C:\Program Files (x86)\Common Files</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="CommonProgramW6432">C:\Program Files\Common Files</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="COMPUTERNAME">LENOVO</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="ComSpec">C:\Windows\system32\cmd.exe</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="FP_NO_HOST_CHECK">NO</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="HOMEDRIVE">C:</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="HOMEPATH">\Users\Beherit</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="LOCALAPPDATA">C:\Users\Beherit\AppData\Local</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="LOGONSERVER">\\LENOVO</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="MOZ_PLUGIN_PATH">C:\Program Files (x86)\Foxit Reader\plugins\</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="NUMBER_OF_PROCESSORS">8</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="OS">Windows_NT</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="Path">C:\Program Files (x86)\RAD Studio\bin;C:\Users\Public\Documents\RAD Studio\7.0\Bpl;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\ATI Technologies\ATI.ACE\Core-Static;C:\Program Files\Lenovo\Bluetooth Software\;C:\Program Files\Lenovo\Bluetooth Software\syswow64;C:\Program Files (x86)\QT Lite\QTSystem</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="PATHEXT">.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="PROCESSOR_ARCHITECTURE">x86</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="PROCESSOR_ARCHITEW6432">AMD64</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="PROCESSOR_IDENTIFIER">Intel64 Family 6 Model 30 Stepping 5, GenuineIntel</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="PROCESSOR_LEVEL">6</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="PROCESSOR_REVISION">1e05</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="ProgramData">C:\ProgramData</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="ProgramFiles(x86)">C:\Program Files (x86)</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="ProgramFiles">C:\Program Files (x86)</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="ProgramW6432">C:\Program Files</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="PSModulePath">C:\Windows\system32\WindowsPowerShell\v1.0\Modules\</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="PUBLIC">C:\Users\Public</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="SESSIONNAME">Console</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="SystemDrive">C:</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="SystemRoot">C:\Windows</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="TEMP">C:\Users\Beherit\AppData\Local\Temp</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="TMP">C:\Users\Beherit\AppData\Local\Temp</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="USERDOMAIN">Lenovo</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="USERNAME">Beherit</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="USERPROFILE">C:\Users\Beherit</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="VBOX_INSTALL_PATH">C:\Program Files\VirtualBox\</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="windir">C:\Windows</DebugSysEnvironmentVariables>
+						<DebugSysEnvironmentVariables Name="__COMPAT_LAYER">ElevateCreateProcess</DebugSysEnvironmentVariables>
+					</DebugSysEnvironmentVariables>
+					<DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="SESSIONNAME">Console</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="ALLUSERSPROFILE">C:\ProgramData</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="APPDATA">C:\Users\Beherit\AppData\Roaming</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="BCB">c:\program files (x86)\rad studio</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="BDS">c:\program files (x86)\rad studio</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="BDSAppDataBaseDir">BDS</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="BDSCOMMONDIR">C:\Users\Public\Documents\RAD Studio\7.0</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="BDSPROJECTSDIR">C:\Users\Beherit\Documents\RAD Studio\Projects</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="BDSUSERDIR">C:\Users\Beherit\Documents\RAD Studio\7.0</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="CG_BOOST_ROOT">C:\Program Files (x86)\RAD Studio\include\boost_1_39</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="CommonProgramFiles(x86)">C:\Program Files (x86)\Common Files</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="CommonProgramFiles">C:\Program Files (x86)\Common Files</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="CommonProgramW6432">C:\Program Files\Common Files</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="COMPUTERNAME">LENOVO</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="ComSpec">C:\Windows\system32\cmd.exe</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="FP_NO_HOST_CHECK">NO</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="HOMEDRIVE">C:</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="HOMEPATH">\Users\Beherit</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="LOCALAPPDATA">C:\Users\Beherit\AppData\Local</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="LOGONSERVER">\\LENOVO</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="MOZ_PLUGIN_PATH">C:\Program Files (x86)\Foxit Reader\plugins\</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="NUMBER_OF_PROCESSORS">8</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="OS">Windows_NT</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="Path">C:\Program Files (x86)\RAD Studio\bin;C:\Users\Public\Documents\RAD Studio\7.0\Bpl;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\ATI Technologies\ATI.ACE\Core-Static;C:\Program Files\Lenovo\Bluetooth Software\;C:\Program Files\Lenovo\Bluetooth Software\syswow64;C:\Program Files (x86)\QT Lite\QTSystem</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="PATHEXT">.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="PROCESSOR_ARCHITECTURE">x86</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="PROCESSOR_ARCHITEW6432">AMD64</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="PROCESSOR_IDENTIFIER">Intel64 Family 6 Model 30 Stepping 5, GenuineIntel</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="PROCESSOR_LEVEL">6</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="PROCESSOR_REVISION">1e05</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="ProgramData">C:\ProgramData</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="ProgramFiles(x86)">C:\Program Files (x86)</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="ProgramFiles">C:\Program Files (x86)</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="ProgramW6432">C:\Program Files</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="PSModulePath">C:\Windows\system32\WindowsPowerShell\v1.0\Modules\</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="PUBLIC">C:\Users\Public</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="SystemDrive">C:</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="SystemRoot">C:\Windows</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="TEMP">C:\Users\Beherit\AppData\Local\Temp</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="TMP">C:\Users\Beherit\AppData\Local\Temp</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="USERDOMAIN">Lenovo</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="USERNAME">Beherit</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="USERPROFILE">C:\Users\Beherit</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="VBOX_INSTALL_PATH">C:\Program Files\VirtualBox\</DebugEnvironmentVariables>
+						<DebugEnvironmentVariables Name="windir">C:\Windows</DebugEnvironmentVariables>
+					</DebugEnvironmentVariables>
 					<RDP_Source_Files>
 						<RDP_Source_Files Name="Item0">MainFrm.dfm</RDP_Source_Files>
 						<RDP_Source_Files Name="Item1">FixUpdater.drc</RDP_Source_Files>
