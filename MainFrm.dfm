@@ -152,7 +152,7 @@ object MainForm: TMainForm
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object Bevel1: TBevel
+  object Bevel: TBevel
     Left = 0
     Top = 230
     Width = 417
@@ -254,40 +254,31 @@ object MainForm: TMainForm
       end
     end
     object TabSheet2: TTabSheet
-      Caption = 'Cz'#281'stotliwo'#347#263' aktualizacji'
+      Caption = 'Ustawienia aktualizacji'
       ImageIndex = 1
-      object UpdateInfoLabel: TLabel
-        Left = 17
-        Top = 135
-        Width = 359
-        Height = 39
-        Alignment = taCenter
-        Caption = 
-          'Ustawienie cz'#281'stotliwo'#347'ci sprawdzania aktualizacji przez wtyczk'#281 +
-          ' jest niezale'#380'ne od ustawie'#324' w AQQ. Sprawdzenie czy s'#261' dost'#281'pne ' +
-          'aktualizacje nie zostanie przeprowadzone tylko gdy AQQ b'#281'dzie za' +
-          'blokowane!'
-        Enabled = False
-        Transparent = True
-        WordWrap = True
-      end
-      object UpdateModeLabel: TLabel
+      object UpdateTimeLabel: TLabel
         Left = 8
         Top = 8
-        Width = 248
+        Width = 311
         Height = 13
-        Caption = 'Sprawdzaj dost'#281'pno'#347#263' aktualizacji AQQ i dodatk'#243'w:'
+        Caption = 'Cz'#281'stotliwo'#347#263' sprawdzania aktualizacji AQQ i dodatk'#243'w'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentFont = False
       end
       object LastUpdateInfoLabel: TLabel
         Left = 8
-        Top = 55
+        Top = 54
         Width = 147
         Height = 13
         Caption = 'Data ostatniego sprawdzania -'
       end
       object LastUpdateLabel: TLabel
-        Left = 158
-        Top = 55
+        Left = 157
+        Top = 54
         Width = 119
         Height = 13
         Caption = 'RRRR-MM-DD HH:MM:SS'
@@ -300,16 +291,29 @@ object MainForm: TMainForm
         ParentColor = False
         ParentFont = False
       end
+      object UpdateModeLabel: TLabel
+        Left = 8
+        Top = 90
+        Width = 275
+        Height = 13
+        Caption = 'Spos'#243'b sprawdzania aktualizacji AQQ i dodatk'#243'w'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
       object Bevel2: TBevel
         Left = 4
-        Top = 118
+        Top = 79
         Width = 386
         Height = 3
         Shape = bsTopLine
       end
-      object UpdateModeComboBox: TComboBox
+      object UpdateTimeComboBox: TComboBox
         Left = 12
-        Top = 28
+        Top = 27
         Width = 145
         Height = 21
         Style = csDropDownList
@@ -321,17 +325,22 @@ object MainForm: TMainForm
           'Co trzy godziny'
           'Co cztery godziny')
       end
-      object CheckUpdatesAfterSaveBox: TCheckBox
-        Left = 10
-        Top = 82
-        Width = 291
-        Height = 17
-        Caption = 'Sprawdzaj dost'#281'pno'#347#263' aktualizacji po zapisaniu ustawie'#324
+      object UpdateModeComboBox: TComboBox
+        Left = 12
+        Top = 109
+        Width = 293
+        Height = 21
+        Style = csDropDownList
         TabOrder = 1
+        Items.Strings = (
+          'Aktualizacje zale'#380'ne od ustawie'#324' AQQ'
+          'Wymuszaj aktualizacje AQQ i dodatk'#243'w'
+          'Wymuszaj aktualizacje AQQ (+wersje beta) i dodatk'#243'w')
       end
     end
   end
   object ActionList: TActionList
+    Top = 232
     object aReadSettings: TAction
       Category = 'Settings'
       Caption = 'aReadSettings'
@@ -357,14 +366,14 @@ object MainForm: TMainForm
     Enabled = False
     Interval = 300000
     OnTimer = CheckUpdatesOnStartTimerTimer
-    Left = 384
-    Top = 8
+    Left = 64
+    Top = 232
   end
   object CheckUpdatesTimer: TTimer
     Enabled = False
     Interval = 3600000
     OnTimer = CheckUpdatesTimerTimer
-    Left = 352
-    Top = 8
+    Left = 32
+    Top = 232
   end
 end

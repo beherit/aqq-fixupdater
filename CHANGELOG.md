@@ -1,3 +1,9 @@
+1.0.3.0
+-----
+* Możliwość wyboru sposobu sprawdzania aktualizacji.
+* Wtyczka nie włącza już opcji informowania o nowych wersjach dodatków w AQQ.
+* Inne poprawki kosmetyczne.
+
 1.0.2.0
 -----
 * Mała poprawka w kodzie.
