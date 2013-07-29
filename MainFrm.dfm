@@ -226,14 +226,14 @@ object MainForm: TMainForm
         Columns = <
           item
             Caption = 'Aktywne'
-            Width = 68
+            Width = 60
           end
           item
-            AutoSize = True
             Caption = 'Adres'
+            Width = 300
           end>
         Items.ItemData = {
-          03C2010000040000000000000001000000FFFFFFFF01000000FFFFFFFF000000
+          0355010000030000000000000001000000FFFFFFFF01000000FFFFFFFF000000
           00002768007400740070003A002F002F0062006500680065007200690074002E
           0070006C002F006100710071005F007500700064006100740065002F00730074
           00610062006C0065002E0078006D006C000000000000000000FFFFFFFF010000
@@ -243,11 +243,7 @@ object MainForm: TMainForm
           FF01000000FFFFFFFF00000000003368007400740070003A002F002F00610071
           0071006E006500770073002E006B006F006D0075006E0069006B00610074006F
           00720079002E0070006C002F0050006C0069006B0069002F006100710071005F
-          007500700064006100740065002E0078006D006C000000000000000000FFFFFF
-          FF01000000FFFFFFFF00000000002868007400740070003A002F002F00770077
-          0077002E007A0079006C006200650072002E0069006E0066006F002D0073002E
-          0070006C002F006100710071002F0062006500740061002E0078006D006C00FF
-          FFFFFFFFFFFFFF}
+          007500700064006100740065002E0078006D006C00FFFFFFFFFFFF}
         ReadOnly = True
         RowSelect = True
         TabOrder = 0
@@ -272,6 +268,7 @@ object MainForm: TMainForm
           'aktualizacje nie zostanie przeprowadzone tylko gdy AQQ b'#281'dzie za' +
           'blokowane!'
         Enabled = False
+        Transparent = True
         WordWrap = True
       end
       object UpdateModeLabel: TLabel
@@ -316,7 +313,6 @@ object MainForm: TMainForm
         Width = 145
         Height = 21
         Style = csDropDownList
-        ItemHeight = 13
         TabOrder = 0
         Items.Strings = (
           'Przy w'#322#261'czeniu AQQ'

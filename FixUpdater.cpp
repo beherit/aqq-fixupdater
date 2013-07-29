@@ -7,6 +7,7 @@
 #include "MainFrm.h"
 #include <inifiles.hpp>
 #define FIXUPDATER_SYSTEM_ADDLINK L"FixUpdater/System/AddLink"
+#define FIXUPDATER_SYSTEM_DELETELINK L"FixUpdater/System/DeleteLink"
 //---------------------------------------------------------------------------
 
 int WINAPI DllEntryPoint(HINSTANCE hinst, unsigned long reason, void* lpReserved)
@@ -50,7 +51,7 @@ extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVe
   }
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = (wchar_t*)L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,1,4);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,1,6);
   PluginInfo.Description = (wchar_t*)L"Dodawanie w³asnych serwerów aktualizacji dodatków";
   PluginInfo.Author = (wchar_t*)L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = (wchar_t*)L"sirbeherit@gmail.com";
@@ -67,31 +68,64 @@ int __stdcall AddLink(WPARAM wParam, LPARAM lParam)
   PEnable = (WPARAM)wParam;
   PURL = (wchar_t*)lParam;
   PURL = PURL.Trim();
-  if(handle==NULL)
-  {
-	Application->Handle = MainForm;
-	handle = new TMainForm(Application);
-  }
-  handle->aReadSettings->Execute();
 
-  PDoNotAdd = false;
-  PCount = handle->UrlListPreview->Items->Count;
-  for(PCount=0;PCount<handle->UrlListPreview->Items->Count;PCount++)
+  if(PURL!="")
   {
-	if(handle->UrlListPreview->Items->Item[PCount]->SubItems->Strings[0]==PURL)
+	if(handle==NULL)
 	{
-	  PDoNotAdd = true;
+	  Application->Handle = (HWND__*)MainForm;
+	  handle = new TMainForm(Application);
+	}
+	handle->aReadSettings->Execute();
+
+	PDoNotAdd = false;
+	for(PCount=0;PCount<handle->UrlListPreview->Items->Count;PCount++)
+	{
+	  if(handle->UrlListPreview->Items->Item[PCount]->SubItems->Strings[0]==PURL)
+	  {
+		PDoNotAdd = true;
+		PCount = handle->UrlListPreview->Items->Count;
+	  }
+	}
+
+	if(PDoNotAdd==false)
+	{
 	  PCount = handle->UrlListPreview->Items->Count;
+	  handle->UrlListPreview->Items->Add();
+	  handle->UrlListPreview->Items->Item[PCount]->Checked=StrToBool(PEnable);
+	  handle->UrlListPreview->Items->Item[PCount]->SubItems->Add(PURL);
+	  handle->aSaveSettings->Execute();
 	}
   }
 
-  if(PDoNotAdd==false)
+  return 0;
+}
+//---------------------------------------------------------------------------
+
+//Usuwanie kana³ow przez zewnetrzne wtyczki
+int __stdcall DeleteLink(WPARAM wParam, LPARAM lParam)
+{
+  PURL = (wchar_t*)lParam;
+  PURL = PURL.Trim();
+
+  if(PURL!="")
   {
-	PCount = handle->UrlListPreview->Items->Count;
-	handle->UrlListPreview->Items->Add();
-	handle->UrlListPreview->Items->Item[PCount]->Checked=StrToBool(PEnable);
-	handle->UrlListPreview->Items->Item[PCount]->SubItems->Add(PURL);
-	handle->aSaveSettings->Execute();
+	if(handle==NULL)
+	{
+	  Application->Handle = (HWND__*)MainForm;
+	  handle = new TMainForm(Application);
+	}
+	handle->aReadSettings->Execute();
+
+	for(PCount=0;PCount<handle->UrlListPreview->Items->Count;PCount++)
+	{
+	  if(handle->UrlListPreview->Items->Item[PCount]->SubItems->Strings[0]==PURL)
+	  {
+		handle->UrlListPreview->Items->Delete(PCount);
+		handle->aSaveSettings->Execute();
+		PCount = handle->UrlListPreview->Items->Count;
+	  }
+	}
   }
 
   return 0;
@@ -102,7 +136,7 @@ int __stdcall OnModulesLoaded(WPARAM, LPARAM)
 {
   if(handle==NULL)
   {
-	Application->Handle = MainForm;
+	Application->Handle = (HWND__*)MainForm;
 	handle = new TMainForm(Application);
   }
   handle->eUpdateMode = UpdateMode;
@@ -137,6 +171,7 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 
   //Hook SDK wtyczki
   PluginLink.HookEvent(FIXUPDATER_SYSTEM_ADDLINK,AddLink);
+  PluginLink.HookEvent(FIXUPDATER_SYSTEM_DELETELINK,DeleteLink);
 
   //Ustawienia domyœlne
   if(!FileExists(Dir + "\\\\FixUpdater\\\\Url.ini"))
@@ -145,15 +180,13 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 	 CreateDir(Dir + "\\\\FixUpdater");
 
 	TIniFile *Ini = new TIniFile(Dir + "\\\\FixUpdater\\\\Url.ini");
-	Ini->WriteInteger("UrlCount", "Count", 4);
+	Ini->WriteInteger("UrlCount", "Count", 3);
 	Ini->WriteString("Update1", "Url", "http://beherit.pl/aqq_update/stable.xml");
 	Ini->WriteBool("Update1", "Enable", true);
 	Ini->WriteString("Update2", "Url", "http://beherit.pl/aqq_update/beta.xml");
 	Ini->WriteBool("Update2", "Enable", false);
 	Ini->WriteString("Update3", "Url", "http://aqqnews.komunikatory.pl/Pliki/aqq_update.xml");
 	Ini->WriteBool("Update3", "Enable", true);
-	Ini->WriteString("Update4", "Url", "http://www.zylber.info-s.pl/aqq/beta.xml");
-	Ini->WriteBool("Update4", "Enable", false);
 	delete Ini;
   }
 
@@ -181,7 +214,7 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
   {
 	if(handle==NULL)
 	{
-	  Application->Handle = MainForm;
+	  Application->Handle = (HWND__*)MainForm;
 	  handle = new TMainForm(Application);
 	}
 	handle->eUpdateMode = UpdateMode;
@@ -198,7 +231,7 @@ extern "C" int __declspec(dllexport)__stdcall Settings()
 {
   if(handle==NULL)
   {
-	Application->Handle = MainForm;
+	Application->Handle = (HWND__*)MainForm;
 	handle = new TMainForm(Application);
   }
   handle->Show();
@@ -211,7 +244,7 @@ extern "C" int __declspec(dllexport) __stdcall Unload()
 {
   Dir = GetPluginUserDir();
   TIniFile *Ini = new TIniFile(Dir + "\\\\FixUpdater\\\\Url.ini");
-  UrlCount = Ini->ReadInteger("UrlCount", "Count", 2);
+  UrlCount = Ini->ReadInteger("UrlCount", "Count", 3);
   for(Count=1;Count<=UrlCount;Count++)
   {
 	Enabled = Ini->ReadBool("Update" + IntToStr(Count), "Enable", true);
@@ -223,6 +256,7 @@ extern "C" int __declspec(dllexport) __stdcall Unload()
   }
   delete Ini;
   PluginLink.UnhookEvent(AddLink);
+  PluginLink.UnhookEvent(DeleteLink);
 
   return 0;
 }
