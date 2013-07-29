@@ -11,12 +11,13 @@
 #include "sPageControl.hpp"
 #include "sSkinManager.hpp"
 #include "sSkinProvider.hpp"
-#include <ActnList.hpp>
-#include <Classes.hpp>
-#include <ComCtrls.hpp>
-#include <Controls.hpp>
-#include <ExtCtrls.hpp>
-#include <StdCtrls.hpp>
+#include <System.Actions.hpp>
+#include <System.Classes.hpp>
+#include <Vcl.ActnList.hpp>
+#include <Vcl.ComCtrls.hpp>
+#include <Vcl.Controls.hpp>
+#include <Vcl.ExtCtrls.hpp>
+#include <Vcl.StdCtrls.hpp>
 //---------------------------------------------------------------------------
 class TMainForm : public TForm
 {

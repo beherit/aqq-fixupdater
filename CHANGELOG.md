@@ -1,3 +1,9 @@
+1.2.0.0
+-----
+* Przepisanie wtyczki pod kompilator Embarcadero C++ Builder XE3.
+* Aktualizacja komponentów AlphaControls do najnowszej dostępnej wersji (7.70).
+* Inne mniej ważne zmiany w kodzie.
+
 1.1.2.0
 -----
 * Wtyczka posiada własną ikonę pokazywaną w ustawieniach komunikatora na liście wtyczek.

@@ -14,15 +14,6 @@
 #pragma link "sPageControl"
 #pragma link "sSkinManager"
 #pragma link "sSkinProvider"
-#pragma link "sBevel"
-#pragma link "sButton"
-#pragma link "sCheckBox"
-#pragma link "sComboBox"
-#pragma link "sLabel"
-#pragma link "sListView"
-#pragma link "sPageControl"
-#pragma link "sSkinManager"
-#pragma link "sSkinProvider"
 #pragma resource "*.dfm"
 TMainForm *MainForm;
 //---------------------------------------------------------------------------

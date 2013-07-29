@@ -1,15 +1,13 @@
-//---------------------------------------------------------------------------
 #include <vcl.h>
 #include <windows.h>
 #pragma hdrstop
 #pragma argsused
-#include "Aqq.h"
 #include "MainFrm.h"
+#include <PluginAPI.h>
 #include <inifiles.hpp>
 #include <IdHashMessageDigest.hpp>
 #define FIXUPDATER_SYSTEM_ADDLINK L"FixUpdater/System/AddLink"
 #define FIXUPDATER_SYSTEM_DELETELINK L"FixUpdater/System/DeleteLink"
-//---------------------------------------------------------------------------
 
 int WINAPI DllEntryPoint(HINSTANCE hinst, unsigned long reason, void* lpReserved)
 {
@@ -258,9 +256,9 @@ int __stdcall OnThemeChanged (WPARAM wParam, LPARAM lParam)
 //---------------------------------------------------------------------------
 
 //Zapisywanie zasobów
-bool SaveResourceToFile(char *FileName, char *res)
+bool SaveResourceToFile(wchar_t* FileName, wchar_t* Res)
 {
-  HRSRC hrsrc = FindResource(HInstance, res, RT_RCDATA);
+  HRSRC hrsrc = FindResource(HInstance, Res, RT_RCDATA);
   if(!hrsrc) return false;
   DWORD size = SizeofResource(HInstance, hrsrc);
   HGLOBAL hglob = LoadResource(HInstance, hrsrc);
@@ -272,8 +270,6 @@ bool SaveResourceToFile(char *FileName, char *res)
   return true;
 }
 //---------------------------------------------------------------------------
-
-using namespace std;
 
 //Obliczanie sumy kontrolnej pliku
 UnicodeString MD5File(UnicodeString FileName)
@@ -289,11 +285,11 @@ UnicodeString MD5File(UnicodeString FileName)
 	  TIdHashMessageDigest5 *idmd5= new TIdHashMessageDigest5();
 	  try
 	  {
-		Result = idmd5->HashStreamAsHex(fs);
+	    Result = idmd5->HashStreamAsHex(fs);
 	  }
 	  __finally
 	  {
-		delete idmd5;
+	    delete idmd5;
 	  }
     }
 	__finally
@@ -325,9 +321,9 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
   if(!DirectoryExists(PluginUserDir+"\\\\Shared"))
    CreateDir(PluginUserDir+"\\\\Shared");
   if(!FileExists(PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png"))
-   SaveResourceToFile((PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png").t_str(),"PLUGIN_RES");
+   SaveResourceToFile((PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png").w_str(),L"PLUGIN_RES");
   else if(MD5File(PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png")!="3EA122B23FBF8835FDE23DCD1CC9968B")
-   SaveResourceToFile((PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png").t_str(),"PLUGIN_RES");
+   SaveResourceToFile((PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png").w_str(),L"PLUGIN_RES");
   //Ustawienia domyœlne wtyczki
   if(!FileExists(PluginUserDir+"\\\\FixUpdater\\\\Settings.ini"))
   {
@@ -426,6 +422,8 @@ extern "C" int __declspec(dllexport) __stdcall Unload()
   }
   delete Links;
   delete Ini;
+  //Usuniecie uchwytu do formy ustawien
+  delete hMainForm;
 
   return 0;
 }
@@ -436,8 +434,8 @@ extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVe
 {
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,1,2,0);
-  PluginInfo.Description = L"Pozwala na dodawanie w³asnych serwerów aktualizacji dodatków";
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,2,0,0);
+  PluginInfo.Description = L"Wtyczka ulepszaj¹ca system aktualizacji w AQQ poprzez mo¿liwoœæ dodawania w³asnych adresów do serwerów zawieraj¹cych aktualizacje.";
   PluginInfo.Author = L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = L"kontakt@beherit.pl";
   PluginInfo.Copyright = L"Krzysztof Grochocki (Beherit)";
