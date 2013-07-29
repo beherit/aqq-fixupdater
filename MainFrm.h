@@ -10,7 +10,6 @@
 #include "sListView.hpp"
 #include "sPageControl.hpp"
 #include "sSkinManager.hpp"
-#include "sSkinProvider.hpp"
 #include <System.Actions.hpp>
 #include <System.Classes.hpp>
 #include <Vcl.ActnList.hpp>
@@ -45,7 +44,6 @@ __published:	// IDE-managed Components
 	TAction *aSettingsChanged;
 	TsButton *CancelButton;
 	TsButton *OkButton;
-	TsSkinProvider *sSkinProvider;
 	TsSkinManager *sSkinManager;
 	TsLabelFX *LastUpdateLabel;
 	void __fastcall UrlListPreviewSelectItem(TObject *Sender, TListItem *Item, bool Selected);

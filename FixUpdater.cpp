@@ -42,7 +42,7 @@ UnicodeString GetThemeSkinDir()
 }
 //---------------------------------------------------------------------------
 
-//Sprawdzanie czy wlaczona jest obsluga stylow obramowania okien
+//Sprawdzanie czy  wlaczona jest zaawansowana stylizacja okien
 bool ChkSkinEnabled()
 {
   TStrings* IniList = new TStringList();
@@ -56,17 +56,29 @@ bool ChkSkinEnabled()
 }
 //---------------------------------------------------------------------------
 
-//Sprawdzanie czy wlaczony jest natywny styl Windows
-bool ChkNativeEnabled()
+//Sprawdzanie ustawien animacji AlphaControls
+bool ChkThemeAnimateWindows()
 {
   TStrings* IniList = new TStringList();
   IniList->SetText((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP,0,0));
   TMemIniFile *Settings = new TMemIniFile(ChangeFileExt(Application->ExeName, ".INI"));
   Settings->SetStrings(IniList);
   delete IniList;
-  UnicodeString NativeEnabled = Settings->ReadString("Settings","Native","0");
+  UnicodeString AnimateWindowsEnabled = Settings->ReadString("Theme","ThemeAnimateWindows","1");
   delete Settings;
-  return StrToBool(NativeEnabled);
+  return StrToBool(AnimateWindowsEnabled);
+}
+//---------------------------------------------------------------------------
+bool ChkThemeGlowing()
+{
+  TStrings* IniList = new TStringList();
+  IniList->SetText((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP,0,0));
+  TMemIniFile *Settings = new TMemIniFile(ChangeFileExt(Application->ExeName, ".INI"));
+  Settings->SetStrings(IniList);
+  delete IniList;
+  UnicodeString GlowingEnabled = Settings->ReadString("Theme","ThemeGlowing","1");
+  delete Settings;
+  return StrToBool(GlowingEnabled);
 }
 //---------------------------------------------------------------------------
 
@@ -211,24 +223,29 @@ int __stdcall OnModulesLoaded(WPARAM, LPARAM)
 //Hook na zmiane kompozycji
 int __stdcall OnThemeChanged (WPARAM wParam, LPARAM lParam)
 {
-  //Pobieranie sciezki nowej aktywnej kompozycji
-  UnicodeString ThemeDir = StringReplace((wchar_t*)lParam, "\\", "\\\\", TReplaceFlags() << rfReplaceAll);
-  //Zmiana skorki wtyczki
+  //Okno ustawien zostalo juz stworzone
   if(hMainForm)
   {
-	//Wlaczenie skorkowania
-	if((FileExists(ThemeDir+"\\\\Skin\\\\Skin.asz"))&&(!ChkNativeEnabled()))
+	//Wlaczona zaawansowana stylizacja okien
+	if(ChkSkinEnabled())
 	{
-	  UnicodeString ThemeSkinDir = ThemeDir+"\\\\Skin";
-	  ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
-	  hMainForm->sSkinManager->SkinDirectory = ThemeSkinDir;
-	  hMainForm->sSkinManager->SkinName = "Skin.asz";
-	  hMainForm->sSkinProvider->DrawNonClientArea = ChkSkinEnabled();
-	  hMainForm->sSkinManager->Active = true;
+	  UnicodeString ThemeSkinDir = GetThemeSkinDir();
+	  //Plik zaawansowanej stylizacji okien istnieje
+	  if(FileExists(ThemeSkinDir + "\\\\Skin.asz"))
+	  {
+		ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
+		hMainForm->sSkinManager->SkinDirectory = ThemeSkinDir;
+		hMainForm->sSkinManager->SkinName = "Skin.asz";
+		if(ChkThemeAnimateWindows()) hMainForm->sSkinManager->AnimEffects->FormShow->Time = 200;
+		else hMainForm->sSkinManager->AnimEffects->FormShow->Time = 0;
+		hMainForm->sSkinManager->Effects->AllowGlowing = ChkThemeGlowing();
+		hMainForm->sSkinManager->Active = true;
+	  }
+	  //Brak pliku zaawansowanej stylizacji okien
+	  else hMainForm->sSkinManager->Active = false;
 	}
-	//Wylaczenie skorkowania
-	else
-	 hMainForm->sSkinManager->Active = false;
+	//Zaawansowana stylizacja okien wylaczona
+	else hMainForm->sSkinManager->Active = false;
   }
 
   return 0;
@@ -236,18 +253,14 @@ int __stdcall OnThemeChanged (WPARAM wParam, LPARAM lParam)
 //---------------------------------------------------------------------------
 
 //Zapisywanie zasobów
-bool SaveResourceToFile(wchar_t* FileName, wchar_t* Res)
+void ExtractRes(wchar_t* FileName, wchar_t* ResName, wchar_t* ResType)
 {
-  HRSRC hrsrc = FindResource(HInstance, Res, RT_RCDATA);
-  if(!hrsrc) return false;
-  DWORD size = SizeofResource(HInstance, hrsrc);
-  HGLOBAL hglob = LoadResource(HInstance, hrsrc);
-  LPVOID rdata = LockResource(hglob);
-  HANDLE hFile = CreateFile(FileName, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-  DWORD writ;
-  WriteFile(hFile, rdata, size, &writ, NULL);
-  CloseHandle(hFile);
-  return true;
+  TPluginTwoFlagParams PluginTwoFlagParams;
+  PluginTwoFlagParams.cbSize = sizeof(TPluginTwoFlagParams);
+  PluginTwoFlagParams.Param1 = ResName;
+  PluginTwoFlagParams.Param2 = ResType;
+  PluginTwoFlagParams.Flag1 = (int)HInstance;
+  PluginLink.CallService(AQQ_FUNCTION_SAVERESOURCE,(WPARAM)&PluginTwoFlagParams,(LPARAM)FileName);
 }
 //---------------------------------------------------------------------------
 
@@ -301,9 +314,9 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
   if(!DirectoryExists(PluginUserDir+"\\\\Shared"))
    CreateDir(PluginUserDir+"\\\\Shared");
   if(!FileExists(PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png"))
-   SaveResourceToFile((PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png").w_str(),L"PLUGIN_RES");
+   ExtractRes((PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png").w_str(),L"SHARED",L"DATA");
   else if(MD5File(PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png")!="3EA122B23FBF8835FDE23DCD1CC9968B")
-   SaveResourceToFile((PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png").w_str(),L"PLUGIN_RES");
+   ExtractRes((PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png").w_str(),L"SHARED",L"DATA");
   //Ustawienia domyœlne wtyczki
   if(!FileExists(PluginUserDir+"\\\\FixUpdater\\\\Settings.ini"))
   {
@@ -403,7 +416,7 @@ extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVe
 {
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,3,0,0);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,4,0,0);
   PluginInfo.Description = L"Ulepszenie systemu aktualizacji poprzez mo¿liwoœæ dodawania dodatkowych adresów serwerów zawieraj¹cych bazê dodatków oraz ustawienie czêstszego interwa³u sprawdzania aktualizacji.";
   PluginInfo.Author = L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = L"kontakt@beherit.pl";

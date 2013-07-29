@@ -192,7 +192,6 @@ object MainForm: TMainForm
       Caption = 'Repozytoria'
       SkinData.CustomColor = False
       SkinData.CustomFont = False
-      ExplicitHeight = 186
       object AddButton: TsButton
         Left = 6
         Top = 124
@@ -277,8 +276,6 @@ object MainForm: TMainForm
       ImageIndex = 1
       SkinData.CustomColor = False
       SkinData.CustomFont = False
-      ExplicitLeft = 0
-      ExplicitTop = 28
       object LastUpdateInfoLabel: TsLabel
         Left = 12
         Top = 54
@@ -421,18 +418,6 @@ object MainForm: TMainForm
     Left = 32
     Top = 200
   end
-  object sSkinProvider: TsSkinProvider
-    AddedTitle.Font.Charset = DEFAULT_CHARSET
-    AddedTitle.Font.Color = clNone
-    AddedTitle.Font.Height = -11
-    AddedTitle.Font.Name = 'Tahoma'
-    AddedTitle.Font.Style = []
-    SkinData.SkinManager = sSkinManager
-    SkinData.SkinSection = 'FORM'
-    TitleButtons = <>
-    Left = 96
-    Top = 200
-  end
   object sSkinManager: TsSkinManager
     ExtendedBorders = True
     Active = False
@@ -466,7 +451,7 @@ object MainForm: TMainForm
     ThirdParty.ThirdScrollControl = ' '
     ThirdParty.ThirdUpDown = ' '
     ThirdParty.ThirdScrollBar = ' '
-    Left = 128
+    Left = 96
     Top = 200
   end
 end
