@@ -44,7 +44,7 @@ void __fastcall TMainForm::SaveButtonClick(TObject *Sender)
 {
   aSaveSettings->Execute();
   Close();
-  CheckUpdates(eUpdateMode);
+  CheckUpdates(UpdateMode);
 }
 //---------------------------------------------------------------------------
 
@@ -56,20 +56,19 @@ void __fastcall TMainForm::AddButtonClick(TObject *Sender)
   {
 	if(URL!="")
 	{
-	  int Count=UrlListPreview->Items->Count;
-	  for(int XCount=0;XCount<Count;XCount++)
+	  for(int Count=0;Count<UrlListPreview->Items->Count;Count++)
 	  {
-		if(UrlListPreview->Items->Item[XCount]->SubItems->Strings[0]==URL)
+		if(UrlListPreview->Items->Item[Count]->SubItems->Strings[0]==URL)
 		{
 		  DoNotAdd = true;
-		  XCount = Count;
+		  Count = UrlListPreview->Items->Count;
 		}
 	  }
 	  if(DoNotAdd==false)
 	  {
 		UrlListPreview->Items->Add();
-		UrlListPreview->Items->Item[Count]->Checked=true;
-		UrlListPreview->Items->Item[Count]->SubItems->Add(URL);
+		UrlListPreview->Items->Item[UrlListPreview->Items->Count-1]->Checked=true;
+		UrlListPreview->Items->Item[UrlListPreview->Items->Count-1]->SubItems->Add(URL);
 		SaveButton->Enabled=true;
 	  }
 	}
@@ -152,7 +151,7 @@ void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
   }
   //Sposób aktualizacji
   Ini->WriteInteger("Settings", "UpdateMode",UpdateModeComboBox->ItemIndex);
-  eUpdateMode = UpdateModeComboBox->ItemIndex;
+  UpdateMode = UpdateModeComboBox->ItemIndex;
   //Czêstotliwoœci aktualizacji
   Ini->WriteInteger("Settings", "UpdateTime",UpdateTimeComboBox->ItemIndex);
   if(UpdateTimeComboBox->ItemIndex!=0)
@@ -226,13 +225,13 @@ void __fastcall TMainForm::aExitExecute(TObject *Sender)
 
 void __fastcall TMainForm::CheckUpdatesOnStartTimerTimer(TObject *Sender)
 {
-  CheckUpdates(eUpdateMode);
+  CheckUpdates(UpdateMode);
   CheckUpdatesOnStartTimer->Enabled=false;
 
-  if(eUpdateTime!=0)
+  if(UpdateTime!=0)
   {
 	CheckUpdatesTimer->Enabled = false;
-	CheckUpdatesTimer->Interval = 3600000 * eUpdateTime;
+	CheckUpdatesTimer->Interval = 3600000 * UpdateTime;
 	CheckUpdatesTimer->Enabled = true;
   }
 }
@@ -240,7 +239,7 @@ void __fastcall TMainForm::CheckUpdatesOnStartTimerTimer(TObject *Sender)
 
 void __fastcall TMainForm::CheckUpdatesTimerTimer(TObject *Sender)
 {
-  CheckUpdates(eUpdateMode);
+  CheckUpdates(UpdateMode);
 }
 //---------------------------------------------------------------------------
 

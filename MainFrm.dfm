@@ -179,6 +179,10 @@ object MainForm: TMainForm
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'Kana'#322'y aktualizacji'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object AddButton: TButton
         Left = 6
         Top = 160
@@ -256,6 +260,10 @@ object MainForm: TMainForm
     object TabSheet2: TTabSheet
       Caption = 'Ustawienia aktualizacji'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object UpdateTimeLabel: TLabel
         Left = 8
         Top = 8
