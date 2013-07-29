@@ -276,10 +276,6 @@ object MainForm: TMainForm
       ImageIndex = 1
       SkinData.CustomColor = False
       SkinData.CustomFont = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object UpdateTimeLabel: TsLabel
         Left = 8
         Top = 8
@@ -345,7 +341,7 @@ object MainForm: TMainForm
         Left = 12
         Top = 27
         Width = 145
-        Height = 22
+        Height = 21
         Alignment = taLeftJustify
         BoundLabel.Indent = 0
         BoundLabel.Font.Charset = DEFAULT_CHARSET
@@ -373,7 +369,7 @@ object MainForm: TMainForm
         Left = 12
         Top = 109
         Width = 293
-        Height = 22
+        Height = 21
         Alignment = taLeftJustify
         BoundLabel.Indent = 0
         BoundLabel.Font.Charset = DEFAULT_CHARSET
@@ -418,7 +414,7 @@ object MainForm: TMainForm
     Height = 25
     Caption = 'Anuluj'
     TabOrder = 1
-    OnClick = CancelButtonClick
+    OnClick = aExitExecute
     SkinData.SkinSection = 'BUTTON'
   end
   object OkButton: TsButton
@@ -433,10 +429,10 @@ object MainForm: TMainForm
   end
   object ActionList: TActionList
     Top = 232
-    object aReadSettings: TAction
+    object aLoadSettings: TAction
       Category = 'Settings'
-      Caption = 'aReadSettings'
-      OnExecute = aReadSettingsExecute
+      Caption = 'aLoadSettings'
+      OnExecute = aLoadSettingsExecute
     end
     object aSaveSettings: TAction
       Category = 'Settings'
@@ -456,11 +452,6 @@ object MainForm: TMainForm
     object aSettingsChanged: TAction
       Caption = 'aSettingsChanged'
       OnExecute = aSettingsChangedExecute
-    end
-    object aPageControlSheetChange: TAction
-      Caption = 'aPageControlSheetChange'
-      ShortCut = 16393
-      OnExecute = aPageControlSheetChangeExecute
     end
   end
   object CheckUpdatesOnStartTimer: TTimer
@@ -521,6 +512,7 @@ object MainForm: TMainForm
     ThirdParty.ThirdSpeedButton = ' '
     ThirdParty.ThirdScrollControl = ' '
     ThirdParty.ThirdUpDown = ' '
+    ThirdParty.ThirdScrollBar = ' '
     Left = 128
     Top = 232
   end

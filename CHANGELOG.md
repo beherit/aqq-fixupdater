@@ -1,3 +1,11 @@
+1.1.2.0
+-----
+* Wtyczka posiada własną ikonę pokazywaną w ustawieniach komunikatora na liście wtyczek.
+* Obsługa natywnego stylu Windows (wyłączone skórkowanie okien wtyczki).
+* Aktualizacja komponentów AlphaControls do najnowszej dostępnej wersji (7.67).
+* Usunięcie zbędnego już kodu poprawiającego działanie kontrolki TsPageControl (AlphaControls).
+* Optymalizacja kodu.
+
 1.1.1.0
 -----
 * Poprawki w implementacji komponentów AlphaControls.
