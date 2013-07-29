@@ -57,8 +57,8 @@ __published:	// IDE-managed Components
 
 private:	// User declarations
 public:		// User declarations
-	int eUpdateTime;
-    int eUpdateMode;
+	int UpdateTime;
+    int UpdateMode;
 	__fastcall TMainForm(TComponent* Owner);
 };
 //---------------------------------------------------------------------------

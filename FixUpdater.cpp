@@ -26,20 +26,14 @@ TPluginHook PluginHook;
 TSaveSetup SaveSetup;
 
 //Zmienne
-UnicodeString Url;
 int UpdateTime;
 int UpdateMode;
-//Zewnetrzny hook
-UnicodeString PEnable;
-UnicodeString PURL;
-int PCount;
-bool PDoNotAdd;
 
 extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVersion)
 {
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = (wchar_t*)L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,4,0);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,4,2);
   PluginInfo.Description = (wchar_t*)L"Dodawanie w³asnych serwerów aktualizacji dodatków";
   PluginInfo.Author = (wchar_t*)L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = (wchar_t*)L"email@beherit.pl";
@@ -53,86 +47,62 @@ extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVe
 //Dodawanie kana³ow przez zewnetrzne wtyczki
 int __stdcall AddLink(WPARAM wParam, LPARAM lParam)
 {
-  PEnable = (WPARAM)wParam;
-  PURL = (wchar_t*)lParam;
-  PURL = PURL.Trim();
+  UnicodeString Enable = (WPARAM)wParam;
+  UnicodeString URL = (wchar_t*)lParam;
+  URL = URL.Trim();
+  int Count;
 
-  if(PURL!="")
+  if(URL!="")
   {
-	if(hMainForm==NULL)
-	{
-	  Application->Handle = (HWND)MainForm;
-	  hMainForm = new TMainForm(Application);
-	}
 	hMainForm->aReadSettings->Execute();
 	//Szukanie URL
-	PDoNotAdd = false;
-	for(PCount=0;PCount<hMainForm->UrlListPreview->Items->Count;PCount++)
+	for(Count=0;Count<hMainForm->UrlListPreview->Items->Count;Count++)
 	{
-	  if(hMainForm->UrlListPreview->Items->Item[PCount]->SubItems->Strings[0]==PURL)
-	  {
-		PDoNotAdd = true;
-		PCount = hMainForm->UrlListPreview->Items->Count;
-	  }
+	  //URL juz dodany
+	  if(hMainForm->UrlListPreview->Items->Item[Count]->SubItems->Strings[0]==URL)
+	   return 2;
 	}
     //Dodawanie URL
-	if(PDoNotAdd==false)
-	{
-	  PCount = hMainForm->UrlListPreview->Items->Count;
-	  hMainForm->UrlListPreview->Items->Add();
-	  hMainForm->UrlListPreview->Items->Item[PCount]->Checked=StrToBool(PEnable);
-	  hMainForm->UrlListPreview->Items->Item[PCount]->SubItems->Add(PURL);
-	  hMainForm->aSaveSettings->Execute();
-	  return 1;
-	}
-	else
-	 return 0;
+	Count = hMainForm->UrlListPreview->Items->Count;
+	hMainForm->UrlListPreview->Items->Add();
+	hMainForm->UrlListPreview->Items->Item[Count]->Checked=StrToBool(Enable);
+	hMainForm->UrlListPreview->Items->Item[Count]->SubItems->Add(URL);
+	hMainForm->aSaveSettings->Execute();
+	return 1;
   }
   else
-   return 0;
+   return 2;
 }
 //---------------------------------------------------------------------------
 
 //Usuwanie kana³ow przez zewnetrzne wtyczki
 int __stdcall DeleteLink(WPARAM wParam, LPARAM lParam)
 {
-  PURL = (wchar_t*)lParam;
-  PURL = PURL.Trim();
+  UnicodeString URL = (wchar_t*)lParam;
+  URL = URL.Trim();
 
-  if(PURL!="")
+  if(URL!="")
   {
-	if(hMainForm==NULL)
-	{
-	  Application->Handle = (HWND)MainForm;
-	  hMainForm = new TMainForm(Application);
-	}
 	hMainForm->aReadSettings->Execute();
 
-	for(PCount=0;PCount<hMainForm->UrlListPreview->Items->Count;PCount++)
+	for(int Count=0;Count<hMainForm->UrlListPreview->Items->Count;Count++)
 	{
-	  if(hMainForm->UrlListPreview->Items->Item[PCount]->SubItems->Strings[0]==PURL)
+	  if(hMainForm->UrlListPreview->Items->Item[Count]->SubItems->Strings[0]==URL)
 	  {
-		hMainForm->UrlListPreview->Items->Delete(PCount);
+		hMainForm->UrlListPreview->Items->Delete(Count);
 		hMainForm->aSaveSettings->Execute();
 		return 1;
 	  }
 	}
-	return 0;
+	return 2;
   }
   else
-   return 0;
+   return 2;
 }
 //---------------------------------------------------------------------------
 
 int __stdcall OnModulesLoaded(WPARAM, LPARAM)
 {
-  if(hMainForm==NULL)
-  {
-	Application->Handle = (HWND)MainForm;
-	hMainForm = new TMainForm(Application);
-  }
-  hMainForm->eUpdateTime = UpdateTime;
-  hMainForm->eUpdateMode = UpdateMode;
   hMainForm->CheckUpdatesOnStartTimer->Enabled=true;
 
   return 0;
@@ -157,6 +127,12 @@ void SetUpdateLink(bool Enabled, UnicodeString URL)
 extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 {
   PluginLink = *Link;
+
+  if(hMainForm==NULL)
+  {
+	Application->Handle = (HWND)MainForm;
+	hMainForm = new TMainForm(Application);
+  }
 
   //Hook SDK wtyczki
   PluginLink.HookEvent(FIXUPDATER_SYSTEM_ADDLINK,AddLink);
@@ -209,29 +185,20 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
   {
 	if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true)==true)
 	{
-	  Url = Ini->ReadString("Links", "Url" + IntToStr(Count+1), "");
+	  UnicodeString Url = Ini->ReadString("Links", "Url" + IntToStr(Count+1), "");
 	  if(Url!="") SetUpdateLink(true,Url);
 	}
   }
   delete Links;
   //Sposób aktualizacji
-  UpdateMode = Ini->ReadInteger("Settings", "UpdateMode", 0);
+  hMainForm->UpdateMode = Ini->ReadInteger("Settings", "UpdateMode", 0);
   //Czêstotliwoœci aktualizacji
-  UpdateTime = Ini->ReadInteger("Settings", "UpdateTime", 0);
+  hMainForm->UpdateTime = Ini->ReadInteger("Settings", "UpdateTime", 0);
+  delete Ini;
   //W³¹czenie Timer'a
   PluginLink.HookEvent(AQQ_SYSTEM_MODULESLOADED, OnModulesLoaded);
   if(PluginLink.CallService(AQQ_SYSTEM_MODULESLOADED,0,0)==true)
-  {
-	if(hMainForm==NULL)
-	{
-	  Application->Handle = (HWND)MainForm;
-	  hMainForm = new TMainForm(Application);
-	}
-	hMainForm->eUpdateTime = UpdateTime;
-	hMainForm->eUpdateMode = UpdateMode;
-	hMainForm->CheckUpdatesOnStartTimer->Enabled=true;
-  }
-  delete Ini;
+   hMainForm->CheckUpdatesOnStartTimer->Enabled=true;
 
   return 0;
 }
@@ -239,11 +206,6 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 
 extern "C" int __declspec(dllexport)__stdcall Settings()
 {
-  if(hMainForm==NULL)
-  {
-	Application->Handle = (HWND)MainForm;
-	hMainForm = new TMainForm(Application);
-  }
   hMainForm->Show();
 
   return 0;
@@ -270,7 +232,7 @@ extern "C" int __declspec(dllexport) __stdcall Unload()
   {
 	if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true)==true)
 	{
-	  Url = Ini->ReadString("Links", "Url" + IntToStr(Count+1), "");
+	  UnicodeString Url = Ini->ReadString("Links", "Url" + IntToStr(Count+1), "");
 	  if(Url!="") SetUpdateLink(false,Url);
 	}
   }

@@ -1,3 +1,7 @@
+1.0.4.2
+-----
+* Funkcje FIXUPDATER_SYSTEM_ADDLINK i FIXUPDATER_SYSTEM_DELETELINK zwracają 2 w przypadku błędu. 
+
 1.0.4.0
 -----
 * Funkcje FIXUPDATER_SYSTEM_ADDLINK i FIXUPDATER_SYSTEM_DELETELINK zwracają 0 w przypadku błędu.
