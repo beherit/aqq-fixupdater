@@ -11,7 +11,7 @@ TMainForm *MainForm;
 __declspec(dllimport)UnicodeString GetPluginUserDir();
 __declspec(dllimport)UnicodeString GetLastUpdate();
 __declspec(dllimport)void SetUpdateLink(bool Enabled, UnicodeString URL);
-__declspec(dllimport)void CheckUpdates();
+__declspec(dllimport)void CheckUpdates(int Mode);
 UnicodeString eDir;
 UnicodeString eUrl;
 int eUrlCount;
@@ -47,8 +47,7 @@ void __fastcall TMainForm::SaveButtonClick(TObject *Sender)
 {
   aSaveSettings->Execute();
   Close();
-  if(CheckUpdatesAfterSaveBox->Checked==true)
-   CheckUpdates();
+  CheckUpdates(eUpdateMode);
 }
 //---------------------------------------------------------------------------
 
@@ -85,8 +84,7 @@ void __fastcall TMainForm::aReadSettingsExecute(TObject *Sender)
 {
   eDir = GetPluginUserDir();
 
-  TIniFile *Ini = new TIniFile(eDir + "\\\\FixUpdater\\\\Url.ini");
-
+  TIniFile *Ini = new TIniFile(eDir + "\\\\FixUpdater\\\\Settings.ini");
   //Kana³y aktualizacji
   eUrlCount = Ini->ReadInteger("UrlCount", "Count", 3);
   UrlListPreview->Items->Clear();
@@ -96,12 +94,14 @@ void __fastcall TMainForm::aReadSettingsExecute(TObject *Sender)
 	UrlListPreview->Items->Item[eCount-1]->Checked = Ini->ReadBool("Update" + IntToStr(eCount), "Enable", true);
 	UrlListPreview->Items->Item[eCount-1]->SubItems->Add( Ini->ReadString("Update" + IntToStr(eCount), "Url", "") );
   }
-
   //Czêstotliwoœci aktualizacji
+  UpdateTimeComboBox->ItemIndex = Ini->ReadInteger("Settings", "UpdateTime", 0);
+  //Sposób aktualizacji
   UpdateModeComboBox->ItemIndex = Ini->ReadInteger("Settings", "UpdateMode", 0);
+  //Czas ostatniej aktualizacji
   LastUpdateLabel->Caption=GetLastUpdate();
-  CheckUpdatesAfterSaveBox->Checked = Ini->ReadBool("Settings", "AfterSave", false);
-
+  //Pozycha labela
+  LastUpdateLabel->Left = LastUpdateInfoLabel->Left + LastUpdateInfoLabel->Width + 2;
   delete Ini;
 }
 //---------------------------------------------------------------------------
@@ -120,8 +120,7 @@ void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
 {
   eDir = GetPluginUserDir();
 
-  TIniFile *Ini = new TIniFile(eDir + "\\\\FixUpdater\\\\Url.ini");
-
+  TIniFile *Ini = new TIniFile(eDir + "\\\\FixUpdater\\\\Settings.ini");
   //Wy³aczanie wszystkich aktualizacji
   eUrlCount = Ini->ReadInteger("UrlCount", "Count", 3);
   for(eCount=1;eCount<=eUrlCount;eCount++)
@@ -132,7 +131,6 @@ void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
 	  if(eUrl!="") SetUpdateLink(1, eUrl);
 	}
   }
-
   //Zapisywanie aktualnych ustawien
   eUrlCount = UrlListPreview->Items->Count;
   Ini->WriteInteger("UrlCount", "Count",eUrlCount);
@@ -144,7 +142,6 @@ void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
 	  Ini->WriteString("Update" + IntToStr(eCount + 1), "Url", UrlListPreview->Items->Item[eCount]->SubItems->Strings[0]);
 	}
   }
-
   //W³aczanie wszystkich aktualizacji
   eUrlCount = Ini->ReadInteger("UrlCount", "Count", 3);
   for(eCount=1;eCount<=eUrlCount;eCount++)
@@ -155,21 +152,21 @@ void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
 	  if(eUrl!="") SetUpdateLink(0, eUrl);
 	}
   }
-
   //Czêstotliwoœci aktualizacji
-  if(Ini->ReadInteger("Settings", "UpdateMode", 0)!=UpdateModeComboBox->ItemIndex)
+  if(Ini->ReadInteger("Settings", "UpdateTime", 0)!=UpdateTimeComboBox->ItemIndex)
   {
-	Ini->WriteInteger("Settings", "UpdateMode",UpdateModeComboBox->ItemIndex);
+	Ini->WriteInteger("Settings", "UpdateTime",UpdateTimeComboBox->ItemIndex);
 	CheckUpdatesTimer->Enabled = false;
 	CheckUpdatesOnStartTimer->Enabled=false;
-	if(UpdateModeComboBox->ItemIndex!=0)
+	if(UpdateTimeComboBox->ItemIndex!=0)
 	{
-	  CheckUpdatesTimer->Interval = 3600000 * UpdateModeComboBox->ItemIndex;
+	  CheckUpdatesTimer->Interval = 3600000 * UpdateTimeComboBox->ItemIndex;
 	  CheckUpdatesTimer->Enabled = true;
 	}
   }
-  Ini->WriteBool("Settings", "AfterSave", CheckUpdatesAfterSaveBox->Checked);
-
+  //Sposób aktualizacji
+  Ini->WriteInteger("Settings", "UpdateMode",UpdateModeComboBox->ItemIndex);
+  eUpdateMode = UpdateModeComboBox->ItemIndex;
   delete Ini;
 }
 //---------------------------------------------------------------------------
@@ -244,13 +241,13 @@ void __fastcall TMainForm::aExitExecute(TObject *Sender)
 
 void __fastcall TMainForm::CheckUpdatesOnStartTimerTimer(TObject *Sender)
 {
-  CheckUpdates();
+  CheckUpdates(eUpdateMode);
   CheckUpdatesOnStartTimer->Enabled=false;
 
-  if(eUpdateMode!=0)
+  if(eUpdateTime!=0)
   {
 	CheckUpdatesTimer->Enabled = false;
-	CheckUpdatesTimer->Interval = 3600000 * eUpdateMode;
+	CheckUpdatesTimer->Interval = 3600000 * eUpdateTime;
 	CheckUpdatesTimer->Enabled = true;
   }
 }
@@ -258,7 +255,7 @@ void __fastcall TMainForm::CheckUpdatesOnStartTimerTimer(TObject *Sender)
 
 void __fastcall TMainForm::CheckUpdatesTimerTimer(TObject *Sender)
 {
-  CheckUpdates();
+  CheckUpdates(eUpdateMode);
 }
 //---------------------------------------------------------------------------
 
