@@ -88,13 +88,13 @@ void __fastcall TMainForm::aReadSettingsExecute(TObject *Sender)
   TIniFile *Ini = new TIniFile(eDir + "\\\\FixUpdater\\\\Url.ini");
 
   //Kana³y aktualizacji
-  eUrlCount = Ini->ReadInteger("UrlCount", "Count", 2);
+  eUrlCount = Ini->ReadInteger("UrlCount", "Count", 3);
   UrlListPreview->Items->Clear();
-  for(eCount=0;eCount<eUrlCount;eCount++)
+  for(eCount=1;eCount<=eUrlCount;eCount++)
   {
 	UrlListPreview->Items->Add();
-	UrlListPreview->Items->Item[eCount]->Checked = Ini->ReadBool("Update" + IntToStr(eCount+1), "Enable", true);
-	UrlListPreview->Items->Item[eCount]->SubItems->Add( Ini->ReadString("Update" + IntToStr(eCount+1), "Url", "") );
+	UrlListPreview->Items->Item[eCount-1]->Checked = Ini->ReadBool("Update" + IntToStr(eCount), "Enable", true);
+	UrlListPreview->Items->Item[eCount-1]->SubItems->Add( Ini->ReadString("Update" + IntToStr(eCount), "Url", "") );
   }
 
   //Czêstotliwoœci aktualizacji
@@ -123,7 +123,7 @@ void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
   TIniFile *Ini = new TIniFile(eDir + "\\\\FixUpdater\\\\Url.ini");
 
   //Wy³aczanie wszystkich aktualizacji
-  eUrlCount = Ini->ReadInteger("UrlCount", "Count", 2);
+  eUrlCount = Ini->ReadInteger("UrlCount", "Count", 3);
   for(eCount=1;eCount<=eUrlCount;eCount++)
   {
 	if(Ini->ReadBool("Update" + IntToStr(eCount), "Enable", true)==true)
@@ -146,7 +146,7 @@ void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
   }
 
   //W³aczanie wszystkich aktualizacji
-  eUrlCount = Ini->ReadInteger("UrlCount", "Count", 2);
+  eUrlCount = Ini->ReadInteger("UrlCount", "Count", 3);
   for(eCount=1;eCount<=eUrlCount;eCount++)
   {
 	if(Ini->ReadBool("Update" + IntToStr(eCount), "Enable", true)==true)
@@ -187,9 +187,6 @@ void __fastcall TMainForm::aResetSettingsExecute(TObject *Sender)
   UrlListPreview->Items->Add();
   UrlListPreview->Items->Item[2]->Checked = true;
   UrlListPreview->Items->Item[2]->SubItems->Add("http://aqqnews.komunikatory.pl/Pliki/aqq_update.xml");
-  UrlListPreview->Items->Add();
-  UrlListPreview->Items->Item[3]->Checked = false;
-  UrlListPreview->Items->Item[3]->SubItems->Add("http://www.zylber.info-s.pl/aqq/beta.xml");
 
   SaveButton->Enabled=true;
 }

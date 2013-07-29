@@ -1,3 +1,9 @@
+1.0.1.6
+-----
+* Przepisanie wtyczki pod kompilator Embarcadero C++ Builder 2010.
+* SDK: Dodano funkcję FIXUPDATER_SYSTEM_DELETELINK = "FixUpdater/System/DeleteLink".
+* Drobne poprawki w funkcji FIXUPDATER_SYSTEM_ADDLINK.
+
 1.0.1.4
 -----
 * Poprawienie drobnych literówek.
