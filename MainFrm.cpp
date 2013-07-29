@@ -128,6 +128,21 @@ void __fastcall TMainForm::aReadSettingsExecute(TObject *Sender)
 
 void __fastcall TMainForm::FormShow(TObject *Sender)
 {
+  if(!ChkSkinEnabled())
+  {
+	UnicodeString ThemeSkinDir = GetThemeSkinDir();
+	if(FileExists(ThemeSkinDir + "\\\\Skin.asz"))
+	{
+	  ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
+	  sSkinManager->SkinDirectory = ThemeSkinDir;
+	  sSkinManager->SkinName = "Skin.asz";
+	  sSkinProvider->DrawNonClientArea = false;
+	  sSkinManager->Active = true;
+	}
+	else
+	 sSkinManager->Active = false;
+  }
+
   aReadSettings->Execute();
   SaveButton->Enabled = false;
   PageControl->ActivePage = LinksTabSheet;
@@ -302,16 +317,31 @@ void __fastcall TMainForm::CancelButtonClick(TObject *Sender)
 
 void __fastcall TMainForm::FormCreate(TObject *Sender)
 {
-  UnicodeString ThemeSkinDir = GetThemeSkinDir();
-  if(FileExists(ThemeSkinDir + "\\\\Skin.asz"))
+  if(ChkSkinEnabled())
   {
-	ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
-	sSkinManager->SkinDirectory = ThemeSkinDir;
-	sSkinManager->SkinName = "Skin.asz";
-	sSkinProvider->DrawNonClientArea = ChkSkinEnabled();
-	sSkinManager->Active = true;
+	UnicodeString ThemeSkinDir = GetThemeSkinDir();
+	if(FileExists(ThemeSkinDir + "\\\\Skin.asz"))
+	{
+	  ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
+	  sSkinManager->SkinDirectory = ThemeSkinDir;
+	  sSkinManager->SkinName = "Skin.asz";
+	  sSkinProvider->DrawNonClientArea = true;
+	  sSkinManager->Active = true;
+	}
+	else
+	 sSkinManager->Active = false;
   }
-  else
-   sSkinManager->Active = false;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::aPageControlSheetChangeExecute(TObject *Sender)
+{
+  if(!SaveButton->Focused()&&!CancelButton->Focused()&&!OkButton->Focused())
+  {
+	if(PageControl->TabIndex==0)
+	 PageControl->TabIndex = 1;
+	else
+	 PageControl->TabIndex = 0;
+  }
 }
 //---------------------------------------------------------------------------

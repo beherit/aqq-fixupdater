@@ -170,7 +170,7 @@ object MainForm: TMainForm
     Height = 25
     Caption = 'Zastosuj'
     Enabled = False
-    TabOrder = 1
+    TabOrder = 0
     OnClick = SaveButtonClick
     SkinData.SkinSection = 'BUTTON'
   end
@@ -186,7 +186,7 @@ object MainForm: TMainForm
     Margins.Bottom = 6
     ActivePage = LinksTabSheet
     Align = alClient
-    TabOrder = 0
+    TabOrder = 3
     SkinData.SkinSection = 'PAGECONTROL'
     object LinksTabSheet: TsTabSheet
       Caption = 'Kana'#322'y aktualizacji'
@@ -276,6 +276,10 @@ object MainForm: TMainForm
       ImageIndex = 1
       SkinData.CustomColor = False
       SkinData.CustomFont = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object UpdateTimeLabel: TsLabel
         Left = 8
         Top = 8
@@ -413,7 +417,7 @@ object MainForm: TMainForm
     Width = 75
     Height = 25
     Caption = 'Anuluj'
-    TabOrder = 2
+    TabOrder = 1
     OnClick = CancelButtonClick
     SkinData.SkinSection = 'BUTTON'
   end
@@ -423,7 +427,7 @@ object MainForm: TMainForm
     Width = 75
     Height = 25
     Caption = 'OK'
-    TabOrder = 3
+    TabOrder = 2
     OnClick = OkButtonClick
     SkinData.SkinSection = 'BUTTON'
   end
@@ -452,6 +456,11 @@ object MainForm: TMainForm
     object aSettingsChanged: TAction
       Caption = 'aSettingsChanged'
       OnExecute = aSettingsChangedExecute
+    end
+    object aPageControlSheetChange: TAction
+      Caption = 'aPageControlSheetChange'
+      ShortCut = 16393
+      OnExecute = aPageControlSheetChangeExecute
     end
   end
   object CheckUpdatesOnStartTimer: TTimer
@@ -510,6 +519,8 @@ object MainForm: TMainForm
     ThirdParty.ThirdToolBar = ' '
     ThirdParty.ThirdStatusBar = ' '
     ThirdParty.ThirdSpeedButton = ' '
+    ThirdParty.ThirdScrollControl = ' '
+    ThirdParty.ThirdUpDown = ' '
     Left = 128
     Top = 232
   end
