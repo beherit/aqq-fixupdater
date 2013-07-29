@@ -61,17 +61,17 @@
 			<TASM_Debugging>None</TASM_Debugging>
 		</PropertyGroup>
 		<ItemGroup>
-			<ResFiles Include="FixUpdater.res">
-				<BuildOrder>2</BuildOrder>
-			</ResFiles>
+			<CppCompile Include="FixUpdater.cpp">
+				<BuildOrder>0</BuildOrder>
+			</CppCompile>
 			<CppCompile Include="MainFrm.cpp">
 				<Form>MainForm</Form>
 				<DependentOn>MainFrm.h</DependentOn>
 				<BuildOrder>1</BuildOrder>
 			</CppCompile>
-			<CppCompile Include="FixUpdater.cpp">
-				<BuildOrder>0</BuildOrder>
-			</CppCompile>
+			<ResFiles Include="FixUpdater.res">
+				<BuildOrder>2</BuildOrder>
+			</ResFiles>
 			<FormResources Include="MainFrm.dfm"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
@@ -97,7 +97,7 @@
 						<VersionInfo Name="MajorVer">1</VersionInfo>
 						<VersionInfo Name="MinorVer">0</VersionInfo>
 						<VersionInfo Name="Release">1</VersionInfo>
-						<VersionInfo Name="Build">2</VersionInfo>
+						<VersionInfo Name="Build">4</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -109,13 +109,13 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName">Krzysztof Grochocki (Beherit)</VersionInfoKeys>
 						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">1.0.1.2</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">1.0.1.4</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName">Fix Updater</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalCopyright">Krzysztof Grochocki (Beherit)</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks">Krzysztof Grochocki (Beherit)</VersionInfoKeys>
 						<VersionInfoKeys Name="OriginalFilename">FixUpdater.dll</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductName">Fix Updater</VersionInfoKeys>
-						<VersionInfoKeys Name="ProductVersion">1.0.1.2</VersionInfoKeys>
+						<VersionInfoKeys Name="ProductVersion">1.0.1.4</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments">Dodawanie własnych serwerów aktualizacji dodatków</VersionInfoKeys>
 					</VersionInfoKeys>
 					<Debugging>

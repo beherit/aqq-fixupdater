@@ -63,7 +63,7 @@ void __fastcall TMainForm::AddButtonClick(TObject *Sender)
 	  int Count=UrlListPreview->Items->Count;
 	  for(int XCount=0;XCount<Count;XCount++)
 	  {
-		if(Trim(UrlListPreview->Items->Item[XCount]->SubItems->GetText())==URL)
+		if(UrlListPreview->Items->Item[XCount]->SubItems->Strings[0]==URL)
 		{
 		  DoNotAdd = true;
 		  XCount = Count;
@@ -138,10 +138,10 @@ void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
   Ini->WriteInteger("UrlCount", "Count",eUrlCount);
   for(eCount=0;eCount<eUrlCount;eCount++)
   {
-	if(Trim(UrlListPreview->Items->Item[eCount]->SubItems->GetText())!="")
+	if(UrlListPreview->Items->Item[eCount]->SubItems->Strings[0]!="")
 	{
 	  Ini->WriteBool("Update" + IntToStr(eCount + 1), "Enable", UrlListPreview->Items->Item[eCount]->Checked);
-	  Ini->WriteString("Update" + IntToStr(eCount + 1), "Url", Trim(UrlListPreview->Items->Item[eCount]->SubItems->GetText()));
+	  Ini->WriteString("Update" + IntToStr(eCount + 1), "Url", UrlListPreview->Items->Item[eCount]->SubItems->Strings[0]);
 	}
   }
 
@@ -223,10 +223,10 @@ void __fastcall TMainForm::EditButtonClick(TObject *Sender)
 {
   if(UrlListPreview->ItemIndex!=-1)
   {
-	UnicodeString URL = InputBox("Edycja kana³u aktualizacji","Edytuj adres:",Trim(UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->GetText()));
+	UnicodeString URL = InputBox("Edycja kana³u aktualizacji","Edytuj adres:",UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->Strings[0]);
 	if(URL!="")
 	{
-	  UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->Text=URL;
+	  UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->Strings[0]=URL;
 	}
 	UrlListPreview->ItemIndex=-1;
   }
@@ -264,5 +264,4 @@ void __fastcall TMainForm::CheckUpdatesTimerTimer(TObject *Sender)
   CheckUpdates();
 }
 //---------------------------------------------------------------------------
-
 

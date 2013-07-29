@@ -1,3 +1,9 @@
+1.0.1.4
+-----
+* Poprawienie drobnych literówek.
+* Małe poprawki w zapisie kanałów aktualizacji.
+* Ikonka HD.
+
 1.0.1.2
 -----
 * Poprawienie funkcji FIXUPDATER_SYSTEM_ADDLINK - link nie jest dodawany gdy już znajduje się na liście.
