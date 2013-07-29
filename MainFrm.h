@@ -40,6 +40,8 @@ __published:	// IDE-managed Components
 	TAction *aSettingsChanged;
 	TButton *CancelButton;
 	TButton *OkButton;
+	TBevel *Bevel1;
+	TCheckBox *ChangeAddonBrowserCheckBox;
 	void __fastcall UrlListPreviewSelectItem(TObject *Sender, TListItem *Item, bool Selected);
 	void __fastcall DeleteButtonClick(TObject *Sender);
 	void __fastcall SaveButtonClick(TObject *Sender);

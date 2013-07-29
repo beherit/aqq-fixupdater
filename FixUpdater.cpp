@@ -28,6 +28,10 @@ TSaveSetup SaveSetup;
 //Zmienne
 int UpdateTime;
 int UpdateMode;
+bool ChangeAddonBrowserChk;
+
+//Wymagana wersja AQQ
+bool ChkAQQVersion = true;
 
 //Dodawanie kana³ow przez zewnetrzne wtyczki
 int __stdcall AddLink(WPARAM wParam, LPARAM lParam)
@@ -86,11 +90,42 @@ int __stdcall DeleteLink(WPARAM wParam, LPARAM lParam)
 }
 //---------------------------------------------------------------------------
 
+int __stdcall OnAddonBrowser(WPARAM wParam, LPARAM lParam)
+{
+   if(ChangeAddonBrowserChk) return (LPARAM)L"http://addons.aqqnews.pl/";
+   else return 0;
+}
+//---------------------------------------------------------------------------
+
 int __stdcall OnModulesLoaded(WPARAM, LPARAM)
 {
   hMainForm->CheckUpdatesOnStartTimer->Enabled=true;
 
   return 0;
+}
+//---------------------------------------------------------------------------
+
+void CheckUpdates(int Mode)
+{
+  if(Mode==0)//Normalne aktualizacje
+   PluginLink.CallService(AQQ_FUNCTION_SILENTUPDATECHECK,0,0);
+  else if(Mode==1)//Wymuszanie
+   PluginLink.CallService(AQQ_FUNCTION_SILENTUPDATECHECK,0,1);
+  else if(Mode==2)//Wersje Beta AQQ
+   PluginLink.CallService(AQQ_FUNCTION_SILENTUPDATECHECK,0,2);
+}
+//---------------------------------------------------------------------------
+
+UnicodeString GetLastUpdate()
+{
+  TStrings* IniList = new TStringList();
+  IniList->SetText((wchar_t*)(PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP,0,0)));
+  TMemIniFile *Settings = new TMemIniFile(ChangeFileExt(Application->ExeName, ".INI"));
+  Settings->SetStrings(IniList);
+  delete IniList;
+  UnicodeString LastUpdate = Settings->ReadString("User","LastUpdateDate","0");
+  delete Settings;
+  return LastUpdate;
 }
 //---------------------------------------------------------------------------
 
@@ -109,22 +144,23 @@ void SetUpdateLink(bool Enabled, UnicodeString URL)
 }
 //---------------------------------------------------------------------------
 
+void ChangeAddonBrowser(bool Enabled)
+{
+  ChangeAddonBrowserChk = Enabled;
+}
+//---------------------------------------------------------------------------
+
 extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 {
   PluginLink = *Link;
-
+  //Tworzenie uchwytu do okna glownego
   if(hMainForm==NULL)
   {
 	Application->Handle = (HWND)MainForm;
 	hMainForm = new TMainForm(Application);
   }
-
-  //Hook SDK wtyczki
-  PluginLink.HookEvent(FIXUPDATER_SYSTEM_ADDLINK,AddLink);
-  PluginLink.HookEvent(FIXUPDATER_SYSTEM_DELETELINK,DeleteLink);
-
+  //Pobieranie sciezki
   UnicodeString Path = GetPluginUserDir();
-
   //Ustawienia domyœlne
   if(!FileExists(Path + "\\\\FixUpdater\\\\Settings.ini"))
   {
@@ -145,13 +181,13 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
   //Sprawdzenie czy sa domyslne linki
   else
   {
-    TIniFile *Ini = new TIniFile(Path + "\\\\FixUpdater\\\\Settings.ini");
+	TIniFile *Ini = new TIniFile(Path + "\\\\FixUpdater\\\\Settings.ini");
 	UnicodeString Version = Ini->ReadString("Settings","Default","");
 	//Wersja domyslnych linkow jest inna
-	if(Version!="1.2")
+	if(Version!="1.3")
 	{
 	  //Ustawiane nowej wersji
-	  Ini->WriteString("Settings","Default","1.2");
+	  Ini->WriteString("Settings","Default","1.3");
 	  //Aktualizacja linkow
 	  TStringList *Links = new TStringList;
 	  TStringList *UserLinks = new TStringList;
@@ -162,8 +198,21 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 		UserLinks->Add(Ini->ReadString("Links","Url"+IntToStr(Count+1),""));
 		UserLinks->Add(Ini->ReadString("Links","Enable"+IntToStr(Count+1),""));
 	  }
-	  ///Usuwanie domyslnych linkow
-	  int Count = UserLinks->IndexOf("http://beherit.pl/aqq_update/stable.xml");
+	  //Usuwanie starych domyslnych linkow
+	  int Count = UserLinks->IndexOf("http://beherit.pl/aqq_update.xml");
+	  if(Count!=-1)
+	  {
+		UserLinks->Delete(Count);
+		UserLinks->Delete(Count);
+	  }
+	  Count = UserLinks->IndexOf("http://beherit.pl/aqq_update_beta.xml");
+      if(Count!=-1)
+	  {
+		UserLinks->Delete(Count);
+		UserLinks->Delete(Count);
+	  }
+	  //Usuwanie domyslnych linkow
+	  Count = UserLinks->IndexOf("http://beherit.pl/aqq_update/stable.xml");
 	  if(Count!=-1)
 	  {
 		DefLinks->Add(UserLinks->Strings[Count]);
@@ -187,9 +236,26 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 		UserLinks->Delete(Count);
 		UserLinks->Delete(Count);
 	  }
+	  Count = UserLinks->IndexOf("http://files.aqqnews.pl/fixupdater-beta.php");
+	  if(Count!=-1)
+	  {
+		DefLinks->Add(UserLinks->Strings[Count]);
+		DefLinks->Add(UserLinks->Strings[Count+1]);
+		UserLinks->Delete(Count);
+		UserLinks->Delete(Count);
+	  }
 	  //Dodawanie domyslnych linkow
-	  UserLinks->Insert(0,"0");
-	  UserLinks->Insert(0,"http://files.aqqnews.pl/fixupdater-beta.php");
+	  Count = DefLinks->IndexOf("http://files.aqqnews.pl/fixupdater-beta.php");
+	  if(Count!=-1)
+	  {
+		UserLinks->Insert(0,DefLinks->Strings[Count+1]);
+		UserLinks->Insert(0,DefLinks->Strings[Count]);
+	  }
+	  else
+	  {
+		UserLinks->Insert(0,"1");
+		UserLinks->Insert(0,"http://files.aqqnews.pl/fixupdater-beta.php");
+	  }
 	  Count = DefLinks->IndexOf("http://files.aqqnews.pl/fixupdater.php");
 	  if(Count!=-1)
 	  {
@@ -236,7 +302,6 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 	}
 	delete Ini;
   }
-
   //Kana³y aktualizacji
   TIniFile *Ini = new TIniFile(Path + "\\\\FixUpdater\\\\Settings.ini");
   TStringList *Links = new TStringList;
@@ -254,8 +319,15 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
   hMainForm->UpdateMode = Ini->ReadInteger("Settings", "UpdateMode", 0);
   //Czêstotliwoœci aktualizacji
   hMainForm->UpdateTime = Ini->ReadInteger("Settings", "UpdateTime", 0);
+  //Menedzer dodatkow
+  ChangeAddonBrowserChk = Ini->ReadBool("Settings", "ChangeAddonBrowser", true);
   delete Ini;
-  //W³¹czenie Timer'a
+  //Hook SDK wtyczki
+  PluginLink.HookEvent(FIXUPDATER_SYSTEM_ADDLINK,AddLink);
+  PluginLink.HookEvent(FIXUPDATER_SYSTEM_DELETELINK,DeleteLink);
+  //Hook na pokaztwanie browsera dodatkow
+  PluginLink.HookEvent(AQQ_SYSTEM_ADDONBROWSER_URL,OnAddonBrowser);
+  //W³¹czenie Timer'a automatycznej aktualizacji
   PluginLink.HookEvent(AQQ_SYSTEM_MODULESLOADED, OnModulesLoaded);
   if(PluginLink.CallService(AQQ_SYSTEM_MODULESLOADED,0,0)==true)
    hMainForm->CheckUpdatesOnStartTimer->Enabled=true;
@@ -267,6 +339,7 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 extern "C" int __declspec(dllexport)__stdcall Settings()
 {
   hMainForm->Show();
+  hMainForm->ChangeAddonBrowserCheckBox->Enabled = ChkAQQVersion;
 
   return 0;
 }
@@ -283,6 +356,7 @@ extern "C" int __declspec(dllexport) __stdcall Unload()
   //Unhook eventow
   PluginLink.UnhookEvent(AddLink);
   PluginLink.UnhookEvent(DeleteLink);
+  PluginLink.UnhookEvent(OnAddonBrowser);
   PluginLink.UnhookEvent(OnModulesLoaded);
   //Wywalanie linkow z aktualizatora
   TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
@@ -303,38 +377,17 @@ extern "C" int __declspec(dllexport) __stdcall Unload()
 }
 //---------------------------------------------------------------------------
 
-void CheckUpdates(int Mode)
-{
-  if(Mode==0)//Normalne aktualizacje
-   PluginLink.CallService(AQQ_FUNCTION_SILENTUPDATECHECK,0,0);
-  else if(Mode==1)//Wymuszanie
-   PluginLink.CallService(AQQ_FUNCTION_SILENTUPDATECHECK,0,1);
-  else if(Mode==2)//Wersje Beta AQQ
-   PluginLink.CallService(AQQ_FUNCTION_SILENTUPDATECHECK,0,2);
-}
-//---------------------------------------------------------------------------
-
-UnicodeString GetLastUpdate()
-{
-  TStrings* IniList = new TStringList();
-  IniList->SetText((wchar_t*)(PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP,0,0)));
-  TMemIniFile *Settings = new TMemIniFile(ChangeFileExt(Application->ExeName, ".INI"));
-  Settings->SetStrings(IniList);
-  delete IniList;
-  UnicodeString LastUpdate = Settings->ReadString("User","LastUpdateDate","0");
-  delete Settings;
-  return LastUpdate;
-}
-//---------------------------------------------------------------------------
-
 extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVersion)
 {
+  //Sprawdzanie wersji AQQ
+  if(PLUGIN_COMPARE_VERSION(AQQVersion,PLUGIN_MAKE_VERSION(2,3,0,15))<0)
+   ChkAQQVersion = false;
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = (wchar_t*)L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,4,4);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,5,0);
   PluginInfo.Description = (wchar_t*)L"Dodawanie w³asnych serwerów aktualizacji dodatków";
   PluginInfo.Author = (wchar_t*)L"Krzysztof Grochocki (Beherit)";
-  PluginInfo.AuthorMail = (wchar_t*)L"email@beherit.pl";
+  PluginInfo.AuthorMail = (wchar_t*)L"kontakt@beherit.pl";
   PluginInfo.Copyright = (wchar_t*)L"Krzysztof Grochocki (Beherit)";
   PluginInfo.Homepage = (wchar_t*)L"http://beherit.pl/";
 
