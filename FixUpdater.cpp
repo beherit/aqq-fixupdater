@@ -29,21 +29,6 @@ TSaveSetup SaveSetup;
 int UpdateTime;
 int UpdateMode;
 
-extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVersion)
-{
-  PluginInfo.cbSize = sizeof(TPluginInfo);
-  PluginInfo.ShortName = (wchar_t*)L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,4,2);
-  PluginInfo.Description = (wchar_t*)L"Dodawanie w³asnych serwerów aktualizacji dodatków";
-  PluginInfo.Author = (wchar_t*)L"Krzysztof Grochocki (Beherit)";
-  PluginInfo.AuthorMail = (wchar_t*)L"email@beherit.pl";
-  PluginInfo.Copyright = (wchar_t*)L"Krzysztof Grochocki (Beherit)";
-  PluginInfo.Homepage = (wchar_t*)L"http://beherit.pl/";
-
-  return &PluginInfo;
-}
-//---------------------------------------------------------------------------
-
 //Dodawanie kana³ow przez zewnetrzne wtyczki
 int __stdcall AddLink(WPARAM wParam, LPARAM lParam)
 {
@@ -140,27 +125,6 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 
   UnicodeString Path = GetPluginUserDir();
 
-  //Konwersja ustawieñ 1.0.3.0 -> 1.0.4.0
-  if(FileExists(Path + "\\\\FixUpdater\\\\Settings.ini"))
-  {
-	TIniFile *Ini = new TIniFile(Path + "\\\\FixUpdater\\\\Settings.ini");
-	if(Ini->SectionExists("UrlCount"))
-	{
-	  int UrlCount = Ini->ReadInteger("UrlCount", "Count", 3);
-	  for(int Count=1;Count<=UrlCount;Count++)
-	  {
-		if(Ini->ReadString("Update" + IntToStr(Count), "Url", "")=="http://aqqnews.komunikatory.pl/Pliki/aqq_update.xml")
-		 Ini->WriteString("Update" + IntToStr(Count), "Url", "http://files.aqqnews.pl/fixupdater.php");
-
-		Ini->WriteString("Links", "Url" +  IntToStr(Count), Ini->ReadString("Update" + IntToStr(Count), "Url", ""));
-		Ini->WriteBool("Links", "Enable" + IntToStr(Count), Ini->ReadBool("Update" + IntToStr(Count), "Enable", true));
-		Ini->EraseSection("Update" + IntToStr(Count));
-	  }
-	  Ini->EraseSection("UrlCount");
-	}
-	delete Ini;
-  }
-
   //Ustawienia domyœlne
   if(!FileExists(Path + "\\\\FixUpdater\\\\Settings.ini"))
   {
@@ -174,6 +138,102 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 	Ini->WriteBool("Links", "Enable2", false);
 	Ini->WriteString("Links", "Url3", "http://files.aqqnews.pl/fixupdater.php");
 	Ini->WriteBool("Links", "Enable3", true);
+	Ini->WriteString("Links", "Url4", "http://files.aqqnews.pl/fixupdater-beta.php");
+	Ini->WriteBool("Links", "Enable4", false);
+	delete Ini;
+  }
+  //Sprawdzenie czy sa domyslne linki
+  else
+  {
+    TIniFile *Ini = new TIniFile(Path + "\\\\FixUpdater\\\\Settings.ini");
+	UnicodeString Version = Ini->ReadString("Settings","Default","");
+	//Wersja domyslnych linkow jest inna
+	if(Version!="1.2")
+	{
+	  //Ustawiane nowej wersji
+	  Ini->WriteString("Settings","Default","1.2");
+	  //Aktualizacja linkow
+	  TStringList *Links = new TStringList;
+	  TStringList *UserLinks = new TStringList;
+	  TStringList *DefLinks = new TStringList;
+	  Ini->ReadSection("Links",Links);
+	  for(int Count=0;Count<Links->Count/2;Count++)
+	  {
+		UserLinks->Add(Ini->ReadString("Links","Url"+IntToStr(Count+1),""));
+		UserLinks->Add(Ini->ReadString("Links","Enable"+IntToStr(Count+1),""));
+	  }
+	  ///Usuwanie domyslnych linkow
+	  int Count = UserLinks->IndexOf("http://beherit.pl/aqq_update/stable.xml");
+	  if(Count!=-1)
+	  {
+		DefLinks->Add(UserLinks->Strings[Count]);
+		DefLinks->Add(UserLinks->Strings[Count+1]);
+		UserLinks->Delete(Count);
+		UserLinks->Delete(Count);
+	  }
+	  Count = UserLinks->IndexOf("http://beherit.pl/aqq_update/beta.xml");
+	  if(Count!=-1)
+	  {
+		DefLinks->Add(UserLinks->Strings[Count]);
+		DefLinks->Add(UserLinks->Strings[Count+1]);
+		UserLinks->Delete(Count);
+		UserLinks->Delete(Count);
+	  }
+	  Count = UserLinks->IndexOf("http://files.aqqnews.pl/fixupdater.php");
+	  if(Count!=-1)
+	  {
+		DefLinks->Add(UserLinks->Strings[Count]);
+		DefLinks->Add(UserLinks->Strings[Count+1]);
+		UserLinks->Delete(Count);
+		UserLinks->Delete(Count);
+	  }
+	  //Dodawanie domyslnych linkow
+	  UserLinks->Insert(0,"0");
+	  UserLinks->Insert(0,"http://files.aqqnews.pl/fixupdater-beta.php");
+	  Count = DefLinks->IndexOf("http://files.aqqnews.pl/fixupdater.php");
+	  if(Count!=-1)
+	  {
+		UserLinks->Insert(0,DefLinks->Strings[Count+1]);
+		UserLinks->Insert(0,DefLinks->Strings[Count]);
+	  }
+	  else
+	  {
+		UserLinks->Insert(0,"1");
+		UserLinks->Insert(0,"http://files.aqqnews.pl/fixupdater.php");
+	  }
+	  Count = DefLinks->IndexOf("http://beherit.pl/aqq_update/beta.xml");
+	  if(Count!=-1)
+	  {
+		UserLinks->Insert(0,DefLinks->Strings[Count+1]);
+		UserLinks->Insert(0,DefLinks->Strings[Count]);
+	  }
+	  else
+	  {
+		UserLinks->Insert(0,"0");
+		UserLinks->Insert(0,"http://beherit.pl/aqq_update/beta.xml");
+	  }
+	  Count = DefLinks->IndexOf("http://beherit.pl/aqq_update/stable.xml");
+	  if(Count!=-1)
+	  {
+		UserLinks->Insert(0,DefLinks->Strings[Count+1]);
+		UserLinks->Insert(0,DefLinks->Strings[Count]);
+	  }
+	  else
+	  {
+		UserLinks->Insert(0,"1");
+		UserLinks->Insert(0,"http://beherit.pl/aqq_update/stable.xml");
+	  }
+	  //Zapisywanie nowej struktury
+	  Ini->EraseSection("Links");
+	  for(int Count=0;Count<UserLinks->Count/2;Count++)
+	  {
+		Ini->WriteString("Links","Url"+IntToStr(Count+1),UserLinks->Strings[Count+Count]);
+		Ini->WriteString("Links","Enable"+IntToStr(Count+1),UserLinks->Strings[Count+Count+1]);
+	  }
+	  delete DefLinks;
+	  delete UserLinks;
+	  delete Links;
+	}
 	delete Ini;
   }
 
@@ -256,11 +316,28 @@ void CheckUpdates(int Mode)
 
 UnicodeString GetLastUpdate()
 {
-  UnicodeString LastUpdate = (wchar_t*)(PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP,0,0));
-  int Pos = AnsiPos("LastUpdateDate=",LastUpdate);
-  LastUpdate.Delete(1,Pos+14);
-  Pos = AnsiPos("\n",LastUpdate);
-  LastUpdate.Delete(Pos,LastUpdate.Length());
+  TStrings* IniList = new TStringList();
+  IniList->SetText((wchar_t*)(PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP,0,0)));
+  TMemIniFile *Settings = new TMemIniFile(ChangeFileExt(Application->ExeName, ".INI"));
+  Settings->SetStrings(IniList);
+  delete IniList;
+  UnicodeString LastUpdate = Settings->ReadString("User","LastUpdateDate","0");
+  delete Settings;
   return LastUpdate;
+}
+//---------------------------------------------------------------------------
+
+extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVersion)
+{
+  PluginInfo.cbSize = sizeof(TPluginInfo);
+  PluginInfo.ShortName = (wchar_t*)L"FixUpdater";
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,4,4);
+  PluginInfo.Description = (wchar_t*)L"Dodawanie w³asnych serwerów aktualizacji dodatków";
+  PluginInfo.Author = (wchar_t*)L"Krzysztof Grochocki (Beherit)";
+  PluginInfo.AuthorMail = (wchar_t*)L"email@beherit.pl";
+  PluginInfo.Copyright = (wchar_t*)L"Krzysztof Grochocki (Beherit)";
+  PluginInfo.Homepage = (wchar_t*)L"http://beherit.pl/";
+
+  return &PluginInfo;
 }
 //---------------------------------------------------------------------------

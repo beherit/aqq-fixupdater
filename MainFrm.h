@@ -25,8 +25,8 @@ __published:	// IDE-managed Components
 	TButton *EditButton;
 	TAction *aExit;
 	TPageControl *PageControl;
-	TTabSheet *TabSheet1;
-	TTabSheet *TabSheet2;
+	TTabSheet *LinksTabSheet;
+	TTabSheet *SettingsTabSheet;
 	TComboBox *UpdateTimeComboBox;
 	TLabel *UpdateTimeLabel;
 	TLabel *LastUpdateInfoLabel;
@@ -37,6 +37,9 @@ __published:	// IDE-managed Components
 	TComboBox *UpdateModeComboBox;
 	TLabel *UpdateModeLabel;
 	TBevel *Bevel2;
+	TAction *aSettingsChanged;
+	TButton *CancelButton;
+	TButton *OkButton;
 	void __fastcall UrlListPreviewSelectItem(TObject *Sender, TListItem *Item, bool Selected);
 	void __fastcall DeleteButtonClick(TObject *Sender);
 	void __fastcall SaveButtonClick(TObject *Sender);
@@ -52,8 +55,11 @@ __published:	// IDE-managed Components
 	void __fastcall CheckUpdatesOnStartTimerTimer(TObject *Sender);
 	void __fastcall CheckUpdatesTimerTimer(TObject *Sender);
 	void __fastcall aSettingsChangedExecute(TObject *Sender);
-	void __fastcall UrlListPreviewDataStateChange(TObject *Sender, int StartIndex, int EndIndex,
-          TItemStates OldState, TItemStates NewState);
+	void __fastcall UrlListPreviewItemChecked(TObject *Sender, TListItem *Item);
+	void __fastcall OkButtonClick(TObject *Sender);
+	void __fastcall CancelButtonClick(TObject *Sender);
+
+
 
 private:	// User declarations
 public:		// User declarations
