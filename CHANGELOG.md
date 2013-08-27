@@ -1,3 +1,7 @@
+1.4.3.2
+-----
+* Mała poprawka w obsłudze kolorystyki stylizacji okien.
+
 1.4.3.0
 -----
 * Obsługa kolorystyki stylizacji okien (barwa i nasycenie).
