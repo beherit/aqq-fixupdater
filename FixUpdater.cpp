@@ -44,6 +44,7 @@ TPluginInfo PluginInfo;
 //FORWARD-AQQ-HOOKS----------------------------------------------------------
 int __stdcall OnAddLink(WPARAM wParam, LPARAM lParam);
 int __stdcall OnAddonInstalled(WPARAM wParam, LPARAM lParam);
+int __stdcall OnColorChange(WPARAM wParam, LPARAM lParam);
 int __stdcall OnDeleteLink(WPARAM wParam, LPARAM lParam);
 int __stdcall OnModulesLoaded(WPARAM wParam, LPARAM lParam);
 int __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam);
@@ -203,6 +204,24 @@ int __stdcall OnAddonInstalled(WPARAM wParam, LPARAM lParam)
 	  //Wlaczenie timera sprawdzania aktualizacji dodatkow
 	  hMainForm->CheckUpdatesOnStartTimer->Enabled = true;
     }
+  }
+
+  return 0;
+}
+//---------------------------------------------------------------------------
+
+//Hook na zmiane kolorystyki AlphaControls
+int __stdcall OnColorChange(WPARAM wParam, LPARAM lParam)
+{
+  //Okno ustawien zostalo juz stworzone
+  if(hMainForm)
+  {
+	//Wlaczona zaawansowana stylizacja okien
+	if(ChkSkinEnabled())
+	{
+	  hMainForm->sSkinManager->HueOffset = wParam;
+	  hMainForm->sSkinManager->Saturation = lParam;
+	}
   }
 
   return 0;
@@ -395,6 +414,8 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
   PluginLink.HookEvent(FIXUPDATER_SYSTEM_ADDLINK,OnAddLink);
   //Hook na instalowanie dodatkow
   PluginLink.HookEvent(AQQ_SYSTEM_ADDONINSTALLED,OnAddonInstalled);
+  //Hook na zmiane kolorystyki AlphaControls
+  PluginLink.HookEvent(AQQ_SYSTEM_COLORCHANGE,OnColorChange);
   //Hook na usuwanie repozytorium przez zewnetrzne wtyczki
   PluginLink.HookEvent(FIXUPDATER_SYSTEM_DELETELINK,OnDeleteLink);
   //Hook na zaladowanie wszystkich modolow
@@ -429,6 +450,7 @@ extern "C" int __declspec(dllexport) __stdcall Unload()
   //Wyladowanie wszystkich hookow
   PluginLink.UnhookEvent(OnAddLink);
   PluginLink.UnhookEvent(OnAddonInstalled);
+  PluginLink.UnhookEvent(OnColorChange);
   PluginLink.UnhookEvent(OnDeleteLink);
   PluginLink.UnhookEvent(OnModulesLoaded);
   PluginLink.UnhookEvent(OnThemeChanged);
@@ -456,7 +478,7 @@ extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVe
 {
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,4,3,0);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,4,3,2);
   PluginInfo.Description = L"Ulepszenie systemu aktualizacji poprzez mo¿liwoœæ dodawania dodatkowych adresów serwerów zawieraj¹cych bazê dodatków oraz ustawienie czêstszego interwa³u sprawdzania aktualizacji.";
   PluginInfo.Author = L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = L"kontakt@beherit.pl";
