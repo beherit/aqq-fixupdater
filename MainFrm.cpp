@@ -1,4 +1,25 @@
 //---------------------------------------------------------------------------
+// Copyright (C) 2009-2013 Krzysztof Grochocki
+//
+// This file is part of FixUpdater
+//
+// FixUpdater is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3, or (at your option)
+// any later version.
+//
+// FixUpdater is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Radio; see the file COPYING. If not, write to
+// the Free Software Foundation, Inc., 51 Franklin Street,
+// Boston, MA 02110-1301, USA.
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
 #include <vcl.h>
 #pragma hdrstop
 #include "MainFrm.h"
@@ -22,6 +43,8 @@ __declspec(dllimport)UnicodeString GetThemeSkinDir();
 __declspec(dllimport)bool ChkSkinEnabled();
 __declspec(dllimport)bool ChkThemeAnimateWindows();
 __declspec(dllimport)bool ChkThemeGlowing();
+__declspec(dllimport)int GetSaturation();
+__declspec(dllimport)int GetHUE();
 __declspec(dllimport)UnicodeString GetLastUpdate();
 __declspec(dllimport)void SetUpdateLink(UnicodeString URL, bool Enabled);
 __declspec(dllimport)void CheckUpdates(int Mode);
@@ -35,12 +58,16 @@ __fastcall TMainForm::TMainForm(TComponent* Owner)
 void __fastcall TMainForm::WMTransparency(TMessage &Message)
 {
   Application->ProcessMessages();
-  sSkinProvider->BorderForm->UpdateExBordersPos(true,(int)Message.LParam);
+  if(sSkinManager->Active) sSkinProvider->BorderForm->UpdateExBordersPos(true,(int)Message.LParam);
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TMainForm::FormCreate(TObject *Sender)
 {
+  //Hack na blad w AC
+  #if defined(_WIN64)
+  UrlListPreview->SkinData->SkinSection = "";
+  #endif
   //Wlaczona zaawansowana stylizacja okien
   if(ChkSkinEnabled())
   {
@@ -48,12 +75,18 @@ void __fastcall TMainForm::FormCreate(TObject *Sender)
 	//Plik zaawansowanej stylizacji okien istnieje
 	if(FileExists(ThemeSkinDir + "\\\\Skin.asz"))
 	{
+	  //Dane pliku zaawansowanej stylizacji okien
 	  ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
 	  sSkinManager->SkinDirectory = ThemeSkinDir;
 	  sSkinManager->SkinName = "Skin.asz";
+	  //Ustawianie animacji AlphaControls
 	  if(ChkThemeAnimateWindows()) sSkinManager->AnimEffects->FormShow->Time = 200;
 	  else sSkinManager->AnimEffects->FormShow->Time = 0;
 	  sSkinManager->Effects->AllowGlowing = ChkThemeGlowing();
+	  //Zmiana kolorystyki AlphaControls
+	  sSkinManager->HueOffset = GetHUE();
+	  sSkinManager->Saturation = GetSaturation();
+	  //Aktywacja skorkowania AlphaControls
 	  sSkinManager->Active = true;
 	}
 	//Brak pliku zaawansowanej stylizacji okien

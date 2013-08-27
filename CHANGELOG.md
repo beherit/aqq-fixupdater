@@ -1,3 +1,9 @@
+1.4.3.0
+-----
+* Obsługa kolorystyki stylizacji okien (barwa i nasycenie).
+* Drobna poprawka w obsłudze nadawania przeźroczystości obramowań przez wtyczkę AlphaWindows.
+* Aktualizacja komponentów AlphaControls do nowszej wersji (8.44).
+
 1.4.2.0
 -----
 * Zmiany w wsparciu dla wtyczki AlphaWindows.

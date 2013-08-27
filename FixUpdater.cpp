@@ -1,3 +1,24 @@
+//---------------------------------------------------------------------------
+// Copyright (C) 2009-2013 Krzysztof Grochocki
+//
+// This file is part of FixUpdater
+//
+// FixUpdater is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3, or (at your option)
+// any later version.
+//
+// FixUpdater is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Radio; see the file COPYING. If not, write to
+// the Free Software Foundation, Inc., 51 Franklin Street,
+// Boston, MA 02110-1301, USA.
+//---------------------------------------------------------------------------
+
 #include <vcl.h>
 #include <windows.h>
 #pragma hdrstop
@@ -79,6 +100,18 @@ bool ChkThemeGlowing()
   UnicodeString GlowingEnabled = Settings->ReadString("Theme","ThemeGlowing","1");
   delete Settings;
   return StrToBool(GlowingEnabled);
+}
+//---------------------------------------------------------------------------
+
+//Pobieranie ustawien koloru AlphaControls
+int GetHUE()
+{
+  return (int)PluginLink.CallService(AQQ_SYSTEM_COLORGETHUE,0,0);
+}
+//---------------------------------------------------------------------------
+int GetSaturation()
+{
+  return (int)PluginLink.CallService(AQQ_SYSTEM_COLORGETSATURATION,0,0);
 }
 //---------------------------------------------------------------------------
 
@@ -229,16 +262,23 @@ int __stdcall OnThemeChanged (WPARAM wParam, LPARAM lParam)
 	//Wlaczona zaawansowana stylizacja okien
 	if(ChkSkinEnabled())
 	{
-	  UnicodeString ThemeSkinDir = GetThemeSkinDir();
+	  //Pobieranie sciezki nowej aktywnej kompozycji
+	  UnicodeString ThemeSkinDir = StringReplace((wchar_t*)lParam, "\\", "\\\\", TReplaceFlags() << rfReplaceAll) + "\\\\Skin";
 	  //Plik zaawansowanej stylizacji okien istnieje
 	  if(FileExists(ThemeSkinDir + "\\\\Skin.asz"))
 	  {
+		//Dane pliku zaawansowanej stylizacji okien
 		ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
 		hMainForm->sSkinManager->SkinDirectory = ThemeSkinDir;
 		hMainForm->sSkinManager->SkinName = "Skin.asz";
+		//Ustawianie animacji AlphaControls
 		if(ChkThemeAnimateWindows()) hMainForm->sSkinManager->AnimEffects->FormShow->Time = 200;
 		else hMainForm->sSkinManager->AnimEffects->FormShow->Time = 0;
 		hMainForm->sSkinManager->Effects->AllowGlowing = ChkThemeGlowing();
+		//Zmiana kolorystyki AlphaControls
+		hMainForm->sSkinManager->HueOffset = GetHUE();
+	    hMainForm->sSkinManager->Saturation = GetSaturation();
+		//Aktywacja skorkowania AlphaControls
 		hMainForm->sSkinManager->Active = true;
 	  }
 	  //Brak pliku zaawansowanej stylizacji okien
@@ -416,12 +456,14 @@ extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVe
 {
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,4,2,0);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,4,3,0);
   PluginInfo.Description = L"Ulepszenie systemu aktualizacji poprzez mo¿liwoœæ dodawania dodatkowych adresów serwerów zawieraj¹cych bazê dodatków oraz ustawienie czêstszego interwa³u sprawdzania aktualizacji.";
   PluginInfo.Author = L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = L"kontakt@beherit.pl";
   PluginInfo.Copyright = L"Krzysztof Grochocki (Beherit)";
   PluginInfo.Homepage = L"http://beherit.pl/";
+  PluginInfo.Flag = 0;
+  PluginInfo.ReplaceDefaultModule = 0;
 
   return &PluginInfo;
 }
