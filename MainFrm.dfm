@@ -192,10 +192,6 @@ object MainForm: TMainForm
       Caption = 'Repozytoria'
       SkinData.CustomColor = False
       SkinData.CustomFont = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object AddButton: TsButton
         Left = 6
         Top = 124
@@ -280,10 +276,6 @@ object MainForm: TMainForm
       ImageIndex = 1
       SkinData.CustomColor = False
       SkinData.CustomFont = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object LastUpdateInfoLabel: TsLabel
         Left = 12
         Top = 54
@@ -292,18 +284,21 @@ object MainForm: TMainForm
         Caption = 'Data ostatniego sprawdzania -'
       end
       object LastUpdateLabel: TsLabelFX
-        Left = 165
-        Top = 54
+        Left = 168
+        Top = 57
         Width = 119
         Height = 13
         Caption = 'RRRR-MM-DD HH:MM:SS'
         Color = clBtnFace
         ParentColor = False
+        Angle = 0
         Kind.KindType = ktCustom
         Kind.Color = clGreen
         Shadow.BlurCount = 0
         Shadow.Distance = 0
         Shadow.Mode = smCustom
+        Shadow.OffsetKeeper.LeftTop = 0
+        Shadow.OffsetKeeper.RightBottom = 0
       end
       object UpdateTimeComboBox: TsComboBox
         Left = 12
