@@ -42,12 +42,12 @@ TMainForm *hMainForm;
 TPluginLink PluginLink;
 TPluginInfo PluginInfo;
 //FORWARD-AQQ-HOOKS----------------------------------------------------------
-int __stdcall OnAddLink(WPARAM wParam, LPARAM lParam);
-int __stdcall OnAddonInstalled(WPARAM wParam, LPARAM lParam);
-int __stdcall OnColorChange(WPARAM wParam, LPARAM lParam);
-int __stdcall OnDeleteLink(WPARAM wParam, LPARAM lParam);
-int __stdcall OnModulesLoaded(WPARAM wParam, LPARAM lParam);
-int __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam);
+INT_PTR __stdcall OnAddLink(WPARAM wParam, LPARAM lParam);
+INT_PTR __stdcall OnAddonInstalled(WPARAM wParam, LPARAM lParam);
+INT_PTR __stdcall OnColorChange(WPARAM wParam, LPARAM lParam);
+INT_PTR __stdcall OnDeleteLink(WPARAM wParam, LPARAM lParam);
+INT_PTR __stdcall OnModulesLoaded(WPARAM wParam, LPARAM lParam);
+INT_PTR __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam);
 //---------------------------------------------------------------------------
 
 //Pobieranie sciezki katalogu prywatnego wtyczek
@@ -150,7 +150,7 @@ void SetUpdateLink(UnicodeString URL, bool Enabled)
 //---------------------------------------------------------------------------
 
 //Hook na dodawanie repozytorium przez zewnetrzne wtyczki
-int __stdcall OnAddLink(WPARAM wParam, LPARAM lParam)
+INT_PTR __stdcall OnAddLink(WPARAM wParam, LPARAM lParam)
 {
   //Pobieranie adresu repozytorium
   UnicodeString URL = (wchar_t*)lParam;
@@ -186,7 +186,7 @@ int __stdcall OnAddLink(WPARAM wParam, LPARAM lParam)
 //---------------------------------------------------------------------------
 
 //Hook na instalowanie dodatkow
-int __stdcall OnAddonInstalled(WPARAM wParam, LPARAM lParam)
+INT_PTR __stdcall OnAddonInstalled(WPARAM wParam, LPARAM lParam)
 {
   //Pobranie typu zainstalowanego dodatku
   PPluginTriple PluginTriple = (PPluginTriple)wParam;
@@ -211,7 +211,7 @@ int __stdcall OnAddonInstalled(WPARAM wParam, LPARAM lParam)
 //---------------------------------------------------------------------------
 
 //Hook na zmiane kolorystyki AlphaControls
-int __stdcall OnColorChange(WPARAM wParam, LPARAM lParam)
+INT_PTR __stdcall OnColorChange(WPARAM wParam, LPARAM lParam)
 {
   //Okno ustawien zostalo juz stworzone
   if(hMainForm)
@@ -229,7 +229,7 @@ int __stdcall OnColorChange(WPARAM wParam, LPARAM lParam)
 //---------------------------------------------------------------------------
 
 //Hook na usuwanie repozytorium przez zewnetrzne wtyczki
-int __stdcall OnDeleteLink(WPARAM wParam, LPARAM lParam)
+INT_PTR __stdcall OnDeleteLink(WPARAM wParam, LPARAM lParam)
 {
   //Pobieranie adresu repozytorium
   UnicodeString URL = (wchar_t*)lParam;
@@ -263,7 +263,7 @@ int __stdcall OnDeleteLink(WPARAM wParam, LPARAM lParam)
 //---------------------------------------------------------------------------
 
 //Hook na zaladowanie wszystkich modolow
-int __stdcall OnModulesLoaded(WPARAM, LPARAM)
+INT_PTR __stdcall OnModulesLoaded(WPARAM, LPARAM)
 {
   //Wlaczenie timera sprawdzania aktualizacji dodatkow
   hMainForm->CheckUpdatesOnStartTimer->Enabled = true;
@@ -273,7 +273,7 @@ int __stdcall OnModulesLoaded(WPARAM, LPARAM)
 //---------------------------------------------------------------------------
 
 //Hook na zmiane kompozycji
-int __stdcall OnThemeChanged (WPARAM wParam, LPARAM lParam)
+INT_PTR __stdcall OnThemeChanged (WPARAM wParam, LPARAM lParam)
 {
   //Okno ustawien zostalo juz stworzone
   if(hMainForm)
@@ -356,7 +356,7 @@ UnicodeString MD5File(UnicodeString FileName)
 }
 //---------------------------------------------------------------------------
 
-extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
+extern "C" INT_PTR __declspec(dllexport) __stdcall Load(PPluginLink Link)
 {
   //Linkowanie wtyczki z komunikatorem
   PluginLink = *Link;
@@ -430,7 +430,7 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 }
 //---------------------------------------------------------------------------
 
-extern "C" int __declspec(dllexport)__stdcall Settings()
+extern "C" INT_PTR __declspec(dllexport)__stdcall Settings()
 {
   //Pokaznie okna ustawien
   hMainForm->Show();
@@ -439,7 +439,7 @@ extern "C" int __declspec(dllexport)__stdcall Settings()
 }
 //---------------------------------------------------------------------------
 
-extern "C" int __declspec(dllexport) __stdcall Unload()
+extern "C" INT_PTR __declspec(dllexport) __stdcall Unload()
 {
   //Wylaczanie timerow
   if(hMainForm)
@@ -478,7 +478,7 @@ extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVe
 {
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = L"FixUpdater";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,4,3,2);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,4,4,0);
   PluginInfo.Description = L"Ulepszenie systemu aktualizacji poprzez mo¿liwoœæ dodawania dodatkowych adresów serwerów zawieraj¹cych bazê dodatków oraz ustawienie czêstszego interwa³u sprawdzania aktualizacji.";
   PluginInfo.Author = L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = L"kontakt@beherit.pl";

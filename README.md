@@ -12,7 +12,7 @@ Autorem wtyczki FixUpdater jest Krzysztof Grochocki. Możesz skontaktować się 
 
 Licencja
 -------
-Wtyczka FixUpdater wykorzystuje licencję [GNU General Public License 3](http://www.gnu.org/copyleft/gpl.html).
+Wtyczka FixUpdater objęta jest licencją [GNU General Public License 3](http://www.gnu.org/copyleft/gpl.html).
 
     FixUpdater
     Copyright (C) 2009-2013  Krzysztof Grochocki

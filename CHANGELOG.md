@@ -1,3 +1,9 @@
+1.4.4.0
+-----
+* Wersja 64-bitowa jest wreszcie prawidłowo skórkowana.
+* Kompilacja pod poprawionymi nagłówkami dla wersji 64-bitowej.
+* Aktualizacja komponentów AlphaControls do nowszej wersji (8.46).
+
 1.4.3.2
 -----
 * Mała poprawka w obsłudze kolorystyki stylizacji okien.

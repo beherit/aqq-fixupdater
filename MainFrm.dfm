@@ -192,6 +192,10 @@ object MainForm: TMainForm
       Caption = 'Repozytoria'
       SkinData.CustomColor = False
       SkinData.CustomFont = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object AddButton: TsButton
         Left = 6
         Top = 124
@@ -276,6 +280,10 @@ object MainForm: TMainForm
       ImageIndex = 1
       SkinData.CustomColor = False
       SkinData.CustomFont = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object LastUpdateInfoLabel: TsLabel
         Left = 12
         Top = 54
@@ -454,6 +462,7 @@ object MainForm: TMainForm
     ThirdParty.ThirdScrollControl = ' '
     ThirdParty.ThirdUpDown = ' '
     ThirdParty.ThirdScrollBar = ' '
+    ThirdParty.ThirdStaticText = ' '
     Left = 96
     Top = 200
   end
