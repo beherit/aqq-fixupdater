@@ -64,10 +64,6 @@ void __fastcall TMainForm::WMTransparency(TMessage &Message)
 
 void __fastcall TMainForm::FormCreate(TObject *Sender)
 {
-  //Hack na blad w AC
-  #if defined(_WIN64)
-  UrlListPreview->SkinData->SkinSection = "";
-  #endif
   //Wlaczona zaawansowana stylizacja okien
   if(ChkSkinEnabled())
   {
