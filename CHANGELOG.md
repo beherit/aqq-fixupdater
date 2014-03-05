@@ -1,3 +1,8 @@
+1.4.5.0
+-----
+* Zmniejszenie rozmiaru wtyczki 64-bitowej poprzez użycie kompresji LZMA.
+* Aktualizacja komponentów AlphaControls do nowszej wersji (8.53).
+
 1.4.4.0
 -----
 * Wersja 64-bitowa jest wreszcie prawidłowo skórkowana.

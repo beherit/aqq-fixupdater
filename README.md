@@ -8,14 +8,14 @@ Znalezione błędy wtyczki należy zgłaszać na [tracekerze](http://forum.aqq.e
 
 Kontakt z autorem
 -------
-Autorem wtyczki FixUpdater jest Krzysztof Grochocki. Możesz skontaktować się z nim drogą mailową (kontakt@beherit.pl) lub poprzez Jabber (beherit@aqq.eu).
+Autorem wtyczki FixUpdater jest Krzysztof Grochocki. Możesz skontaktować się z nim drogą mailową (kontakt@beherit.pl) lub poprzez Jabber (im@beherit.pl).
 
 Licencja
 -------
 Wtyczka FixUpdater objęta jest licencją [GNU General Public License 3](http://www.gnu.org/copyleft/gpl.html).
 
     FixUpdater
-    Copyright (C) 2009-2013  Krzysztof Grochocki
+    Copyright (C) 2009-2014  Krzysztof Grochocki
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
