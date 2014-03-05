@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-// Copyright (C) 2009-2013 Krzysztof Grochocki
+// Copyright (C) 2009-2014 Krzysztof Grochocki
 //
 // This file is part of FixUpdater
 //
