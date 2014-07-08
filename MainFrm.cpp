@@ -378,3 +378,10 @@ void __fastcall TMainForm::CheckUpdatesTimerTimer(TObject *Sender)
   CheckUpdates(UpdateMode);
 }
 //---------------------------------------------------------------------------
+
+void __fastcall TMainForm::sSkinManagerSysDlgInit(TacSysDlgData DlgData, bool &AllowSkinning)
+{
+  AllowSkinning = false;
+}
+//---------------------------------------------------------------------------
+
