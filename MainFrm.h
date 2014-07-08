@@ -88,6 +88,7 @@ __published:	// IDE-managed Components
 	void __fastcall UrlListPreviewItemChecked(TObject *Sender, TListItem *Item);
 	void __fastcall OkButtonClick(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
+	void __fastcall sSkinManagerSysDlgInit(TacSysDlgData DlgData, bool &AllowSkinning);
 private:	// User declarations
 public:		// User declarations
 	int UpdateTime;

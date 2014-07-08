@@ -1,3 +1,8 @@
+1.4.6.0
+-----
+* Nieskórkowanie systemowych okien dialogowych niepochodzących z wtyczki.
+* Aktualizacja komponentów AlphaControls do nowszej wersji (9.10).
+
 1.4.5.0
 -----
 * Zmniejszenie rozmiaru wtyczki 64-bitowej poprzez użycie kompresji LZMA.
