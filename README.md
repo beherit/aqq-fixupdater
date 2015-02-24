@@ -2,7 +2,7 @@
 FixUpdater jest wtyczką do komunikatora [AQQ](http://www.aqq.eu/pl.php). Ulepsza system aktualizacji poprzez możliwość dodawania dodatkowych adresów serwerów zawierających bazę dodatków oraz ustawienie częstszego interwału sprawdzania aktualizacji.
 
 ### Wymagania
-Do skompilowania wtyczki AlphaWindows potrzebne jest:
+Do skompilowania wtyczki FixUpdater potrzebne jest:
 
 * Embarcadero RAD Studio XE7 (C++Builder oraz Delphi, jeżeli chcemy kompilować wersję x64)
 * Pełna wersja komponentów [AlphaControls](http://www.alphaskins.com/) (do kompilacji wersji x64 potrzebne jest Delphi)
