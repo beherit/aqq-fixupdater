@@ -115,6 +115,11 @@ int GetSaturation()
 	return (int)PluginLink.CallService(AQQ_SYSTEM_COLORGETSATURATION,0,0);
 }
 //---------------------------------------------------------------------------
+int GetBrightness()
+{
+	return (int)PluginLink.CallService(AQQ_SYSTEM_COLORGETBRIGHTNESS,0,0);
+}
+//---------------------------------------------------------------------------
 
 //Sprawdzanie dostepnosci aktualizacji
 void CheckUpdates(int Mode)
@@ -218,8 +223,10 @@ INT_PTR __stdcall OnColorChange(WPARAM wParam, LPARAM lParam)
 		//Wlaczona zaawansowana stylizacja okien
 		if(ChkSkinEnabled())
 		{
-			hMainForm->sSkinManager->HueOffset = wParam;
-			hMainForm->sSkinManager->Saturation = lParam;
+			TPluginColorChange ColorChange = *(PPluginColorChange)wParam;
+			hMainForm->sSkinManager->HueOffset = ColorChange.Hue;
+			hMainForm->sSkinManager->Saturation = ColorChange.Saturation;
+			hMainForm->sSkinManager->Brightness = ColorChange.Brightness;
 		}
 	}
 
@@ -295,6 +302,7 @@ INT_PTR __stdcall OnThemeChanged (WPARAM wParam, LPARAM lParam)
 				//Zmiana kolorystyki AlphaControls
 				hMainForm->sSkinManager->HueOffset = GetHUE();
 				hMainForm->sSkinManager->Saturation = GetSaturation();
+				hMainForm->sSkinManager->Brightness = GetBrightness();
 				//Aktywacja skorkowania AlphaControls
 				hMainForm->sSkinManager->Active = true;
 			}
@@ -410,11 +418,11 @@ extern "C" INT_PTR __declspec(dllexport) __stdcall Load(PPluginLink Link)
 	//Hook na instalowanie dodatkow
 	PluginLink.HookEvent(AQQ_SYSTEM_ADDONINSTALLED,OnAddonInstalled);
 	//Hook na zmiane kolorystyki AlphaControls
-	PluginLink.HookEvent(AQQ_SYSTEM_COLORCHANGE,OnColorChange);
+	PluginLink.HookEvent(AQQ_SYSTEM_COLORCHANGEV2,OnColorChange);
 	//Hook na usuwanie repozytorium przez zewnetrzne wtyczki
 	PluginLink.HookEvent(FIXUPDATER_SYSTEM_DELETELINK,OnDeleteLink);
 	//Hook na zaladowanie wszystkich modolow
-	PluginLink.HookEvent(AQQ_SYSTEM_MODULESLOADED, OnModulesLoaded);
+	PluginLink.HookEvent(AQQ_SYSTEM_MODULESLOADED,OnModulesLoaded);
 	//Hook na zmiane kompozycji
 	PluginLink.HookEvent(AQQ_SYSTEM_THEMECHANGED,OnThemeChanged);
 	//Wlaczenie timera sprawdzania aktualizacji dodatkow

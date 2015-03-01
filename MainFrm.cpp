@@ -43,8 +43,9 @@ __declspec(dllimport)UnicodeString GetThemeSkinDir();
 __declspec(dllimport)bool ChkSkinEnabled();
 __declspec(dllimport)bool ChkThemeAnimateWindows();
 __declspec(dllimport)bool ChkThemeGlowing();
-__declspec(dllimport)int GetSaturation();
 __declspec(dllimport)int GetHUE();
+__declspec(dllimport)int GetSaturation();
+__declspec(dllimport)int GetBrightness();
 __declspec(dllimport)UnicodeString GetLastUpdate();
 __declspec(dllimport)void SetUpdateLink(UnicodeString URL, bool Enabled);
 __declspec(dllimport)void CheckUpdates(int Mode);
@@ -82,6 +83,7 @@ void __fastcall TMainForm::FormCreate(TObject *Sender)
 			//Zmiana kolorystyki AlphaControls
 			sSkinManager->HueOffset = GetHUE();
 			sSkinManager->Saturation = GetSaturation();
+			sSkinManager->Brightness = GetBrightness();
 			//Aktywacja skorkowania AlphaControls
 			sSkinManager->Active = true;
 		}
