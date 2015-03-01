@@ -182,10 +182,10 @@ void __fastcall TMainForm::aResetSettingsExecute(TObject *Sender)
 	//Dodawanie domyslnych repozytorium
 	UrlListPreview->Items->Add();
 	UrlListPreview->Items->Item[0]->Checked = true;
-	UrlListPreview->Items->Item[0]->SubItems->Add("http://beherit.pl/aqq_update/stable.xml");
+	UrlListPreview->Items->Item[0]->SubItems->Add("http://beherit.pl/aqq_update/plugins.xml");
 	UrlListPreview->Items->Add();
-	UrlListPreview->Items->Item[1]->Checked = false;
-	UrlListPreview->Items->Item[1]->SubItems->Add("http://beherit.pl/aqq_update/beta.xml");
+	UrlListPreview->Items->Item[1]->Checked = true;
+	UrlListPreview->Items->Item[1]->SubItems->Add("http://beherit.pl/aqq_update/themes.xml");
 	//Wlaczenie przycisku do zapisu
 	SaveButton->Enabled = true;
 }
