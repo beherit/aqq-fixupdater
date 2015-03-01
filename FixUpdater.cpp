@@ -439,6 +439,9 @@ void LoadSettings()
 {
 	//Otwarcie pliku ustawien
 	TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
+	//Nadpisanie domyslnych adresow repozytoriow
+	Ini->WriteString("Links", "Url1", "http://beherit.pl/aqq_update/plugins.xml");
+	Ini->WriteString("Links", "Url2", "http://beherit.pl/aqq_update/themes.xml");
 	//Odczyt repozytoriow
 	TStringList *Links = new TStringList;
 	Ini->ReadSection("Links", Links);
@@ -477,17 +480,6 @@ extern "C" INT_PTR __declspec(dllexport) __stdcall Load(PPluginLink Link)
 	//Tworzeniu katalogu z ustawieniami wtyczki
 	if(!DirectoryExists(PluginUserDir + "\\\\Blabler"))
 	 CreateDir(PluginUserDir + "\\\\Blabler");
-	//Ustawienia domyslne wtyczki
-	if(!FileExists(PluginUserDir + "\\\\FixUpdater\\\\Settings.ini"))
-	{
-		//Tworzenie pliku ustawien z domyslnymi repozytoriami
-		TIniFile *Ini = new TIniFile(PluginUserDir + "\\\\FixUpdater\\\\Settings.ini");
-		Ini->WriteString("Links", "Url1", "http://beherit.pl/aqq_update/stable.xml");
-		Ini->WriteBool("Links", "Enable1", true);
-		Ini->WriteString("Links", "Url2", "http://beherit.pl/aqq_update/beta.xml");
-		Ini->WriteBool("Links", "Enable2", false);
-		delete Ini;
-	}
 	//Odczyt ustawien
 	LoadSettings();
 	//Hook na dodawanie repozytorium przez zewnetrzne wtyczki
