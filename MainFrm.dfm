@@ -276,10 +276,6 @@ object MainForm: TMainForm
       ImageIndex = 1
       SkinData.CustomColor = False
       SkinData.CustomFont = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object LastUpdateInfoLabel: TsLabel
         Left = 12
         Top = 54
@@ -413,20 +409,6 @@ object MainForm: TMainForm
       OnExecute = aSettingsChangedExecute
     end
   end
-  object CheckUpdatesOnStartTimer: TTimer
-    Enabled = False
-    Interval = 300000
-    OnTimer = CheckUpdatesOnStartTimerTimer
-    Left = 64
-    Top = 200
-  end
-  object CheckUpdatesTimer: TTimer
-    Enabled = False
-    Interval = 3600000
-    OnTimer = CheckUpdatesTimerTimer
-    Left = 32
-    Top = 200
-  end
   object sSkinManager: TsSkinManager
     ExtendedBorders = True
     Active = False
@@ -464,7 +446,7 @@ object MainForm: TMainForm
     ThirdParty.ThirdStaticText = ' '
     ThirdParty.ThirdNativePaint = ' '
     OnSysDlgInit = sSkinManagerSysDlgInit
-    Left = 96
+    Left = 32
     Top = 200
   end
   object sSkinProvider: TsSkinProvider
@@ -475,7 +457,7 @@ object MainForm: TMainForm
     AddedTitle.Font.Style = []
     SkinData.SkinSection = 'FORM'
     TitleButtons = <>
-    Left = 128
+    Left = 64
     Top = 200
   end
 end
