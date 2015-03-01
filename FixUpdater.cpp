@@ -21,12 +21,12 @@
 
 #include <vcl.h>
 #include <windows.h>
+#include <inifiles.hpp>
+#include <IdHashMessageDigest.hpp>
+#include <PluginAPI.h>
 #pragma hdrstop
 #pragma argsused
 #include "SettingsFrm.h"
-#include <PluginAPI.h>
-#include <inifiles.hpp>
-#include <IdHashMessageDigest.hpp>
 #define FIXUPDATER_SYSTEM_ADDLINK L"FixUpdater/System/AddLink"
 #define FIXUPDATER_SYSTEM_DELETELINK L"FixUpdater/System/DeleteLink"
 
