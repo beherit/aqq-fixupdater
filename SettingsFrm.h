@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-// Copyright (C) 2009-2014 Krzysztof Grochocki
+// Copyright (C) 2009-2015 Krzysztof Grochocki
 //
 // This file is part of FixUpdater
 //
@@ -20,8 +20,8 @@
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-#ifndef MainFrmH
-#define MainFrmH
+#ifndef SettingsFrmH
+#define SettingsFrmH
 #define WM_ALPHAWINDOWS (WM_USER + 666)
 //---------------------------------------------------------------------------
 #include "sBevel.hpp"
@@ -41,7 +41,7 @@
 #include <Vcl.StdCtrls.hpp>
 #include "sSkinProvider.hpp"
 //---------------------------------------------------------------------------
-class TMainForm : public TForm
+class TSettingsForm : public TForm
 {
 __published:	// IDE-managed Components
 	TActionList *ActionList;
@@ -87,13 +87,13 @@ __published:	// IDE-managed Components
 	void __fastcall sSkinManagerSysDlgInit(TacSysDlgData DlgData, bool &AllowSkinning);
 private:	// User declarations
 public:		// User declarations
-	__fastcall TMainForm(TComponent* Owner);
+	__fastcall TSettingsForm(TComponent* Owner);
 	void __fastcall WMTransparency(TMessage &Message);
 	BEGIN_MESSAGE_MAP
 	MESSAGE_HANDLER(WM_ALPHAWINDOWS,TMessage,WMTransparency);
 	END_MESSAGE_MAP(TForm)
 };
 //---------------------------------------------------------------------------
-extern PACKAGE TMainForm *MainForm;
+extern PACKAGE TSettingsForm *SettingsForm;
 //---------------------------------------------------------------------------
 #endif

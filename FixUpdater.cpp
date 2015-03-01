@@ -23,7 +23,7 @@
 #include <windows.h>
 #pragma hdrstop
 #pragma argsused
-#include "MainFrm.h"
+#include "SettingsFrm.h"
 #include <PluginAPI.h>
 #include <inifiles.hpp>
 #include <IdHashMessageDigest.hpp>
@@ -37,7 +37,7 @@ int WINAPI DllEntryPoint(HINSTANCE hinst, unsigned long reason, void* lpReserved
 //---------------------------------------------------------------------------
 
 //Uchwyt-do-formy-ustawien---------------------------------------------------
-TMainForm *hMainForm;
+TSettingsForm *hSettingsForm;
 //Struktury-glowne-----------------------------------------------------------
 TPluginLink PluginLink;
 TPluginInfo PluginInfo;
@@ -281,15 +281,15 @@ INT_PTR __stdcall OnBeforeUnload(WPARAM wParam, LPARAM lParam)
 INT_PTR __stdcall OnColorChange(WPARAM wParam, LPARAM lParam)
 {
 	//Okno ustawien zostalo juz stworzone
-	if(hMainForm)
+	if(hSettingsForm)
 	{
 		//Wlaczona zaawansowana stylizacja okien
 		if(ChkSkinEnabled())
 		{
 			TPluginColorChange ColorChange = *(PPluginColorChange)wParam;
-			hMainForm->sSkinManager->HueOffset = ColorChange.Hue;
-			hMainForm->sSkinManager->Saturation = ColorChange.Saturation;
-			hMainForm->sSkinManager->Brightness = ColorChange.Brightness;
+			hSettingsForm->sSkinManager->HueOffset = ColorChange.Hue;
+			hSettingsForm->sSkinManager->Saturation = ColorChange.Saturation;
+			hSettingsForm->sSkinManager->Brightness = ColorChange.Brightness;
 		}
 	}
 
@@ -356,7 +356,7 @@ INT_PTR __stdcall OnModulesLoaded(WPARAM, LPARAM)
 INT_PTR __stdcall OnThemeChanged (WPARAM wParam, LPARAM lParam)
 {
 	//Okno ustawien zostalo juz stworzone
-	if(hMainForm)
+	if(hSettingsForm)
 	{
 		//Wlaczona zaawansowana stylizacja okien
 		if(ChkSkinEnabled())
@@ -368,24 +368,24 @@ INT_PTR __stdcall OnThemeChanged (WPARAM wParam, LPARAM lParam)
 			{
 				//Dane pliku zaawansowanej stylizacji okien
 				ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
-				hMainForm->sSkinManager->SkinDirectory = ThemeSkinDir;
-				hMainForm->sSkinManager->SkinName = "Skin.asz";
+				hSettingsForm->sSkinManager->SkinDirectory = ThemeSkinDir;
+				hSettingsForm->sSkinManager->SkinName = "Skin.asz";
 				//Ustawianie animacji AlphaControls
-				if(ChkThemeAnimateWindows()) hMainForm->sSkinManager->AnimEffects->FormShow->Time = 200;
-				else hMainForm->sSkinManager->AnimEffects->FormShow->Time = 0;
-				hMainForm->sSkinManager->Effects->AllowGlowing = ChkThemeGlowing();
+				if(ChkThemeAnimateWindows()) hSettingsForm->sSkinManager->AnimEffects->FormShow->Time = 200;
+				else hSettingsForm->sSkinManager->AnimEffects->FormShow->Time = 0;
+				hSettingsForm->sSkinManager->Effects->AllowGlowing = ChkThemeGlowing();
 				//Zmiana kolorystyki AlphaControls
-				hMainForm->sSkinManager->HueOffset = GetHUE();
-				hMainForm->sSkinManager->Saturation = GetSaturation();
-				hMainForm->sSkinManager->Brightness = GetBrightness();
+				hSettingsForm->sSkinManager->HueOffset = GetHUE();
+				hSettingsForm->sSkinManager->Saturation = GetSaturation();
+				hSettingsForm->sSkinManager->Brightness = GetBrightness();
 				//Aktywacja skorkowania AlphaControls
-				hMainForm->sSkinManager->Active = true;
+				hSettingsForm->sSkinManager->Active = true;
 			}
 			//Brak pliku zaawansowanej stylizacji okien
-			else hMainForm->sSkinManager->Active = false;
+			else hSettingsForm->sSkinManager->Active = false;
 		}
 		//Zaawansowana stylizacja okien wylaczona
-		else hMainForm->sSkinManager->Active = false;
+		else hSettingsForm->sSkinManager->Active = false;
 	}
 
 	return 0;
@@ -525,13 +525,13 @@ extern "C" INT_PTR __declspec(dllexport) __stdcall Load(PPluginLink Link)
 extern "C" INT_PTR __declspec(dllexport)__stdcall Settings()
 {
 	//Przypisanie uchwytu do formy ustawien
-	if(!hMainForm)
+	if(!hSettingsForm)
 	{
-		Application->Handle = (HWND)MainForm;
-		hMainForm = new TMainForm(Application);
+		Application->Handle = (HWND)SettingsForm;
+		hSettingsForm = new TSettingsForm(Application);
 	}
 	//Pokaznie okna ustawien
-	hMainForm->Show();
+	hSettingsForm->Show();
 
 	return 0;
 }

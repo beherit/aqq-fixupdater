@@ -22,7 +22,7 @@
 //---------------------------------------------------------------------------
 #include <vcl.h>
 #pragma hdrstop
-#include "MainFrm.h"
+#include "SettingsFrm.h"
 #include <inifiles.hpp>
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -36,7 +36,7 @@
 #pragma link "sSkinManager"
 #pragma link "sSkinProvider"
 #pragma resource "*.dfm"
-TMainForm *MainForm;
+TSettingsForm *SettingsForm;
 //---------------------------------------------------------------------------
 __declspec(dllimport)UnicodeString GetPluginUserDir();
 __declspec(dllimport)UnicodeString GetThemeSkinDir();
@@ -53,20 +53,20 @@ __declspec(dllimport)void KillTimerEx();
 __declspec(dllimport)void SetTimerEx(int Interval);
 __declspec(dllimport)void LoadSettings();
 //---------------------------------------------------------------------------
-__fastcall TMainForm::TMainForm(TComponent* Owner)
+__fastcall TSettingsForm::TSettingsForm(TComponent* Owner)
 	: TForm(Owner)
 {
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::WMTransparency(TMessage &Message)
+void __fastcall TSettingsForm::WMTransparency(TMessage &Message)
 {
 	Application->ProcessMessages();
 	if(sSkinManager->Active) sSkinProvider->BorderForm->UpdateExBordersPos(true,(int)Message.LParam);
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::FormCreate(TObject *Sender)
+void __fastcall TSettingsForm::FormCreate(TObject *Sender)
 {
 	//Wlaczona zaawansowana stylizacja okien
 	if(ChkSkinEnabled())
@@ -98,7 +98,7 @@ void __fastcall TMainForm::FormCreate(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::FormShow(TObject *Sender)
+void __fastcall TSettingsForm::FormShow(TObject *Sender)
 {
 	//Odczyt ustawien
 	aLoadSettings->Execute();
@@ -111,7 +111,7 @@ void __fastcall TMainForm::FormShow(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::aLoadSettingsExecute(TObject *Sender)
+void __fastcall TSettingsForm::aLoadSettingsExecute(TObject *Sender)
 {
 	//Otwarcie pliku ustawien
 	TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
@@ -139,7 +139,7 @@ void __fastcall TMainForm::aLoadSettingsExecute(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
+void __fastcall TSettingsForm::aSaveSettingsExecute(TObject *Sender)
 {
 	//Wylaczenie timera sprawdzania aktualizacji
 	KillTimerEx();
@@ -175,7 +175,7 @@ void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::aResetSettingsExecute(TObject *Sender)
+void __fastcall TSettingsForm::aResetSettingsExecute(TObject *Sender)
 {
 	//Usuwanie wszystkich dostepnych repozytorium
 	UrlListPreview->Items->Clear();
@@ -191,21 +191,21 @@ void __fastcall TMainForm::aResetSettingsExecute(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::aSettingsChangedExecute(TObject *Sender)
+void __fastcall TSettingsForm::aSettingsChangedExecute(TObject *Sender)
 {
 	//Wlaczenie przycisku do zapisu
 	SaveButton->Enabled = true;
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::aExitExecute(TObject *Sender)
+void __fastcall TSettingsForm::aExitExecute(TObject *Sender)
 {
 	//Zamkniecie formy ustawien
 	Close();
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::OkButtonClick(TObject *Sender)
+void __fastcall TSettingsForm::OkButtonClick(TObject *Sender)
 {
 	//Wylaczenie przyciskow
 	SaveButton->Enabled = false;
@@ -225,7 +225,7 @@ void __fastcall TMainForm::OkButtonClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::SaveButtonClick(TObject *Sender)
+void __fastcall TSettingsForm::SaveButtonClick(TObject *Sender)
 {
 	//Wylaczenie przyciskow
 	SaveButton->Enabled = false;
@@ -243,7 +243,7 @@ void __fastcall TMainForm::SaveButtonClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::UrlListPreviewSelectItem(TObject *Sender, TListItem *Item,
+void __fastcall TSettingsForm::UrlListPreviewSelectItem(TObject *Sender, TListItem *Item,
 			bool Selected)
 {
 	//Zezwolenie edycji dodatkowych adresow repozytoriow
@@ -261,7 +261,7 @@ void __fastcall TMainForm::UrlListPreviewSelectItem(TObject *Sender, TListItem *
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::AddButtonClick(TObject *Sender)
+void __fastcall TSettingsForm::AddButtonClick(TObject *Sender)
 {
 	//Dodawanie nowego elementu
 	UnicodeString URL;
@@ -293,7 +293,7 @@ void __fastcall TMainForm::AddButtonClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::DeleteButtonClick(TObject *Sender)
+void __fastcall TSettingsForm::DeleteButtonClick(TObject *Sender)
 {
 	//Usuwanie wybranego elementu
 	UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->Delete();
@@ -305,7 +305,7 @@ void __fastcall TMainForm::DeleteButtonClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::EditButtonClick(TObject *Sender)
+void __fastcall TSettingsForm::EditButtonClick(TObject *Sender)
 {
 	//Edycja wybranego elementu
 	UnicodeString URL = InputBox("Edycja repozytorium", "Edytuj adres:", UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->Strings[0]);
@@ -322,14 +322,14 @@ void __fastcall TMainForm::EditButtonClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::ResetButtonClick(TObject *Sender)
+void __fastcall TSettingsForm::ResetButtonClick(TObject *Sender)
 {
 	//Przywracanie domyslnych ustawien repozytoriow
 	aResetSettings->Execute();
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::UrlListPreviewClick(TObject *Sender)
+void __fastcall TSettingsForm::UrlListPreviewClick(TObject *Sender)
 {
 	//Wylaczanie przyciskow
 	if(UrlListPreview->ItemIndex==-1)
@@ -340,14 +340,14 @@ void __fastcall TMainForm::UrlListPreviewClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::UrlListPreviewItemChecked(TObject *Sender, TListItem *Item)
+void __fastcall TSettingsForm::UrlListPreviewItemChecked(TObject *Sender, TListItem *Item)
 {
 	//Wylaczenie przycisku do zapisu
 	SaveButton->Enabled = true;
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainForm::sSkinManagerSysDlgInit(TacSysDlgData DlgData, bool &AllowSkinning)
+void __fastcall TSettingsForm::sSkinManagerSysDlgInit(TacSysDlgData DlgData, bool &AllowSkinning)
 {
 	AllowSkinning = false;
 }
