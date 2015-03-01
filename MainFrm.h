@@ -60,8 +60,6 @@ __published:	// IDE-managed Components
 	TsTabSheet *UpdaterTabSheet;
 	TsComboBox *UpdateTimeComboBox;
 	TsLabel *LastUpdateInfoLabel;
-	TTimer *CheckUpdatesOnStartTimer;
-	TTimer *CheckUpdatesTimer;
 	TsBevel *Bevel;
 	TsComboBox *UpdateModeComboBox;
 	TAction *aSettingsChanged;
@@ -82,8 +80,6 @@ __published:	// IDE-managed Components
 	void __fastcall UrlListPreviewClick(TObject *Sender);
 	void __fastcall EditButtonClick(TObject *Sender);
 	void __fastcall aExitExecute(TObject *Sender);
-	void __fastcall CheckUpdatesOnStartTimerTimer(TObject *Sender);
-	void __fastcall CheckUpdatesTimerTimer(TObject *Sender);
 	void __fastcall aSettingsChangedExecute(TObject *Sender);
 	void __fastcall UrlListPreviewItemChecked(TObject *Sender, TListItem *Item);
 	void __fastcall OkButtonClick(TObject *Sender);
@@ -91,8 +87,6 @@ __published:	// IDE-managed Components
 	void __fastcall sSkinManagerSysDlgInit(TacSysDlgData DlgData, bool &AllowSkinning);
 private:	// User declarations
 public:		// User declarations
-	int UpdateTime;
-    int UpdateMode;
 	__fastcall TMainForm(TComponent* Owner);
 	void __fastcall WMTransparency(TMessage &Message);
 	BEGIN_MESSAGE_MAP

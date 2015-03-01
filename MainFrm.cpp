@@ -49,6 +49,9 @@ __declspec(dllimport)int GetBrightness();
 __declspec(dllimport)UnicodeString GetLastUpdate();
 __declspec(dllimport)void SetUpdateLink(UnicodeString URL, bool Enabled);
 __declspec(dllimport)void CheckUpdates(int Mode);
+__declspec(dllimport)void KillTimerEx();
+__declspec(dllimport)void SetTimerEx(int Interval);
+__declspec(dllimport)void LoadSettings();
 //---------------------------------------------------------------------------
 __fastcall TMainForm::TMainForm(TComponent* Owner)
 	: TForm(Owner)
@@ -101,7 +104,7 @@ void __fastcall TMainForm::FormShow(TObject *Sender)
 	aLoadSettings->Execute();
 	//Wylaczenie przycisku do zapisu
 	SaveButton->Enabled = false;
-	//Ustawienie fokusu na kontrolce
+	//Ustawienie fokusu na przycisku anulowania
 	CancelButton->SetFocus();
 	//Ustawienie domyslnej zakladki
 	PageControl->ActivePage = ReposTabSheet;
@@ -110,79 +113,65 @@ void __fastcall TMainForm::FormShow(TObject *Sender)
 
 void __fastcall TMainForm::aLoadSettingsExecute(TObject *Sender)
 {
+	//Otwarcie pliku ustawien
 	TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
-	//Kana³y aktualizacji
+	//Odczyt repozytoriow
 	UrlListPreview->Items->Clear();
 	TStringList *Links = new TStringList;
 	Ini->ReadSection("Links",Links);
-	for(int Count=0;Count<(Links->Count/2);Count++)
+	int LinksCount = Links->Count/2;
+	delete Links;
+	for(int Count=0; Count<LinksCount; Count++)
 	{
 		UrlListPreview->Items->Add();
 		UrlListPreview->Items->Item[Count]->Checked = Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), false);
 		UrlListPreview->Items->Item[Count]->SubItems->Add(Ini->ReadString("Links", "Url" + IntToStr(Count+1), ""));
 	}
-	delete Links;
-	//Czêstotliwoœci aktualizacji
+	//Czestotliwosc aktualizacji
 	UpdateTimeComboBox->ItemIndex = Ini->ReadInteger("Settings", "UpdateTime", 0);
+	//Sposob aktualizacji
+	UpdateModeComboBox->ItemIndex = Ini->ReadInteger("Settings", "UpdateMode", 0);
+	//Zamkniecie pliku ustawien
+	delete Ini;
 	//Czas ostatniej aktualizacji
 	LastUpdateLabel->Caption = GetLastUpdate();
-	//Pozycja labela
 	LastUpdateLabel->Left = LastUpdateInfoLabel->Left + LastUpdateInfoLabel->Width + 2;
-	//Sposób aktualizacji
-	UpdateModeComboBox->ItemIndex = Ini->ReadInteger("Settings", "UpdateMode", 0);
-	delete Ini;
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TMainForm::aSaveSettingsExecute(TObject *Sender)
 {
-	//Wylaczenie timerow sprawdzania aktualizacji dodatkow
-	CheckUpdatesTimer->Enabled = false;
-	CheckUpdatesOnStartTimer->Enabled = false;
-	//Odczyt pliku ustawien
+	//Wylaczenie timera sprawdzania aktualizacji
+	KillTimerEx();
+	//Otwarcie pliku ustawien
 	TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
-	//Wy³aczanie wszystkich aktualizacji
+	//Odczyt repozytoriow
 	TStringList *Links = new TStringList;
 	Ini->ReadSection("Links",Links);
-	for(int Count=0;Count<Links->Count/2;Count++)
-	{
-		if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true))
-		{
-			UnicodeString Url = Ini->ReadString("Links", "Url" + IntToStr(Count+1), "");
-			if(!Url.IsEmpty()) SetUpdateLink(Url,false);
-		}
-	}
+	int LinksCount = Links->Count/2;
 	delete Links;
-	//Zapisywanie aktualnych ustawien
+	for(int Count=0; Count<LinksCount; Count++)
+	{
+		//Repozytorium wlaczone
+		if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true))
+			//Usuniecie adresu repozytoria z aktualizatora
+			SetUpdateLink(Ini->ReadString("Links", "Url" + IntToStr(Count+1), ""), false);
+	}
+	//Zapisywanie aktualnych ustawien repozytorium
 	Ini->EraseSection("Links");
-	for(int Count=0;Count<UrlListPreview->Items->Count;Count++)
+	for(int Count=0; Count<UrlListPreview->Items->Count; Count++)
 	{
-		if(!UrlListPreview->Items->Item[Count]->SubItems->Strings[0].IsEmpty())
-		{
-			Ini->WriteString("Links", "Url" +	IntToStr(Count+1), UrlListPreview->Items->Item[Count]->SubItems->Strings[0]);
-			Ini->WriteBool("Links", "Enable" + IntToStr(Count+1), UrlListPreview->Items->Item[Count]->Checked);
-		}
+		Ini->WriteString("Links", "Url" +	IntToStr(Count+1), UrlListPreview->Items->Item[Count]->SubItems->Strings[0]);
+		Ini->WriteBool("Links", "Enable" + IntToStr(Count+1), UrlListPreview->Items->Item[Count]->Checked);
 	}
-	//W³aczanie wszystkich aktualizacji
-	for(int Count=0;Count<UrlListPreview->Items->Count;Count++)
-	{
-		if((!UrlListPreview->Items->Item[Count]->SubItems->Strings[0].IsEmpty())&&
-		(UrlListPreview->Items->Item[Count]->Checked))
-		{
-			SetUpdateLink(UrlListPreview->Items->Item[Count]->SubItems->Strings[0],true);
-		}
-	}
-	//Czêstotliwoœci aktualizacji
-	Ini->WriteInteger("Settings", "UpdateTime",UpdateTimeComboBox->ItemIndex);
-	if(UpdateTimeComboBox->ItemIndex!=0)
-	{
-		CheckUpdatesTimer->Interval = 3600000 * UpdateTimeComboBox->ItemIndex;
-		CheckUpdatesTimer->Enabled = true;
-	}
-	//Sposób aktualizacji
-	Ini->WriteInteger("Settings", "UpdateMode",UpdateModeComboBox->ItemIndex);
-	UpdateMode = UpdateModeComboBox->ItemIndex;
+	//Czestotliwosc aktualizacji
+	Ini->WriteInteger("Settings", "UpdateTime", UpdateTimeComboBox->ItemIndex);
+	//Sposob aktualizacji
+	Ini->WriteInteger("Settings", "UpdateMode", UpdateModeComboBox->ItemIndex);
+	//Zamkniecie pliku ustawien
 	delete Ini;
+	//Wlaczenie timera sprawdzania aktualizacji
+	if(UpdateTimeComboBox->ItemIndex)	SetTimerEx(3600000 * UpdateTimeComboBox->ItemIndex);
 }
 //---------------------------------------------------------------------------
 
@@ -224,13 +213,15 @@ void __fastcall TMainForm::OkButtonClick(TObject *Sender)
 	OkButton->Enabled = false;
 	//Zapisywanie ustawien
 	aSaveSettings->Execute();
+	//Odczyt ustawien w rdzeniu wtyczki
+	LoadSettings();
 	//Wlaczenie przyciskow
 	CancelButton->Enabled = true;
 	OkButton->Enabled = true;
 	//Zamkniecie formy ustawien
 	Close();
 	//Sprawdzanie dostepnosci aktualizacji
-	CheckUpdates(UpdateMode);
+	CheckUpdates(UpdateModeComboBox->ItemIndex);
 }
 //---------------------------------------------------------------------------
 
@@ -242,24 +233,26 @@ void __fastcall TMainForm::SaveButtonClick(TObject *Sender)
 	OkButton->Enabled = false;
 	//Zapisywanie ustawien
 	aSaveSettings->Execute();
+	//Odczyt ustawien w rdzeniu wtyczki
+  LoadSettings();
 	//Wlaczenie przyciskow
 	CancelButton->Enabled = true;
 	OkButton->Enabled = true;
 	//Sprawdzanie dostepnosci aktualizacji
-	CheckUpdates(UpdateMode);
+	CheckUpdates(UpdateModeComboBox->ItemIndex);
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TMainForm::UrlListPreviewSelectItem(TObject *Sender, TListItem *Item,
 			bool Selected)
 {
-	//Zezwolenie edycji elementow
+	//Zezwolenie edycji dodatkowych adresow repozytoriow
 	if(UrlListPreview->ItemIndex>1)
 	{
 		DeleteButton->Enabled = true;
 		EditButton->Enabled = true;
 	}
-	//Zablokowanie edycji elementow
+	//Zablokowanie edycji domyslnych adresow repozytoriow
 	else
 	{
 		DeleteButton->Enabled = false;
@@ -270,24 +263,25 @@ void __fastcall TMainForm::UrlListPreviewSelectItem(TObject *Sender, TListItem *
 
 void __fastcall TMainForm::AddButtonClick(TObject *Sender)
 {
+	//Dodawanie nowego elementu
 	UnicodeString URL;
-	if(InputQuery("Nowe repozytorium","Dodaj nowy adres:",URL))
+	if(InputQuery("Nowe repozytorium", "Dodaj nowy adres:", URL))
 	{
 		//Jezeli zostal wpisany jakis tekst
 		if(!URL.IsEmpty())
 		{
 			//Sprawdzanie czy wskazany adres URL jest juz dodany
-			bool DoNotAdd = false;
-			for(int Count=0;Count<UrlListPreview->Items->Count;Count++)
+			bool ItemExists = false;
+			for(int Count=0; Count<UrlListPreview->Items->Count; Count++)
 			{
 				if(UrlListPreview->Items->Item[Count]->SubItems->Strings[0]==URL)
 				{
-					DoNotAdd = true;
+					ItemExists = true;
 					Count = UrlListPreview->Items->Count;
 				}
 			}
 			//Wskazany adres URL nie zostal jeszcze dodany
-			if(!DoNotAdd)
+			if(!ItemExists)
 			{
 				UrlListPreview->Items->Add();
 				UrlListPreview->Items->Item[UrlListPreview->Items->Count-1]->Checked = true;
@@ -302,8 +296,7 @@ void __fastcall TMainForm::AddButtonClick(TObject *Sender)
 void __fastcall TMainForm::DeleteButtonClick(TObject *Sender)
 {
 	//Usuwanie wybranego elementu
-	if(UrlListPreview->ItemIndex!=-1)
-		UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->Delete();
+	UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->Delete();
 	//Wylaczanie przyciskow
 	DeleteButton->Enabled = false;
 	EditButton->Enabled = false;
@@ -315,17 +308,13 @@ void __fastcall TMainForm::DeleteButtonClick(TObject *Sender)
 void __fastcall TMainForm::EditButtonClick(TObject *Sender)
 {
 	//Edycja wybranego elementu
-	if(UrlListPreview->ItemIndex!=-1)
+	UnicodeString URL = InputBox("Edycja repozytorium", "Edytuj adres:", UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->Strings[0]);
+	if(!URL.IsEmpty())
 	{
-		UnicodeString URL = InputBox("Edycja repozytorium","Edytuj adres:",UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->Strings[0]);
-		if(!URL.IsEmpty())
-		{
-			//Zmiana wybranego elementu
-			UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->Strings[0] = URL;
-			//Wlaczenie przycisku do zapisu
-			SaveButton->Enabled = true;
-		}
-		UrlListPreview->ItemIndex = -1;
+		//Zmiana wybranego elementu
+		UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->Strings[0] = URL;
+		//Wlaczenie przycisku do zapisu
+		SaveButton->Enabled = true;
 	}
 	//Wylaczanie przyciskow
 	DeleteButton->Enabled = false;
@@ -335,7 +324,7 @@ void __fastcall TMainForm::EditButtonClick(TObject *Sender)
 
 void __fastcall TMainForm::ResetButtonClick(TObject *Sender)
 {
-	//Przywracanie domyslnych ustawien repozytorium
+	//Przywracanie domyslnych ustawien repozytoriow
 	aResetSettings->Execute();
 }
 //---------------------------------------------------------------------------
@@ -355,29 +344,6 @@ void __fastcall TMainForm::UrlListPreviewItemChecked(TObject *Sender, TListItem 
 {
 	//Wylaczenie przycisku do zapisu
 	SaveButton->Enabled = true;
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TMainForm::CheckUpdatesOnStartTimerTimer(TObject *Sender)
-{
-	//Wylaczenie timera
-	CheckUpdatesOnStartTimer->Enabled = false;
-	//Sprawdzanie dostepnosci aktualizacji
-	CheckUpdates(UpdateMode);
-	//Jezeli aktulizacja nie ma byc sprawdza tylko przy starcie AQQ
-	if(UpdateTime!=0)
-	{
-		CheckUpdatesTimer->Enabled = false;
-		CheckUpdatesTimer->Interval = 3600000 * UpdateTime;
-		CheckUpdatesTimer->Enabled = true;
-	}
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TMainForm::CheckUpdatesTimerTimer(TObject *Sender)
-{
-	//Sprawdzanie dostepnosci aktualizacji
-	CheckUpdates(UpdateMode);
 }
 //---------------------------------------------------------------------------
 

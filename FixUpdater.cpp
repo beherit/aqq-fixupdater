@@ -41,6 +41,17 @@ TMainForm *hMainForm;
 //Struktury-glowne-----------------------------------------------------------
 TPluginLink PluginLink;
 TPluginInfo PluginInfo;
+//Uchwyt-do-okna-timera------------------------------------------------------
+HWND hTimerFrm;
+//Gdy-zostalo-uruchomione-wyladowanie-wtyczki-wraz-z-zamknieciem-komunikatora
+bool ForceUnloadExecuted = false;
+//TIMERY---------------------------------------------------------------------
+#define TIMER_CHKUPDATES 10
+//SETTINGS-------------------------------------------------------------------
+int UpdateMode;
+int UpdateInterval;
+//FORWARD-TIMER--------------------------------------------------------------
+LRESULT CALLBACK TimerFrmProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 //FORWARD-AQQ-HOOKS----------------------------------------------------------
 INT_PTR __stdcall OnAddLink(WPARAM wParam, LPARAM lParam);
 INT_PTR __stdcall OnAddonInstalled(WPARAM wParam, LPARAM lParam);
@@ -53,14 +64,14 @@ INT_PTR __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam);
 //Pobieranie sciezki katalogu prywatnego wtyczek
 UnicodeString GetPluginUserDir()
 {
-	return StringReplace((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_GETPLUGINUSERDIR,0,0), "\\", "\\\\", TReplaceFlags() << rfReplaceAll);
+	return StringReplace((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_GETPLUGINUSERDIR, 0, 0), "\\", "\\\\", TReplaceFlags() << rfReplaceAll);
 }
 //---------------------------------------------------------------------------
 
 //Pobieranie sciezki do skorki kompozycji
 UnicodeString GetThemeSkinDir()
 {
-	return StringReplace((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_GETTHEMEDIR,0,0), "\\", "\\\\", TReplaceFlags() << rfReplaceAll) + "\\\\Skin";
+	return StringReplace((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_GETTHEMEDIR, 0, 0), "\\", "\\\\", TReplaceFlags() << rfReplaceAll) + "\\\\Skin";
 }
 //---------------------------------------------------------------------------
 
@@ -68,11 +79,11 @@ UnicodeString GetThemeSkinDir()
 bool ChkSkinEnabled()
 {
 	TStrings* IniList = new TStringList();
-	IniList->SetText((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP,0,0));
+	IniList->SetText((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP, 0, 0));
 	TMemIniFile *Settings = new TMemIniFile(ChangeFileExt(Application->ExeName, ".INI"));
 	Settings->SetStrings(IniList);
 	delete IniList;
-	UnicodeString SkinsEnabled = Settings->ReadString("Settings","UseSkin","1");
+	UnicodeString SkinsEnabled = Settings->ReadString("Settings", "UseSkin", "1");
 	delete Settings;
 	return StrToBool(SkinsEnabled);
 }
@@ -82,11 +93,11 @@ bool ChkSkinEnabled()
 bool ChkThemeAnimateWindows()
 {
 	TStrings* IniList = new TStringList();
-	IniList->SetText((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP,0,0));
+	IniList->SetText((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP, 0, 0));
 	TMemIniFile *Settings = new TMemIniFile(ChangeFileExt(Application->ExeName, ".INI"));
 	Settings->SetStrings(IniList);
 	delete IniList;
-	UnicodeString AnimateWindowsEnabled = Settings->ReadString("Theme","ThemeAnimateWindows","1");
+	UnicodeString AnimateWindowsEnabled = Settings->ReadString("Theme", "ThemeAnimateWindows", "1");
 	delete Settings;
 	return StrToBool(AnimateWindowsEnabled);
 }
@@ -98,7 +109,7 @@ bool ChkThemeGlowing()
 	TMemIniFile *Settings = new TMemIniFile(ChangeFileExt(Application->ExeName, ".INI"));
 	Settings->SetStrings(IniList);
 	delete IniList;
-	UnicodeString GlowingEnabled = Settings->ReadString("Theme","ThemeGlowing","1");
+	UnicodeString GlowingEnabled = Settings->ReadString("Theme", "ThemeGlowing", "1");
 	delete Settings;
 	return StrToBool(GlowingEnabled);
 }
@@ -107,29 +118,27 @@ bool ChkThemeGlowing()
 //Pobieranie ustawien koloru AlphaControls
 int GetHUE()
 {
-	return (int)PluginLink.CallService(AQQ_SYSTEM_COLORGETHUE,0,0);
+	return (int)PluginLink.CallService(AQQ_SYSTEM_COLORGETHUE, 0, 0);
 }
 //---------------------------------------------------------------------------
 int GetSaturation()
 {
-	return (int)PluginLink.CallService(AQQ_SYSTEM_COLORGETSATURATION,0,0);
+	return (int)PluginLink.CallService(AQQ_SYSTEM_COLORGETSATURATION, 0, 0);
 }
 //---------------------------------------------------------------------------
 int GetBrightness()
 {
-	return (int)PluginLink.CallService(AQQ_SYSTEM_COLORGETBRIGHTNESS,0,0);
+	return (int)PluginLink.CallService(AQQ_SYSTEM_COLORGETBRIGHTNESS, 0, 0);
 }
 //---------------------------------------------------------------------------
 
 //Sprawdzanie dostepnosci aktualizacji
 void CheckUpdates(int Mode)
 {
-	if(Mode==0) //Normalne aktualizacje
-		PluginLink.CallService(AQQ_FUNCTION_SILENTUPDATECHECK,0,0);
-	else if(Mode==1) //Wymuszanie
-		PluginLink.CallService(AQQ_FUNCTION_SILENTUPDATECHECK,0,1);
-	else if(Mode==2) //Wersje Beta AQQ
-		PluginLink.CallService(AQQ_FUNCTION_SILENTUPDATECHECK,0,2);
+	//0 = Aktualizacja zalezna od ustawien AQQ
+	//1 = Wymuszanie aktualizacji
+	//2 = Wymuszanie aktualizacji + sprawdzanie wersji beta
+	PluginLink.CallService(AQQ_FUNCTION_SILENTUPDATECHECK, 0, Mode);
 }
 //---------------------------------------------------------------------------
 
@@ -137,11 +146,11 @@ void CheckUpdates(int Mode)
 UnicodeString GetLastUpdate()
 {
 	TStrings* IniList = new TStringList();
-	IniList->SetText((wchar_t*)(PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP,0,0)));
+	IniList->SetText((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP, 0, 0));
 	TMemIniFile *Settings = new TMemIniFile(ChangeFileExt(Application->ExeName, ".INI"));
 	Settings->SetStrings(IniList);
 	delete IniList;
-	UnicodeString LastUpdate = Settings->ReadString("User","LastUpdateDate","0");
+	UnicodeString LastUpdate = Settings->ReadString("User", "LastUpdateDate", "0");
 	delete Settings;
 	return LastUpdate;
 }
@@ -150,7 +159,44 @@ UnicodeString GetLastUpdate()
 //Dodawanie lub usuwanie adresow repozytorium
 void SetUpdateLink(UnicodeString URL, bool Enabled)
 {
-	PluginLink.CallService(AQQ_SYSTEM_SETUPDATELINK,!Enabled,(LPARAM)URL.w_str());
+	PluginLink.CallService(AQQ_SYSTEM_SETUPDATELINK, !Enabled, (LPARAM)URL.w_str());
+}
+//---------------------------------------------------------------------------
+
+//Wylaczenie timera sprawdzania aktualizacji
+void KillTimerEx()
+{
+	KillTimer(hTimerFrm, TIMER_CHKUPDATES);
+}
+//---------------------------------------------------------------------------
+
+//Wlaczenie timera sprawdzania aktualizacji
+void SetTimerEx(int Interval)
+{
+	SetTimer(hTimerFrm, TIMER_CHKUPDATES, Interval, (TIMERPROC)TimerFrmProc);
+}
+//---------------------------------------------------------------------------
+
+//Procka okna timera
+LRESULT CALLBACK TimerFrmProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	if(uMsg==WM_TIMER)
+	{
+		//Sprawdzanie aktualizacji
+		if(wParam==TIMER_CHKUPDATES)
+		{
+			//Wylaczenie timera
+			KillTimer(hTimerFrm, TIMER_CHKUPDATES);
+			//Sprawdzanie dostepnosci aktualizacji
+			CheckUpdates(UpdateMode);
+			//Ponowne wlaczenie timera sprawdzania aktualizacji
+			if(UpdateInterval) SetTimer(hTimerFrm, TIMER_CHKUPDATES, 3600000 * UpdateInterval, (TIMERPROC)TimerFrmProc);
+		}
+
+		return 0;
+	}
+
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 //---------------------------------------------------------------------------
 
@@ -160,27 +206,37 @@ INT_PTR __stdcall OnAddLink(WPARAM wParam, LPARAM lParam)
 	//Pobieranie adresu repozytorium
 	UnicodeString URL = (wchar_t*)lParam;
 	URL = URL.Trim();
-	//Jezeli pobrane repozytorium nie jest puste
+	//Pobrany adres repozytorium nie jest pusty
 	if(!URL.IsEmpty())
 	{
 		//Pobieranie informacji o aktywacji repozytorium
 		UnicodeString Enable = (WPARAM)wParam;
-		//Odczyt ustawien wtyczki na formie ustawien
-		hMainForm->aLoadSettings->Execute();
-		//Szukanie wskazanego adresu
-		for(int Count=0;Count<hMainForm->UrlListPreview->Items->Count;Count++)
+		//Otwarcie pliku ustawien
+		TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
+		//Pobieranie ilosci repozytoriow
+		TStringList *Links = new TStringList;
+		Ini->ReadSection("Links", Links);
+		int LinksCount = Links->Count/2;
+		delete Links;
+		//Szukanie wskazanego adresu na liscie dodanych repozytoriow
+		for(int Count=2; Count<LinksCount; Count++)
 		{
-			//Wskazane repozytorium juz istenieje
-			if(hMainForm->UrlListPreview->Items->Item[Count]->SubItems->Strings[0]==URL)
+			//Wskazane repozytorium zostalo juz dodane
+			if(URL==Ini->ReadString("Links", "Url" + IntToStr(Count+1), ""))
+			{
+				//Zamkniecie pliku ustawien
+				delete Ini;
+				//Zwrocenie info o istnieniu repozytorium
 				return 2;
+			}
 		}
-		//Dodawanie wskazanego adresu
-		int Count = hMainForm->UrlListPreview->Items->Count;
-		hMainForm->UrlListPreview->Items->Add();
-		hMainForm->UrlListPreview->Items->Item[Count]->Checked=StrToBool(Enable);
-		hMainForm->UrlListPreview->Items->Item[Count]->SubItems->Add(URL);
-		//Zapisanie ustawien
-		hMainForm->aSaveSettings->Execute();
+		//Dodawanie wskazanego adresu repozytorium
+		Ini->WriteString("Links", "Url" +	IntToStr(LinksCount), URL);
+		Ini->WriteBool("Links", "Enable" + IntToStr(LinksCount), StrToBool(Enable));
+		//Zamkniecie pliku ustawien
+		delete Ini;
+		//Dodawanie adresu repozytorium do aktualizatora
+		if(StrToBool(Enable)) SetUpdateLink(URL, true);
 		//Zwrocenie info o pomyslnej operacji
 		return 1;
 	}
@@ -200,15 +256,22 @@ INT_PTR __stdcall OnAddonInstalled(WPARAM wParam, LPARAM lParam)
 		UnicodeString AddonFile = (wchar_t*)lParam ;
 		if(ExtractFileName(AddonFile)!="FixUpdater.dll")
 		{
-			//Wylaczenie timerow sprawdzania aktualizacji dodatkow
-			hMainForm->CheckUpdatesTimer->Enabled = false;
-			hMainForm->CheckUpdatesOnStartTimer->Enabled = false;
-			//Ustawienie interwalu timera
-			hMainForm->CheckUpdatesOnStartTimer->Interval = 2000;
-			//Wlaczenie timera sprawdzania aktualizacji dodatkow
-			hMainForm->CheckUpdatesOnStartTimer->Enabled = true;
+			//Wylaczanie timera sprawdzania aktualizacji
+			KillTimer(hTimerFrm, TIMER_CHKUPDATES);
+			//Wlaczenie timera sprawdzania aktualizacji
+			SetTimer(hTimerFrm, TIMER_CHKUPDATES, 2000, (TIMERPROC)TimerFrmProc);
 		}
 	}
+
+	return 0;
+}
+//---------------------------------------------------------------------------
+
+//Hook na wylaczenie komunikatora poprzez usera
+INT_PTR __stdcall OnBeforeUnload(WPARAM wParam, LPARAM lParam)
+{
+	//Info o rozpoczeciu procedury zamykania komunikatora
+	ForceUnloadExecuted = true;
 
 	return 0;
 }
@@ -240,25 +303,37 @@ INT_PTR __stdcall OnDeleteLink(WPARAM wParam, LPARAM lParam)
 	//Pobieranie adresu repozytorium
 	UnicodeString URL = (wchar_t*)lParam;
 	URL = URL.Trim();
-	//Jezeli pobrane repozytorium nie jest puste
+	//Pobrany adres repozytorium nie jest pusty
 	if(!URL.IsEmpty())
 	{
-		//Odczyt ustawien wtyczki na formie ustawien
-		hMainForm->aLoadSettings->Execute();
+    //Otwarcie pliku ustawien
+		TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
+		//Pobieranie ilosci repozytoriow
+		TStringList *Links = new TStringList;
+		Ini->ReadSection("Links", Links);
+		int LinksCount = Links->Count/2;
+		delete Links;
 		//Szukanie wskazanego repozytorium na formie ustawien
-		for(int Count=0;Count<hMainForm->UrlListPreview->Items->Count;Count++)
+		for(int Count=2; Count<LinksCount; Count++)
 		{
-			//Porownanie rekordu z przekazanym w notyfikacji adresem repozytorium
-			if(hMainForm->UrlListPreview->Items->Item[Count]->SubItems->Strings[0]==URL)
+			//Wskazane repozytorium zostalo dodane
+			if(URL==Ini->ReadString("Links", "Url" + IntToStr(Count+1), ""))
 			{
-				//Usuniecie wskazanej pozycji
-				hMainForm->UrlListPreview->Items->Delete(Count);
-				//Zapisanie ustawien
-				hMainForm->aSaveSettings->Execute();
+				//Przesuniecie ostatniego repozytorium
+				Ini->WriteString("Links", "Url" + IntToStr(Count+1), Ini->ReadString("Links", "Url" + IntToStr(LinksCount), ""));
+				Ini->WriteBool("Links", "Enable" + IntToStr(Count+1), Ini->ReadBool("Links", "Enable" + IntToStr(LinksCount), ""));
+				Ini->DeleteKey("Links", "Url" + IntToStr(LinksCount));
+				Ini->DeleteKey("Links", "Enable" + IntToStr(LinksCount));
+				//Usuwanie adresu repozytorium z aktualizatora
+				SetUpdateLink(URL, false);
+				//Zamkniecie pliku ustawien
+				delete Ini;
 				//Zwrocenie info o pomyslnej operacji
 				return 1;
 			}
 		}
+		//Zamkniecie pliku ustawien
+		delete Ini;
 		//Brak repozytorium
 		return 2;
 	}
@@ -270,8 +345,8 @@ INT_PTR __stdcall OnDeleteLink(WPARAM wParam, LPARAM lParam)
 //Hook na zaladowanie wszystkich modolow
 INT_PTR __stdcall OnModulesLoaded(WPARAM, LPARAM)
 {
-	//Wlaczenie timera sprawdzania aktualizacji dodatkow
-	hMainForm->CheckUpdatesOnStartTimer->Enabled = true;
+	//Wlaczenie timera sprawdzania aktualizacji
+	SetTimer(hTimerFrm, TIMER_CHKUPDATES, 300000, (TIMERPROC)TimerFrmProc);
 
 	return 0;
 }
@@ -317,7 +392,7 @@ INT_PTR __stdcall OnThemeChanged (WPARAM wParam, LPARAM lParam)
 }
 //---------------------------------------------------------------------------
 
-//Zapisywanie zasobów
+//Zapisywanie plikow z zasobow
 void ExtractRes(wchar_t* FileName, wchar_t* ResName, wchar_t* ResType)
 {
 	TPluginTwoFlagParams PluginTwoFlagParams;
@@ -325,7 +400,7 @@ void ExtractRes(wchar_t* FileName, wchar_t* ResName, wchar_t* ResType)
 	PluginTwoFlagParams.Param1 = ResName;
 	PluginTwoFlagParams.Param2 = ResType;
 	PluginTwoFlagParams.Flag1 = (int)HInstance;
-	PluginLink.CallService(AQQ_FUNCTION_SAVERESOURCE,(WPARAM)&PluginTwoFlagParams,(LPARAM)FileName);
+	PluginLink.CallService(AQQ_FUNCTION_SAVERESOURCE, (WPARAM)&PluginTwoFlagParams, (LPARAM)FileName);
 }
 //---------------------------------------------------------------------------
 
@@ -359,33 +434,53 @@ UnicodeString MD5File(UnicodeString FileName)
 }
 //---------------------------------------------------------------------------
 
+//Odczyt ustawien
+void LoadSettings()
+{
+	//Otwarcie pliku ustawien
+	TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
+	//Odczyt repozytoriow
+	TStringList *Links = new TStringList;
+	Ini->ReadSection("Links", Links);
+	int LinksCount = Links->Count/2;
+	delete Links;
+	for(int Count=0; Count<LinksCount; Count++)
+	{
+		//Repozytorium wlaczone
+		if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true))
+			//Dodanie adresu repozytoria do aktualizatora
+			SetUpdateLink(Ini->ReadString("Links", "Url" + IntToStr(Count+1), ""), true);
+	}
+	//Sposob aktualizacji
+	UpdateMode = Ini->ReadInteger("Settings", "UpdateMode", 0);
+	//Czestotliwosci aktualizacji
+	UpdateInterval = Ini->ReadInteger("Settings", "UpdateTime", 0);
+	//Zamkniecie pliku ustawien
+	delete Ini;
+}
+//---------------------------------------------------------------------------
+
 extern "C" INT_PTR __declspec(dllexport) __stdcall Load(PPluginLink Link)
 {
 	//Linkowanie wtyczki z komunikatorem
 	PluginLink = *Link;
-	//Przypisanie uchwytu do formy ustawien
-	if(!hMainForm)
-	{
-		Application->Handle = (HWND)MainForm;
-		hMainForm = new TMainForm(Application);
-	}
 	//Sciezka folderu prywatnego wtyczek
 	UnicodeString PluginUserDir = GetPluginUserDir();
 	//Wypakiwanie ikonki FixUpdater.dll.png
 	//3EA122B23FBF8835FDE23DCD1CC9968B
-	if(!DirectoryExists(PluginUserDir+"\\\\Shared"))
-		CreateDir(PluginUserDir+"\\\\Shared");
-	if(!FileExists(PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png"))
-		ExtractRes((PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png").w_str(),L"SHARED",L"DATA");
-	else if(MD5File(PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png")!="3EA122B23FBF8835FDE23DCD1CC9968B")
-		ExtractRes((PluginUserDir+"\\\\Shared\\\\FixUpdater.dll.png").w_str(),L"SHARED",L"DATA");
-	//Ustawienia domyœlne wtyczki
-	if(!FileExists(PluginUserDir+"\\\\FixUpdater\\\\Settings.ini"))
+	if(!DirectoryExists(PluginUserDir + "\\\\Shared"))
+		CreateDir(PluginUserDir + "\\\\Shared");
+	if(!FileExists(PluginUserDir + "\\\\Shared\\\\FixUpdater.dll.png"))
+		ExtractRes((PluginUserDir + "\\\\Shared\\\\FixUpdater.dll.png").w_str(), L"SHARED", L"DATA");
+	else if(MD5File(PluginUserDir + "\\\\Shared\\\\FixUpdater.dll.png")!="3EA122B23FBF8835FDE23DCD1CC9968B")
+		ExtractRes((PluginUserDir + "\\\\Shared\\\\FixUpdater.dll.png").w_str(), L"SHARED", L"DATA");
+	//Tworzeniu katalogu z ustawieniami wtyczki
+	if(!DirectoryExists(PluginUserDir + "\\\\Blabler"))
+	 CreateDir(PluginUserDir + "\\\\Blabler");
+	//Ustawienia domyslne wtyczki
+	if(!FileExists(PluginUserDir + "\\\\FixUpdater\\\\Settings.ini"))
 	{
-		//Tworzenie folderu z ustawieniami wtyczki
-		if(!DirectoryExists(PluginUserDir + "\\\\FixUpdater"))
-		CreateDir(PluginUserDir + "\\\\FixUpdater");
-		//Tworzenie pliku ustawien z domyslnym repozytorium
+		//Tworzenie pliku ustawien z domyslnymi repozytoriami
 		TIniFile *Ini = new TIniFile(PluginUserDir + "\\\\FixUpdater\\\\Settings.ini");
 		Ini->WriteString("Links", "Url1", "http://beherit.pl/aqq_update/stable.xml");
 		Ini->WriteBool("Links", "Enable1", true);
@@ -393,41 +488,43 @@ extern "C" INT_PTR __declspec(dllexport) __stdcall Load(PPluginLink Link)
 		Ini->WriteBool("Links", "Enable2", false);
 		delete Ini;
 	}
-	//Odczyt ustawien wtyczki
-	TIniFile *Ini = new TIniFile(PluginUserDir + "\\\\FixUpdater\\\\Settings.ini");
-	//Repozytorium
-	TStringList *Links = new TStringList;
-	Ini->ReadSection("Links",Links);
-	for(int Count=0;Count<Links->Count/2;Count++)
-	{
-		if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true))
-		{
-			UnicodeString Url = Ini->ReadString("Links", "Url" + IntToStr(Count+1), "");
-			if(!Url.IsEmpty()) SetUpdateLink(Url,true);
-		}
-	}
-	delete Links;
-	//Sposob aktualizacji
-	hMainForm->UpdateMode = Ini->ReadInteger("Settings", "UpdateMode", 0);
-	//Czestotliwosci aktualizacji
-	hMainForm->UpdateTime = Ini->ReadInteger("Settings", "UpdateTime", 0);
-	//Zakonczenie odczytu ustawien wtyczki
-	delete Ini;
+	//Odczyt ustawien
+	LoadSettings();
 	//Hook na dodawanie repozytorium przez zewnetrzne wtyczki
-	PluginLink.HookEvent(FIXUPDATER_SYSTEM_ADDLINK,OnAddLink);
+	PluginLink.HookEvent(FIXUPDATER_SYSTEM_ADDLINK, OnAddLink);
 	//Hook na instalowanie dodatkow
-	PluginLink.HookEvent(AQQ_SYSTEM_ADDONINSTALLED,OnAddonInstalled);
+	PluginLink.HookEvent(AQQ_SYSTEM_ADDONINSTALLED, OnAddonInstalled);
+	//Hook na wylaczenie komunikatora poprzez usera
+	PluginLink.HookEvent(AQQ_SYSTEM_BEFOREUNLOAD, OnBeforeUnload);
 	//Hook na zmiane kolorystyki AlphaControls
-	PluginLink.HookEvent(AQQ_SYSTEM_COLORCHANGEV2,OnColorChange);
+	PluginLink.HookEvent(AQQ_SYSTEM_COLORCHANGEV2, OnColorChange);
 	//Hook na usuwanie repozytorium przez zewnetrzne wtyczki
-	PluginLink.HookEvent(FIXUPDATER_SYSTEM_DELETELINK,OnDeleteLink);
+	PluginLink.HookEvent(FIXUPDATER_SYSTEM_DELETELINK, OnDeleteLink);
 	//Hook na zaladowanie wszystkich modolow
-	PluginLink.HookEvent(AQQ_SYSTEM_MODULESLOADED,OnModulesLoaded);
+	PluginLink.HookEvent(AQQ_SYSTEM_MODULESLOADED, OnModulesLoaded);
 	//Hook na zmiane kompozycji
-	PluginLink.HookEvent(AQQ_SYSTEM_THEMECHANGED,OnThemeChanged);
-	//Wlaczenie timera sprawdzania aktualizacji dodatkow
+	PluginLink.HookEvent(AQQ_SYSTEM_THEMECHANGED, OnThemeChanged);
+	//Rejestowanie klasy okna timera
+	WNDCLASSEX wincl;
+	wincl.cbSize = sizeof (WNDCLASSEX);
+	wincl.style = 0;
+	wincl.lpfnWndProc = TimerFrmProc;
+	wincl.cbClsExtra = 0;
+	wincl.cbWndExtra = 0;
+	wincl.hInstance = HInstance;
+	wincl.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	wincl.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wincl.hbrBackground = (HBRUSH)COLOR_BACKGROUND;
+	wincl.lpszMenuName = NULL;
+	wincl.lpszClassName = L"TFixUpdaterTimer";
+	wincl.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+	RegisterClassEx(&wincl);
+	//Tworzenie okna timera
+	hTimerFrm = CreateWindowEx(0, L"TFixUpdaterTimer", L"",	0, 0, 0, 0, 0, NULL, NULL, HInstance, NULL);
+	//Wszystkie moduly zostaly zaladowane
 	if(PluginLink.CallService(AQQ_SYSTEM_MODULESLOADED,0,0))
-		hMainForm->CheckUpdatesOnStartTimer->Enabled = true;
+		//Wlaczenie timera sprawdzania aktualizacji
+		SetTimer(hTimerFrm,TIMER_CHKUPDATES, 300000, (TIMERPROC)TimerFrmProc);
 
 	return 0;
 }
@@ -435,6 +532,12 @@ extern "C" INT_PTR __declspec(dllexport) __stdcall Load(PPluginLink Link)
 
 extern "C" INT_PTR __declspec(dllexport)__stdcall Settings()
 {
+	//Przypisanie uchwytu do formy ustawien
+	if(!hMainForm)
+	{
+		Application->Handle = (HWND)MainForm;
+		hMainForm = new TMainForm(Application);
+	}
 	//Pokaznie okna ustawien
 	hMainForm->Show();
 
@@ -444,33 +547,38 @@ extern "C" INT_PTR __declspec(dllexport)__stdcall Settings()
 
 extern "C" INT_PTR __declspec(dllexport) __stdcall Unload()
 {
-	//Wylaczanie timerow
-	if(hMainForm)
-	{
-		hMainForm->CheckUpdatesTimer->Enabled = false;
-		hMainForm->CheckUpdatesOnStartTimer->Enabled = false;
-	}
+	//Zatrzymanie timera
+	KillTimer(hTimerFrm, TIMER_CHKUPDATES);
+	//Usuwanie okna timera
+	DestroyWindow(hTimerFrm);
+	//Wyrejestowanie klasy okna timera
+	UnregisterClass(L"TFixUpdaterTimer", HInstance);
 	//Wyladowanie wszystkich hookow
 	PluginLink.UnhookEvent(OnAddLink);
 	PluginLink.UnhookEvent(OnAddonInstalled);
+	PluginLink.UnhookEvent(OnBeforeUnload);
 	PluginLink.UnhookEvent(OnColorChange);
 	PluginLink.UnhookEvent(OnDeleteLink);
 	PluginLink.UnhookEvent(OnModulesLoaded);
 	PluginLink.UnhookEvent(OnThemeChanged);
-	//Usuniecie adresow repozytorium z aktualizatora
-	TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
-	TStringList *Links = new TStringList;
-	Ini->ReadSection("Links",Links);
-	for(int Count=0;Count<Links->Count/2;Count++)
+	//Usuwanie adresow repozytoriow z aktualizatora
+	if(!ForceUnloadExecuted)
 	{
-		if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true))
+		//Odczyt repozytoriow
+		TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
+		TStringList *Links = new TStringList;
+		Ini->ReadSection("Links", Links);
+		int LinksCount = Links->Count/2;
+		delete Links;
+		for(int Count=0; Count<LinksCount; Count++)
 		{
-			UnicodeString Url = Ini->ReadString("Links", "Url" + IntToStr(Count+1), "");
-			if(!Url.IsEmpty()) SetUpdateLink(Url,false);
+			//Repozytorium wlaczone
+			if(Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true))
+				//Usuniecie adresu repozytoria z aktualizatora
+				SetUpdateLink(Ini->ReadString("Links", "Url" + IntToStr(Count+1), ""), false);
 		}
+		delete Ini;
 	}
-	delete Links;
-	delete Ini;
 
 	return 0;
 }
