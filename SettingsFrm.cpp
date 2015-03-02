@@ -22,6 +22,7 @@
 //---------------------------------------------------------------------------
 #include <vcl.h>
 #include <inifiles.hpp>
+#include <LangAPI.hpp>
 #pragma hdrstop
 #include "SettingsFrm.h"
 //---------------------------------------------------------------------------
@@ -68,6 +69,8 @@ void __fastcall TSettingsForm::WMTransparency(TMessage &Message)
 
 void __fastcall TSettingsForm::FormCreate(TObject *Sender)
 {
+	//Lokalizowanie formy
+	LangForm(this);
 	//Wlaczona zaawansowana stylizacja okien
 	if(ChkSkinEnabled())
 	{
@@ -128,7 +131,7 @@ void __fastcall TSettingsForm::aLoadSettingsExecute(TObject *Sender)
 		UrlListPreview->Items->Item[Count]->SubItems->Add(Ini->ReadString("Links", "Url" + IntToStr(Count+1), ""));
 	}
 	//Czestotliwosc aktualizacji
-	UpdateTimeComboBox->ItemIndex = Ini->ReadInteger("Settings", "UpdateTime", 0);
+	UpdateFrequencyComboBox->ItemIndex = Ini->ReadInteger("Settings", "UpdateTime", 0);
 	//Sposob aktualizacji
 	UpdateModeComboBox->ItemIndex = Ini->ReadInteger("Settings", "UpdateMode", 0);
 	//Zamkniecie pliku ustawien
@@ -165,13 +168,13 @@ void __fastcall TSettingsForm::aSaveSettingsExecute(TObject *Sender)
 		Ini->WriteBool("Links", "Enable" + IntToStr(Count+1), UrlListPreview->Items->Item[Count]->Checked);
 	}
 	//Czestotliwosc aktualizacji
-	Ini->WriteInteger("Settings", "UpdateTime", UpdateTimeComboBox->ItemIndex);
+	Ini->WriteInteger("Settings", "UpdateTime", UpdateFrequencyComboBox->ItemIndex);
 	//Sposob aktualizacji
 	Ini->WriteInteger("Settings", "UpdateMode", UpdateModeComboBox->ItemIndex);
 	//Zamkniecie pliku ustawien
 	delete Ini;
 	//Wlaczenie timera sprawdzania aktualizacji
-	if(UpdateTimeComboBox->ItemIndex)	SetTimerEx(3600000 * UpdateTimeComboBox->ItemIndex);
+	if(UpdateFrequencyComboBox->ItemIndex)	SetTimerEx(3600000 * UpdateFrequencyComboBox->ItemIndex);
 }
 //---------------------------------------------------------------------------
 
@@ -265,7 +268,7 @@ void __fastcall TSettingsForm::AddButtonClick(TObject *Sender)
 {
 	//Dodawanie nowego elementu
 	UnicodeString URL;
-	if(InputQuery("Nowe repozytorium", "Dodaj nowy adres:", URL))
+	if(InputQuery(GetLangStr("NewRepository"), GetLangStr("AddNewURL"), URL))
 	{
 		//Jezeli zostal wpisany jakis tekst
 		if(!URL.IsEmpty())
@@ -308,7 +311,7 @@ void __fastcall TSettingsForm::DeleteButtonClick(TObject *Sender)
 void __fastcall TSettingsForm::EditButtonClick(TObject *Sender)
 {
 	//Edycja wybranego elementu
-	UnicodeString URL = InputBox("Edycja repozytorium", "Edytuj adres:", UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->Strings[0]);
+	UnicodeString URL = InputBox(GetLangStr("EditRepository"), GetLangStr("EditURL"), UrlListPreview->Items->Item[UrlListPreview->ItemIndex]->SubItems->Strings[0]);
 	if(!URL.IsEmpty())
 	{
 		//Zmiana wybranego elementu

@@ -24,6 +24,7 @@
 #include <inifiles.hpp>
 #include <IdHashMessageDigest.hpp>
 #include <PluginAPI.h>
+#include <LangAPI.hpp>
 #pragma hdrstop
 #pragma argsused
 #include "SettingsFrm.h"
@@ -342,6 +343,30 @@ INT_PTR __stdcall OnDeleteLink(WPARAM wParam, LPARAM lParam)
 }
 //---------------------------------------------------------------------------
 
+//Hook na zmiane lokalizacji
+INT_PTR __stdcall OnLangCodeChanged(WPARAM wParam, LPARAM lParam)
+{
+	//Czyszczenie cache lokalizacji
+	ClearLngCache();
+	//Pobranie sciezki do katalogu prywatnego uzytkownika
+	UnicodeString PluginUserDir = GetPluginUserDir();
+	//Ustawienie sciezki lokalizacji wtyczki
+	UnicodeString LangCode = (wchar_t*)lParam;
+	LangPath = PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\" + LangCode + "\\\\";
+	if(!DirectoryExists(LangPath))
+	{
+		LangCode = (wchar_t*)PluginLink.CallService(AQQ_FUNCTION_GETDEFLANGCODE,0,0);
+		LangPath = PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\" + LangCode + "\\\\";
+	}
+	//Aktualizacja lokalizacji form wtyczki
+	for(int i=0;i<Screen->FormCount;i++)
+		LangForm(Screen->Forms[i]);
+	if(hSettingsForm) hSettingsForm->aLoadSettings->Execute();
+
+	return 0;
+}
+//---------------------------------------------------------------------------
+
 //Hook na zaladowanie wszystkich modolow
 INT_PTR __stdcall OnModulesLoaded(WPARAM, LPARAM)
 {
@@ -469,6 +494,44 @@ extern "C" INT_PTR __declspec(dllexport) __stdcall Load(PPluginLink Link)
 	PluginLink = *Link;
 	//Sciezka folderu prywatnego wtyczek
 	UnicodeString PluginUserDir = GetPluginUserDir();
+  //Tworzenie katalogow lokalizacji
+	if(!DirectoryExists(PluginUserDir + "\\\\Languages"))
+		CreateDir(PluginUserDir + "\\\\Languages");
+	if(!DirectoryExists(PluginUserDir + "\\\\Languages\\\\FixUpdater"))
+		CreateDir(PluginUserDir + "\\\\Languages\\\\FixUpdater");
+	if(!DirectoryExists(PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\EN"))
+		CreateDir(PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\EN");
+	if(!DirectoryExists(PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\PL"))
+		CreateDir(PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\PL");
+  //Wypakowanie plikow lokalizacji
+	//ED2ACB3CF57B23E66C1A5BBFF94D893C
+	if(!FileExists(PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\EN\\\\Const.lng"))
+		ExtractRes((PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\EN\\\\Const.lng").w_str(), L"EN_CONST", L"DATA");
+	else if(MD5File(PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\EN\\\\Const.lng")!="ED2ACB3CF57B23E66C1A5BBFF94D893C")
+		ExtractRes((PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\EN\\\\Const.lng").w_str(), L"EN_CONST", L"DATA");
+	//5E59ADA9E88CB1A66E9FD19EB5DA8281
+	if(!FileExists(PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\EN\\\\TSettingsForm.lng"))
+		ExtractRes((PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\EN\\\\TSettingsForm.lng").w_str(), L"EN_SETTINGSFRM", L"DATA");
+	else if(MD5File(PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\EN\\\\TSettingsForm.lng")!="5E59ADA9E88CB1A66E9FD19EB5DA8281")
+		ExtractRes((PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\EN\\\\TSettingsForm.lng").w_str(), L"EN_SETTINGSFRM", L"DATA");
+	//FB0DD8A32BA25D66A3E6109B8C3739B3
+	if(!FileExists(PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\PL\\\\Const.lng"))
+		ExtractRes((PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\PL\\\\Const.lng").w_str(), L"PL_CONST", L"DATA");
+	else if(MD5File(PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\PL\\\\Const.lng")!="FB0DD8A32BA25D66A3E6109B8C3739B3")
+		ExtractRes((PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\PL\\\\Const.lng").w_str(), L"PL_CONST", L"DATA");
+	//440BFE2CAC5623E04EDBE7BFA429D146
+	if(!FileExists(PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\PL\\\\TSettingsForm.lng"))
+		ExtractRes((PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\PL\\\\TSettingsForm.lng").w_str(), L"PL_SETTINGSFRM", L"DATA");
+	else if(MD5File(PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\PL\\\\TSettingsForm.lng")!="440BFE2CAC5623E04EDBE7BFA429D146")
+		ExtractRes((PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\PL\\\\TSettingsForm.lng").w_str(), L"PL_SETTINGSFRM", L"DATA");
+  //Ustawienie sciezki lokalizacji wtyczki
+	UnicodeString LangCode = (wchar_t*)PluginLink.CallService(AQQ_FUNCTION_GETLANGCODE, 0,0);
+	LangPath = PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\" + LangCode + "\\\\";
+	if(!DirectoryExists(LangPath))
+	{
+		LangCode = (wchar_t*)PluginLink.CallService(AQQ_FUNCTION_GETDEFLANGCODE, 0, 0);
+		LangPath = PluginUserDir + "\\\\Languages\\\\FixUpdater\\\\" + LangCode + "\\\\";
+	}
 	//Wypakiwanie ikonki FixUpdater.dll.png
 	//3EA122B23FBF8835FDE23DCD1CC9968B
 	if(!DirectoryExists(PluginUserDir + "\\\\Shared"))
@@ -492,6 +555,8 @@ extern "C" INT_PTR __declspec(dllexport) __stdcall Load(PPluginLink Link)
 	PluginLink.HookEvent(AQQ_SYSTEM_COLORCHANGEV2, OnColorChange);
 	//Hook na usuwanie repozytorium przez zewnetrzne wtyczki
 	PluginLink.HookEvent(FIXUPDATER_SYSTEM_DELETELINK, OnDeleteLink);
+	//Hook na zmiane lokalizacji
+	PluginLink.HookEvent(AQQ_SYSTEM_LANGCODE_CHANGED,OnLangCodeChanged);
 	//Hook na zaladowanie wszystkich modolow
 	PluginLink.HookEvent(AQQ_SYSTEM_MODULESLOADED, OnModulesLoaded);
 	//Hook na zmiane kompozycji
@@ -551,6 +616,7 @@ extern "C" INT_PTR __declspec(dllexport) __stdcall Unload()
 	PluginLink.UnhookEvent(OnBeforeUnload);
 	PluginLink.UnhookEvent(OnColorChange);
 	PluginLink.UnhookEvent(OnDeleteLink);
+	PluginLink.UnhookEvent(OnLangCodeChanged);
 	PluginLink.UnhookEvent(OnModulesLoaded);
 	PluginLink.UnhookEvent(OnThemeChanged);
 	//Usuwanie adresow repozytoriow z aktualizatora

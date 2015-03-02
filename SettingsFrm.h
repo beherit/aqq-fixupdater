@@ -58,7 +58,7 @@ __published:	// IDE-managed Components
 	TsPageControl *PageControl;
 	TsTabSheet *ReposTabSheet;
 	TsTabSheet *UpdaterTabSheet;
-	TsComboBox *UpdateTimeComboBox;
+	TsComboBox *UpdateFrequencyComboBox;
 	TsLabel *LastUpdateInfoLabel;
 	TsBevel *Bevel;
 	TsComboBox *UpdateModeComboBox;
@@ -68,6 +68,8 @@ __published:	// IDE-managed Components
 	TsSkinManager *sSkinManager;
 	TsLabelFX *LastUpdateLabel;
 	TsSkinProvider *sSkinProvider;
+	TsLabel *UpdateFrequencyLabel;
+	TsLabel *UpdateModeLabel;
 	void __fastcall UrlListPreviewSelectItem(TObject *Sender, TListItem *Item, bool Selected);
 	void __fastcall DeleteButtonClick(TObject *Sender);
 	void __fastcall SaveButtonClick(TObject *Sender);

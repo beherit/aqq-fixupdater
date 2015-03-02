@@ -1,0 +1,16 @@
+001=FixUpdater - settings
+002=Apply
+003=Cancel
+004=OK
+005=Repositories
+006=Updater
+007=Address of repository 
+008=Add
+009=Delete
+010=Edit
+011=Default
+012=Frequency of update check
+013=After turning AQQ#Every hour#Every two hours#Every three hours#Every four hours
+014=Last check for updates -
+015=The way to check for updates
+016=Updates depend on the AQQ settings#Forced checking for AQQ update and addons#Forced checking for AQQ update and addons (beta versions)

@@ -1,4 +1,5 @@
 object SettingsForm: TSettingsForm
+  Tag = 1
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
@@ -164,6 +165,7 @@ object SettingsForm: TSettingsForm
     ExplicitWidth = 417
   end
   object SaveButton: TsButton
+    Tag = 2
     Left = 331
     Top = 201
     Width = 75
@@ -189,10 +191,12 @@ object SettingsForm: TSettingsForm
     TabOrder = 3
     SkinData.SkinSection = 'PAGECONTROL'
     object ReposTabSheet: TsTabSheet
+      Tag = 5
       Caption = 'Repozytoria'
       SkinData.CustomColor = False
       SkinData.CustomFont = False
       object AddButton: TsButton
+        Tag = 8
         Left = 6
         Top = 124
         Width = 75
@@ -203,6 +207,7 @@ object SettingsForm: TSettingsForm
         SkinData.SkinSection = 'BUTTON'
       end
       object DeleteButton: TsButton
+        Tag = 9
         Left = 87
         Top = 124
         Width = 75
@@ -214,6 +219,7 @@ object SettingsForm: TSettingsForm
         SkinData.SkinSection = 'BUTTON'
       end
       object EditButton: TsButton
+        Tag = 10
         Left = 168
         Top = 124
         Width = 75
@@ -225,6 +231,7 @@ object SettingsForm: TSettingsForm
         SkinData.SkinSection = 'BUTTON'
       end
       object ResetButton: TsButton
+        Tag = 11
         Left = 311
         Top = 124
         Width = 75
@@ -261,6 +268,7 @@ object SettingsForm: TSettingsForm
             Caption = 'Adres repozytorium'
             MaxWidth = 336
             MinWidth = 336
+            Tag = 7
             Width = 336
           end>
         ReadOnly = True
@@ -272,19 +280,21 @@ object SettingsForm: TSettingsForm
       end
     end
     object UpdaterTabSheet: TsTabSheet
+      Tag = 6
       Caption = 'Aktualizator'
       ImageIndex = 1
       SkinData.CustomColor = False
       SkinData.CustomFont = False
       object LastUpdateInfoLabel: TsLabel
+        Tag = 14
         Left = 12
         Top = 54
-        Width = 147
+        Width = 166
         Height = 13
-        Caption = 'Data ostatniego sprawdzania -'
+        Caption = 'Ostatnie sprawdzanie aktualizacji -'
       end
       object LastUpdateLabel: TsLabelFX
-        Left = 165
+        Left = 184
         Top = 54
         Width = 119
         Height = 13
@@ -300,21 +310,48 @@ object SettingsForm: TSettingsForm
         Shadow.OffsetKeeper.LeftTop = 0
         Shadow.OffsetKeeper.RightBottom = 0
       end
-      object UpdateTimeComboBox: TsComboBox
+      object UpdateFrequencyLabel: TsLabel
+        Tag = 12
+        Left = 12
+        Top = 8
+        Width = 219
+        Height = 13
+        Caption = 'Cz'#281'stotliwo'#347#263' sprawdzania aktualizacji'
+        ParentFont = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+      end
+      object UpdateModeLabel: TsLabel
+        Tag = 15
+        Left = 12
+        Top = 79
+        Width = 183
+        Height = 13
+        Caption = 'Spos'#243'b sprawdzania aktualizacji'
+        ParentFont = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+      end
+      object UpdateFrequencyComboBox: TsComboBox
+        Tag = 13
         Left = 12
         Top = 27
         Width = 145
         Height = 21
         Alignment = taLeftJustify
-        BoundLabel.Active = True
-        BoundLabel.Caption = 'Cz'#281'stotliwo'#347#263' sprawdzania dost'#281'pno'#347'ci aktualizacji'
         BoundLabel.Indent = 6
         BoundLabel.Font.Charset = DEFAULT_CHARSET
         BoundLabel.Font.Color = clWindowText
         BoundLabel.Font.Height = -11
         BoundLabel.Font.Name = 'Tahoma'
-        BoundLabel.Font.Style = [fsBold]
-        BoundLabel.Layout = sclTopLeft
+        BoundLabel.Font.Style = []
+        BoundLabel.Layout = sclLeft
         BoundLabel.MaxWidth = 0
         BoundLabel.UseSkinColor = True
         SkinData.SkinSection = 'COMBOBOX'
@@ -322,29 +359,28 @@ object SettingsForm: TSettingsForm
         Style = csDropDownList
         ItemIndex = 0
         TabOrder = 0
-        Text = 'Przy w'#322#261'czeniu AQQ'
+        Text = 'Po w'#322#261'czeniu AQQ'
         OnChange = aSettingsChangedExecute
         Items.Strings = (
-          'Przy w'#322#261'czeniu AQQ'
+          'Po w'#322#261'czeniu AQQ'
           'Co godzin'#281
           'Co dwie godziny'
           'Co trzy godziny'
           'Co cztery godziny')
       end
       object UpdateModeComboBox: TsComboBox
+        Tag = 16
         Left = 12
         Top = 98
-        Width = 293
+        Width = 330
         Height = 21
         Alignment = taLeftJustify
-        BoundLabel.Active = True
-        BoundLabel.Caption = 'Spos'#243'b sprawdzania aktualizacji przez wtyczk'#281
         BoundLabel.Indent = 6
         BoundLabel.Font.Charset = DEFAULT_CHARSET
         BoundLabel.Font.Color = clWindowText
         BoundLabel.Font.Height = -11
         BoundLabel.Font.Name = 'Tahoma'
-        BoundLabel.Font.Style = [fsBold]
+        BoundLabel.Font.Style = []
         BoundLabel.Layout = sclTopLeft
         BoundLabel.MaxWidth = 0
         BoundLabel.UseSkinColor = True
@@ -358,11 +394,12 @@ object SettingsForm: TSettingsForm
         Items.Strings = (
           'Aktualizacje zale'#380'ne od ustawie'#324' AQQ'
           'Wymuszaj aktualizacje AQQ i dodatk'#243'w'
-          'Wymuszaj aktualizacje AQQ (+wersje beta) i dodatk'#243'w')
+          'Wymuszaj aktualizacje AQQ i dodatk'#243'w (wersje beta)')
       end
     end
   end
   object CancelButton: TsButton
+    Tag = 3
     Left = 250
     Top = 201
     Width = 75
@@ -373,6 +410,7 @@ object SettingsForm: TSettingsForm
     SkinData.SkinSection = 'BUTTON'
   end
   object OkButton: TsButton
+    Tag = 4
     Left = 169
     Top = 201
     Width = 75
