@@ -1,3 +1,11 @@
+1.5.0.0
+-----
+* Pełne wsparcie kolorystyki stylizacji okien.
+* Obsługa lokalizacji (polskiej i angielskiej).
+* Zmiana adresów domyślnych repozytoriów.
+* Inne małe poprawki i optymalizacje kodu.
+* Aktualizacja komponentów AlphaControls do nowszej wersji (9.20).
+
 1.4.6.0
 -----
 * Nieskórkowanie systemowych okien dialogowych niepochodzących z wtyczki.
