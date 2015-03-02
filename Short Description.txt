@@ -1,1 +1,4 @@
+PL:
 Ulepsza system aktualizacji poprzez mo¿liwoœæ dodawania dodatkowych adresów serwerów zawieraj¹cych bazê dodatków oraz ustawienie czêstszego interwa³u sprawdzania aktualizacji.
+EN:
+Improves update system by the ability to add additional server addresses containing addons base and the ability to set more frequent interval to check for updates.
