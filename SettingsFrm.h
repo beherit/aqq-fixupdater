@@ -85,6 +85,8 @@ __published:	// IDE-managed Components
 	void __fastcall OkButtonClick(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall sSkinManagerSysDlgInit(TacSysDlgData DlgData, bool &AllowSkinning);
+	void __fastcall UrlListPreviewChanging(TObject *Sender, TListItem *Item, TItemChange Change,
+          bool &AllowChange);
 private:	// User declarations
 public:		// User declarations
 	__fastcall TSettingsForm(TComponent* Owner);
