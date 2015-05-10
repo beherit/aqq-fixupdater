@@ -125,7 +125,7 @@ void __fastcall TSettingsForm::aLoadSettingsExecute(TObject *Sender)
 	for(int Count=0; Count<LinksCount; Count++)
 	{
 		UrlListPreview->Items->Add();
-		UrlListPreview->Items->Item[Count]->Checked = Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), false);
+		UrlListPreview->Items->Item[Count]->Checked = Ini->ReadBool("Links", "Enable" + IntToStr(Count+1), true);
 		UrlListPreview->Items->Item[Count]->SubItems->Add(Ini->ReadString("Links", "Url" + IntToStr(Count+1), ""));
 	}
 	//Czestotliwosc aktualizacji
