@@ -539,8 +539,8 @@ extern "C" INT_PTR __declspec(dllexport) __stdcall Load(PPluginLink Link)
 	else if(MD5File(PluginUserDir + "\\\\Shared\\\\FixUpdater.dll.png")!="3EA122B23FBF8835FDE23DCD1CC9968B")
 		ExtractRes((PluginUserDir + "\\\\Shared\\\\FixUpdater.dll.png").w_str(), L"SHARED", L"DATA");
 	//Tworzeniu katalogu z ustawieniami wtyczki
-	if(!DirectoryExists(PluginUserDir + "\\\\Blabler"))
-	 CreateDir(PluginUserDir + "\\\\Blabler");
+	if(!DirectoryExists(PluginUserDir + "\\\\FixUpdater"))
+	 CreateDir(PluginUserDir + "\\\\FixUpdater");
 	//Odczyt ustawien
 	LoadSettings();
 	//Hook na dodawanie repozytorium przez zewnetrzne wtyczki
