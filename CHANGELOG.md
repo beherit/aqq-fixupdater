@@ -1,3 +1,8 @@
+1.5.1.0
+-----
+* Domyślne repozytoria są zawsze włączone.
+* Usunięcie błędu przy pierwszej instalacji wtyczki.
+
 1.5.0.0
 -----
 * Pełne wsparcie kolorystyki stylizacji okien.
