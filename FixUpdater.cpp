@@ -464,7 +464,9 @@ void LoadSettings()
 	TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
 	//Nadpisanie domyslnych adresow repozytoriow
 	Ini->WriteString("Links", "Url1", "http://beherit.pl/aqq_update/plugins.xml");
+	Ini->WriteBool("Links", "Enable1", true);
 	Ini->WriteString("Links", "Url2", "http://beherit.pl/aqq_update/themes.xml");
+	Ini->WriteBool("Links", "Enable2", true);
 	//Odczyt repozytoriow
 	TStringList *Links = new TStringList;
 	Ini->ReadSection("Links", Links);
