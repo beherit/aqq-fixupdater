@@ -354,3 +354,10 @@ void __fastcall TSettingsForm::sSkinManagerSysDlgInit(TacSysDlgData DlgData, boo
 }
 //---------------------------------------------------------------------------
 
+void __fastcall TSettingsForm::UrlListPreviewChanging(TObject *Sender, TListItem *Item,
+					TItemChange Change, bool &AllowChange)
+{
+	if((Item->Index==0)||(Item->Index==1)) AllowChange = false;
+}
+//---------------------------------------------------------------------------
+

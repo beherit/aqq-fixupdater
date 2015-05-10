@@ -275,6 +275,7 @@ object SettingsForm: TSettingsForm
         RowSelect = True
         TabOrder = 0
         ViewStyle = vsReport
+        OnChanging = UrlListPreviewChanging
         OnClick = UrlListPreviewClick
         OnSelectItem = UrlListPreviewSelectItem
       end
