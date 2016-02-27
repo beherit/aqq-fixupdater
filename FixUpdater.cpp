@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-// Copyright (C) 2009-2015 Krzysztof Grochocki
+// Copyright (C) 2009-2016 Krzysztof Grochocki
 //
 // This file is part of FixUpdater
 //
@@ -463,9 +463,9 @@ void LoadSettings()
 	//Otwarcie pliku ustawien
 	TIniFile *Ini = new TIniFile(GetPluginUserDir() + "\\\\FixUpdater\\\\Settings.ini");
 	//Nadpisanie domyslnych adresow repozytoriow
-	Ini->WriteString("Links", "Url1", "http://beherit.pl/aqq_update/plugins.xml");
+	Ini->WriteString("Links", "Url1", "https://beherit.pl/aqq_update/plugins.xml");
 	Ini->WriteBool("Links", "Enable1", true);
-	Ini->WriteString("Links", "Url2", "http://beherit.pl/aqq_update/themes.xml");
+	Ini->WriteString("Links", "Url2", "https://beherit.pl/aqq_update/themes.xml");
 	Ini->WriteBool("Links", "Enable2", true);
 	//Odczyt repozytoriow
 	TStringList *Links = new TStringList;
@@ -650,9 +650,9 @@ extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVe
 	PluginInfo.Version = PLUGIN_MAKE_VERSION(1,5,1,0);
 	PluginInfo.Description = L"Ulepsza system aktualizacji poprzez mo¿liwoœæ dodawania dodatkowych adresów serwerów zawieraj¹cych bazê dodatków oraz ustawienie czêstszego interwa³u sprawdzania aktualizacji.";
 	PluginInfo.Author = L"Krzysztof Grochocki";
-	PluginInfo.AuthorMail = L"kontakt@beherit.pl";
+	PluginInfo.AuthorMail = L"contact@beherit.pl";
 	PluginInfo.Copyright = L"Krzysztof Grochocki";
-	PluginInfo.Homepage = L"http://beherit.pl";
+	PluginInfo.Homepage = L"beherit.pl";
 	PluginInfo.Flag = 0;
 	PluginInfo.ReplaceDefaultModule = 0;
 
