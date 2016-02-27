@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-// Copyright (C) 2009-2015 Krzysztof Grochocki
+// Copyright (C) 2009-2016 Krzysztof Grochocki
 //
 // This file is part of FixUpdater
 //
@@ -183,10 +183,10 @@ void __fastcall TSettingsForm::aResetSettingsExecute(TObject *Sender)
 	//Dodawanie domyslnych repozytorium
 	UrlListPreview->Items->Add();
 	UrlListPreview->Items->Item[0]->Checked = true;
-	UrlListPreview->Items->Item[0]->SubItems->Add("http://beherit.pl/aqq_update/plugins.xml");
+	UrlListPreview->Items->Item[0]->SubItems->Add("https://beherit.pl/aqq_update/plugins.xml");
 	UrlListPreview->Items->Add();
 	UrlListPreview->Items->Item[1]->Checked = true;
-	UrlListPreview->Items->Item[1]->SubItems->Add("http://beherit.pl/aqq_update/themes.xml");
+	UrlListPreview->Items->Item[1]->SubItems->Add("https://beherit.pl/aqq_update/themes.xml");
 	//Wlaczenie przycisku do zapisu
 	SaveButton->Enabled = true;
 }
